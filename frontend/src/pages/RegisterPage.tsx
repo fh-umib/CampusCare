@@ -51,7 +51,9 @@ export default function RegisterPage() {
           <label className="block">
             <span className="field-label">Full name</span>
             <input
+              autoComplete="name"
               className="input"
+              required
               value={form.fullName}
               onChange={(event) => setForm({ ...form, fullName: event.target.value })}
             />
@@ -59,7 +61,9 @@ export default function RegisterPage() {
           <label className="block">
             <span className="field-label">Email</span>
             <input
+              autoComplete="email"
               className="input"
+              required
               type="email"
               value={form.email}
               onChange={(event) => setForm({ ...form, email: event.target.value })}
@@ -68,7 +72,10 @@ export default function RegisterPage() {
           <label className="block">
             <span className="field-label">Password</span>
             <input
+              autoComplete="new-password"
               className="input"
+              minLength={8}
+              required
               type="password"
               value={form.password}
               onChange={(event) => setForm({ ...form, password: event.target.value })}
@@ -92,7 +99,7 @@ export default function RegisterPage() {
         <p className="mt-5 text-sm text-slate-600">
           Already have an account?{' '}
           <Link className="font-semibold text-emerald-700" to="/login">
-            Login
+            Sign in
           </Link>
         </p>
       </section>

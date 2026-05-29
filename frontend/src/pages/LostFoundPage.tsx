@@ -58,6 +58,9 @@ export default function LostFoundPage() {
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
+    setError('');
+    setMessage('');
+
     if (!form.title || !form.description) {
       setError('Title and description are required.');
       return;
@@ -84,6 +87,8 @@ export default function LostFoundPage() {
 
   async function handleStatus(id: string, status: LostFoundStatus) {
     try {
+      setError('');
+      setMessage('');
       await lostFoundService.updateStatus(id, status);
       setMessage('Status updated.');
       await loadItems();
@@ -102,7 +107,12 @@ export default function LostFoundPage() {
         <h2 className="section-title lg:col-span-2">Create Report</h2>
         <label>
           <span className="field-label">Title</span>
-          <input className="input" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+          <input
+            className="input"
+            required
+            value={form.title}
+            onChange={(e) => setForm({ ...form, title: e.target.value })}
+          />
         </label>
         <label>
           <span className="field-label">Type</span>
@@ -121,7 +131,12 @@ export default function LostFoundPage() {
         </label>
         <label className="lg:col-span-2">
           <span className="field-label">Description</span>
-          <textarea className="textarea min-h-24" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+          <textarea
+            className="textarea min-h-24"
+            required
+            value={form.description}
+            onChange={(e) => setForm({ ...form, description: e.target.value })}
+          />
         </label>
         <div className="lg:col-span-2">
           <button className="btn-primary" disabled={isSubmitting} type="submit">
@@ -148,7 +163,7 @@ export default function LostFoundPage() {
 
       {isLoading ? <div className="empty-state">Loading reports...</div> : null}
       {!isLoading && items.length === 0 ? (
-        <div className="empty-state">No lost or found reports yet. Create a report to start the demo flow.</div>
+        <div className="empty-state">No lost or found reports match the selected filters yet.</div>
       ) : null}
       <section className="grid gap-4 lg:grid-cols-2">
         {items.map((item) => {
@@ -175,7 +190,13 @@ export default function LostFoundPage() {
                     Admin action
                   </span>
                   {statuses.map((status) => (
-                    <button key={status} className="btn-secondary" type="button" onClick={() => void handleStatus(item.id, status)}>
+                    <button
+                      key={status}
+                      className="btn-secondary"
+                      type="button"
+                      onClick={() => void handleStatus(item.id, status)}
+                      disabled={item.status === status}
+                    >
                       Mark {status}
                     </button>
                   ))}

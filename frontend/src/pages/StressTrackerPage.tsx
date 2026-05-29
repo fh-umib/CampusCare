@@ -39,6 +39,9 @@ export default function StressTrackerPage() {
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
+    setError('');
+    setMessage('');
+
     try {
       setIsSubmitting(true);
       await stressService.create({
@@ -124,7 +127,7 @@ export default function StressTrackerPage() {
                 <div key={item.subject ?? 'overall'} className="rounded-md bg-slate-50 p-3">
                   <p className="font-medium">{item.subject ?? 'Overall'}</p>
                   <p className="text-sm text-slate-500">
-                    {item.count} records - average {item.averageStressLevel}
+                    {item.count} records - average level {Number(item.averageStressLevel).toFixed(2)}
                   </p>
                 </div>
               ))}

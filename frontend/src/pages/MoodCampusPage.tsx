@@ -24,6 +24,7 @@ export default function MoodCampusPage() {
   const isGlobalView = user?.role === 'mentor' || user?.role === 'admin';
 
   async function loadData() {
+    setError('');
     try {
       setIsLoading(true);
       const [recordsData, summaryData] = await Promise.all([moodService.list(), moodService.summary()]);
@@ -42,6 +43,9 @@ export default function MoodCampusPage() {
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
+    setError('');
+    setMessage('');
+
     try {
       setIsSubmitting(true);
       await moodService.create({ mood: form.mood, note: form.note || undefined });

@@ -8,7 +8,7 @@ import {
   type ReactNode
 } from 'react';
 import { authService } from '../services/authService';
-import { clearStoredToken, getApiErrorMessage, getStoredToken, storeToken } from '../services/apiClient';
+import { clearStoredToken, getStoredToken, storeToken } from '../services/apiClient';
 import type { AuthUser, LoginPayload, RegisterPayload } from '../types/auth';
 
 type AuthContextValue = {
@@ -53,13 +53,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const currentUser = await authService.getCurrentUser();
       setUser(currentUser);
       setToken(storedToken);
-    } catch (error) {
+    } catch {
       clearStoredToken();
       setUser(null);
       setToken(null);
-      if (import.meta.env.DEV) {
-        console.warn(getApiErrorMessage(error));
-      }
     } finally {
       setIsLoading(false);
     }

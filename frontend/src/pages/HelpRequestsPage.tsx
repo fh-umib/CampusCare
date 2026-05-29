@@ -22,6 +22,18 @@ function displayLabel(value: string) {
   return value.replace('_', ' ');
 }
 
+function statusClass(status: HelpRequestStatus) {
+  if (status === 'open') {
+    return 'badge-green';
+  }
+
+  if (status === 'answered') {
+    return 'badge-amber';
+  }
+
+  return 'badge';
+}
+
 export default function HelpRequestsPage() {
   const { user } = useAuth();
   const [requests, setRequests] = useState<HelpRequest[]>([]);
@@ -90,6 +102,8 @@ export default function HelpRequestsPage() {
     }
 
     try {
+      setError('');
+      setMessage('');
       await helpRequestService.reply(id, messageText);
       setReplyText({ ...replyText, [id]: '' });
       setMessage('Reply sent.');
@@ -101,6 +115,8 @@ export default function HelpRequestsPage() {
 
   async function handleStatus(id: string, status: HelpRequestStatus) {
     try {
+      setError('');
+      setMessage('');
       await helpRequestService.updateStatus(id, status);
       setMessage('Help request status updated.');
       await loadRequests();
@@ -131,7 +147,12 @@ export default function HelpRequestsPage() {
         <form className="mt-4 grid gap-4 lg:grid-cols-2" onSubmit={handleCreate}>
           <label>
             <span className="field-label">Request title</span>
-            <input className="input" value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} />
+            <input
+              className="input"
+              required
+              value={form.title}
+              onChange={(event) => setForm({ ...form, title: event.target.value })}
+            />
           </label>
           <label>
             <span className="field-label">Category</span>
@@ -151,6 +172,7 @@ export default function HelpRequestsPage() {
             <span className="field-label">What kind of help do you need?</span>
             <textarea
               className="textarea min-h-28"
+              required
               value={form.description}
               onChange={(event) => setForm({ ...form, description: event.target.value })}
             />
@@ -192,7 +214,7 @@ export default function HelpRequestsPage() {
 
       {isLoading ? <div className="empty-state">Loading help requests...</div> : null}
       {!isLoading && requests.length === 0 ? (
-        <div className="empty-state">No help requests yet. Create the first request for the demo.</div>
+        <div className="empty-state">No help requests match the selected filters yet.</div>
       ) : null}
       <section className="grid gap-4">
         {requests.map((request) => (
@@ -206,7 +228,7 @@ export default function HelpRequestsPage() {
               </div>
               <div className="flex gap-2">
                 <span className="badge-blue">{displayLabel(request.category)}</span>
-                <span className={request.status === 'open' ? 'badge-green' : 'badge-amber'}>{request.status}</span>
+                <span className={statusClass(request.status)}>{request.status}</span>
               </div>
             </div>
             <p className="mt-4 text-sm leading-6 text-slate-700">{request.description}</p>
@@ -217,7 +239,12 @@ export default function HelpRequestsPage() {
                 value={replyText[request.id] ?? ''}
                 onChange={(event) => setReplyText({ ...replyText, [request.id]: event.target.value })}
               />
-              <button className="btn-secondary" type="button" onClick={() => void handleReply(request.id)}>
+              <button
+                className="btn-secondary"
+                type="button"
+                onClick={() => void handleReply(request.id)}
+                disabled={!replyText[request.id]?.trim()}
+              >
                 Reply
               </button>
             </div>

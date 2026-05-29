@@ -25,7 +25,7 @@ export default function SkillMapPage() {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submittingAction, setSubmittingAction] = useState<'skill' | 'attach' | null>(null);
 
   async function loadData(skillFilter = search) {
     setError('');
@@ -56,13 +56,16 @@ export default function SkillMapPage() {
 
   async function handleAddSkill(event: FormEvent) {
     event.preventDefault();
+    setError('');
+    setMessage('');
+
     if (!newSkill.name.trim()) {
       setError('Skill name is required.');
       return;
     }
 
     try {
-      setIsSubmitting(true);
+      setSubmittingAction('skill');
       await skillService.create({ name: newSkill.name, category: newSkill.category || undefined });
       setNewSkill({ name: '', category: '' });
       setMessage('Skill saved.');
@@ -70,31 +73,36 @@ export default function SkillMapPage() {
     } catch (err) {
       setError(getApiErrorMessage(err));
     } finally {
-      setIsSubmitting(false);
+      setSubmittingAction(null);
     }
   }
 
   async function handleAttach(event: FormEvent) {
     event.preventDefault();
+    setError('');
+    setMessage('');
+
     if (!attachForm.skillId) {
       setError('Choose a skill to attach.');
       return;
     }
 
     try {
-      setIsSubmitting(true);
+      setSubmittingAction('attach');
       await skillService.attachMySkill(attachForm);
       setMessage('Skill attached to your profile.');
       await loadData();
     } catch (err) {
       setError(getApiErrorMessage(err));
     } finally {
-      setIsSubmitting(false);
+      setSubmittingAction(null);
     }
   }
 
   async function handleRemove(skillId: string) {
     try {
+      setError('');
+      setMessage('');
       await skillService.removeMySkill(skillId);
       setMessage('Skill removed.');
       await loadData();
@@ -105,6 +113,7 @@ export default function SkillMapPage() {
 
   async function handleSearch(event: FormEvent) {
     event.preventDefault();
+    setMessage('');
     await loadData(search);
   }
 
@@ -123,14 +132,19 @@ export default function SkillMapPage() {
           <p className="section-subtitle">Add a skill to the shared catalog if it is not already listed.</p>
           <label className="block">
             <span className="field-label">Skill name</span>
-            <input className="input" value={newSkill.name} onChange={(e) => setNewSkill({ ...newSkill, name: e.target.value })} />
+            <input
+              className="input"
+              required
+              value={newSkill.name}
+              onChange={(e) => setNewSkill({ ...newSkill, name: e.target.value })}
+            />
           </label>
           <label className="block">
             <span className="field-label">Category</span>
             <input className="input" value={newSkill.category} onChange={(e) => setNewSkill({ ...newSkill, category: e.target.value })} />
           </label>
-          <button className="btn-primary" disabled={isSubmitting} type="submit">
-            Save skill
+          <button className="btn-primary" disabled={Boolean(submittingAction)} type="submit">
+            {submittingAction === 'skill' ? 'Saving...' : 'Save skill'}
           </button>
         </form>
 
@@ -170,8 +184,8 @@ export default function SkillMapPage() {
               </select>
             </label>
           </div>
-          <button className="btn-primary" disabled={isSubmitting} type="submit">
-            Attach skill
+          <button className="btn-primary" disabled={Boolean(submittingAction) || !attachForm.skillId} type="submit">
+            {submittingAction === 'attach' ? 'Attaching...' : 'Attach skill'}
           </button>
         </form>
       </section>
@@ -210,7 +224,9 @@ export default function SkillMapPage() {
           </form>
         </div>
         {isLoading ? <p className="empty-text mt-3">Loading skills...</p> : null}
-        {!isLoading && students.length === 0 ? <p className="empty-text mt-3">No student skills found.</p> : null}
+        {!isLoading && students.length === 0 ? (
+          <p className="empty-text mt-3">No student skill cards match this search yet.</p>
+        ) : null}
         <div className="mt-4 grid gap-4 lg:grid-cols-2">
           {students.map((student) => (
             <article key={student.userId} className="rounded-lg border border-slate-200 bg-white p-4">
@@ -223,7 +239,7 @@ export default function SkillMapPage() {
               <div className="mt-3 flex flex-wrap gap-2">
                 {student.skills.map((skill) => (
                   <span key={skill.id} className="badge">
-                    {skill.name} - {skill.level}
+                    {skill.name} - {skill.level} - {displayLabel(skill.availability)}
                   </span>
                 ))}
               </div>
