@@ -7,6 +7,10 @@ import { formatDate } from '../utils/formatDate';
 
 const moods: MoodState[] = ['motivated', 'tired', 'stressed', 'calm', 'overwhelmed'];
 
+function displayLabel(value: string) {
+  return value.replace('_', ' ');
+}
+
 export default function MoodCampusPage() {
   const [records, setRecords] = useState<MoodRecord[]>([]);
   const [summary, setSummary] = useState<MoodSummary[]>([]);
@@ -50,7 +54,10 @@ export default function MoodCampusPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="MoodCampus" description="Share a weekly emotional state and observe campus mood patterns." />
+      <PageHeader
+        title="MoodCampus"
+        description="Record a weekly emotional state and notice wellbeing patterns over time."
+      />
       {message ? <div className="alert-success">{message}</div> : null}
       {error ? <div className="alert-error">{error}</div> : null}
 
@@ -60,7 +67,7 @@ export default function MoodCampusPage() {
           <select className="input" value={form.mood} onChange={(e) => setForm({ ...form, mood: e.target.value as MoodState })}>
             {moods.map((mood) => (
               <option key={mood} value={mood}>
-                {mood}
+                {displayLabel(mood)}
               </option>
             ))}
           </select>
@@ -79,13 +86,14 @@ export default function MoodCampusPage() {
       <section className="grid gap-4 lg:grid-cols-2">
         <div className="panel">
           <h2 className="section-title">Mood Summary</h2>
+          <p className="section-subtitle">Counts across recent MoodCampus records.</p>
           {summary.length === 0 ? (
-            <p className="empty-text mt-3">No mood summary yet.</p>
+            <div className="empty-state mt-4">No mood summary yet.</div>
           ) : (
             <div className="mt-4 grid gap-2">
               {summary.map((item) => (
                 <div key={item.mood} className="flex justify-between rounded-md bg-slate-50 px-3 py-2">
-                  <span className="capitalize">{item.mood}</span>
+                  <span className="capitalize">{displayLabel(item.mood)}</span>
                   <span className="font-semibold">{item.count}</span>
                 </div>
               ))}
@@ -94,12 +102,12 @@ export default function MoodCampusPage() {
         </div>
         <div className="panel">
           <h2 className="section-title">Mood Records</h2>
-          {isLoading ? <p className="empty-text mt-3">Loading mood records...</p> : null}
-          {!isLoading && records.length === 0 ? <p className="empty-text mt-3">No mood records yet.</p> : null}
+          {isLoading ? <div className="empty-state mt-4">Loading mood records...</div> : null}
+          {!isLoading && records.length === 0 ? <div className="empty-state mt-4">No mood records yet.</div> : null}
           <div className="mt-4 space-y-3">
             {records.map((record) => (
               <div key={record.id} className="border-b border-slate-100 pb-3">
-                <p className="font-medium capitalize">{record.mood}</p>
+                <p className="font-medium capitalize">{displayLabel(record.mood)}</p>
                 <p className="text-sm text-slate-500">{formatDate(record.recordedAt)}</p>
                 {record.note ? <p className="mt-1 text-sm text-slate-700">{record.note}</p> : null}
               </div>

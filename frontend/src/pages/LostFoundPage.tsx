@@ -8,6 +8,18 @@ import { formatDate } from '../utils/formatDate';
 
 const statuses: LostFoundStatus[] = ['open', 'claimed', 'resolved'];
 
+function statusClass(status: LostFoundStatus) {
+  if (status === 'resolved') {
+    return 'badge-green';
+  }
+
+  if (status === 'claimed') {
+    return 'badge-amber';
+  }
+
+  return 'badge-blue';
+}
+
 export default function LostFoundPage() {
   const { user } = useAuth();
   const [items, setItems] = useState<LostFoundItem[]>([]);
@@ -82,7 +94,7 @@ export default function LostFoundPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Lost & Found" description="Report and track lost or found items inside the faculty." />
+      <PageHeader title="Lost & Found" description="Report lost or found items and help return them to students quickly." />
       {message ? <div className="alert-success">{message}</div> : null}
       {error ? <div className="alert-error">{error}</div> : null}
 
@@ -118,7 +130,7 @@ export default function LostFoundPage() {
         </div>
       </form>
 
-      <section className="flex flex-wrap gap-3">
+      <section className="panel-soft flex flex-wrap gap-3">
         <select className="input max-w-44" value={filters.item_type} onChange={(e) => setFilters({ ...filters, item_type: e.target.value as LostFoundItemType | '' })}>
           <option value="">All types</option>
           <option value="lost">Lost</option>
@@ -134,8 +146,10 @@ export default function LostFoundPage() {
         </select>
       </section>
 
-      {isLoading ? <p className="empty-text">Loading reports...</p> : null}
-      {!isLoading && items.length === 0 ? <p className="empty-text">No lost or found reports yet.</p> : null}
+      {isLoading ? <div className="empty-state">Loading reports...</div> : null}
+      {!isLoading && items.length === 0 ? (
+        <div className="empty-state">No lost or found reports yet. Create a report to start the demo flow.</div>
+      ) : null}
       <section className="grid gap-4 lg:grid-cols-2">
         {items.map((item) => {
           const canManage = user?.role === 'admin' || item.userId === user?.id;
@@ -146,12 +160,12 @@ export default function LostFoundPage() {
                 <div>
                   <h2 className="text-lg font-semibold">{item.title}</h2>
                   <p className="mt-1 text-sm text-slate-500">
-                    {item.location ?? 'No location'} · {item.itemDate ? formatDate(item.itemDate) : formatDate(item.createdAt)}
+                    {item.location ?? 'No location'} - {item.itemDate ? formatDate(item.itemDate) : formatDate(item.createdAt)}
                   </p>
                 </div>
                 <div className="flex gap-2">
-                  <span className="badge-blue">{item.itemType}</span>
-                  <span className={item.status === 'open' ? 'badge-green' : 'badge-amber'}>{item.status}</span>
+                  <span className={item.itemType === 'lost' ? 'badge-rose' : 'badge-blue'}>{item.itemType}</span>
+                  <span className={statusClass(item.status)}>{item.status}</span>
                 </div>
               </div>
               <p className="mt-4 text-sm leading-6 text-slate-700">{item.description}</p>

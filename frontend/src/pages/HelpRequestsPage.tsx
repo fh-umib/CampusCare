@@ -17,6 +17,10 @@ const categories: HelpRequestCategory[] = [
 
 const statuses: HelpRequestStatus[] = ['open', 'answered', 'closed'];
 
+function displayLabel(value: string) {
+  return value.replace('_', ' ');
+}
+
 export default function HelpRequestsPage() {
   const [requests, setRequests] = useState<HelpRequest[]>([]);
   const [filters, setFilters] = useState<{ status: HelpRequestStatus | ''; category: HelpRequestCategory | '' }>({
@@ -94,15 +98,21 @@ export default function HelpRequestsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Silent Help" description="Anonymous academic, project, GitHub, and stress support requests." />
+      <PageHeader
+        title="Silent Help"
+        description="Create anonymous or named requests for academic, programming, teamwork, and stress support."
+      />
       {message ? <div className="alert-success">{message}</div> : null}
       {error ? <div className="alert-error">{error}</div> : null}
 
       <section className="panel">
         <h2 className="section-title">Create Help Request</h2>
+        <p className="section-subtitle">
+          Anonymous requests hide your name in the public list and display "Anonymous Student".
+        </p>
         <form className="mt-4 grid gap-4 lg:grid-cols-2" onSubmit={handleCreate}>
           <label>
-            <span className="field-label">Title</span>
+            <span className="field-label">Request title</span>
             <input className="input" value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} />
           </label>
           <label>
@@ -114,13 +124,13 @@ export default function HelpRequestsPage() {
             >
               {categories.map((category) => (
                 <option key={category} value={category}>
-                  {category.replace('_', ' ')}
+                  {displayLabel(category)}
                 </option>
               ))}
             </select>
           </label>
           <label className="lg:col-span-2">
-            <span className="field-label">Description</span>
+            <span className="field-label">What kind of help do you need?</span>
             <textarea
               className="textarea min-h-28"
               value={form.description}
@@ -133,7 +143,7 @@ export default function HelpRequestsPage() {
               checked={form.isAnonymous}
               onChange={(event) => setForm({ ...form, isAnonymous: event.target.checked })}
             />
-            Submit anonymously
+            Keep this request anonymous
           </label>
           <div className="flex justify-end">
             <button className="btn-primary" type="submit" disabled={isSubmitting}>
@@ -143,7 +153,7 @@ export default function HelpRequestsPage() {
         </form>
       </section>
 
-      <section className="flex flex-wrap gap-3">
+      <section className="panel-soft flex flex-wrap gap-3">
         <select className="input max-w-48" value={filters.status} onChange={(e) => setFilters({ ...filters, status: e.target.value as HelpRequestStatus | '' })}>
           <option value="">All statuses</option>
           {statuses.map((status) => (
@@ -156,14 +166,16 @@ export default function HelpRequestsPage() {
           <option value="">All categories</option>
           {categories.map((category) => (
             <option key={category} value={category}>
-              {category.replace('_', ' ')}
+              {displayLabel(category)}
             </option>
           ))}
         </select>
       </section>
 
-      {isLoading ? <p className="empty-text">Loading help requests...</p> : null}
-      {!isLoading && requests.length === 0 ? <p className="empty-text">No help requests yet.</p> : null}
+      {isLoading ? <div className="empty-state">Loading help requests...</div> : null}
+      {!isLoading && requests.length === 0 ? (
+        <div className="empty-state">No help requests yet. Create the first request for the demo.</div>
+      ) : null}
       <section className="grid gap-4">
         {requests.map((request) => (
           <article key={request.id} className="panel">
@@ -171,11 +183,11 @@ export default function HelpRequestsPage() {
               <div>
                 <h2 className="text-lg font-semibold">{request.title}</h2>
                 <p className="mt-1 text-sm text-slate-500">
-                  {request.studentName} · {formatDate(request.createdAt)}
+                  {request.studentName} - {formatDate(request.createdAt)}
                 </p>
               </div>
               <div className="flex gap-2">
-                <span className="badge-blue">{request.category.replace('_', ' ')}</span>
+                <span className="badge-blue">{displayLabel(request.category)}</span>
                 <span className={request.status === 'open' ? 'badge-green' : 'badge-amber'}>{request.status}</span>
               </div>
             </div>

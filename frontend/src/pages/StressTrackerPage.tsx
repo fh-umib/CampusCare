@@ -60,7 +60,7 @@ export default function StressTrackerPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="ExamStress Tracker" description="Record exam pressure and spot stressful subjects." />
+      <PageHeader title="ExamStress Tracker" description="Record exam pressure from 1 Low to 5 Very High." />
       {message ? <div className="alert-success">{message}</div> : null}
       {error ? <div className="alert-error">{error}</div> : null}
 
@@ -113,7 +113,7 @@ export default function StressTrackerPage() {
                 <div key={item.subject ?? 'overall'} className="rounded-md bg-slate-50 p-3">
                   <p className="font-medium">{item.subject ?? 'Overall'}</p>
                   <p className="text-sm text-slate-500">
-                    {item.count} records · average {item.averageStressLevel}
+                    {item.count} records - average {item.averageStressLevel}
                   </p>
                 </div>
               ))}
@@ -128,10 +128,10 @@ export default function StressTrackerPage() {
             {records.map((record) => (
               <div key={record.id} className="border-b border-slate-100 pb-3">
                 <p className="font-medium">
-                  Level {record.stressLevel} · {stressLabels[record.stressLevel - 1]}
+                  Level {record.stressLevel} - {stressLabels[record.stressLevel - 1]}
                 </p>
                 <p className="text-sm text-slate-500">
-                  {record.subject ?? 'No subject'} · {formatDate(record.recordedAt)}
+                  {record.subject ?? 'No subject'} - {formatDate(record.recordedAt)}
                 </p>
                 {record.note ? <p className="mt-1 text-sm text-slate-700">{record.note}</p> : null}
               </div>

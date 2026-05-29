@@ -48,7 +48,7 @@ export default function ProfilePage() {
           <div className="mt-4 flex flex-wrap gap-2">
             {skills.map((skill) => (
               <span key={skill.skillId} className="badge">
-                {skill.name} · {skill.level}
+                {skill.name} - {skill.level}
               </span>
             ))}
           </div>

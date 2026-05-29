@@ -7,6 +7,10 @@ import type { Skill, SkillAvailability, SkillLevel, StudentSkill, StudentSkillCa
 const levels: SkillLevel[] = ['beginner', 'intermediate', 'advanced'];
 const availabilityValues: SkillAvailability[] = ['available', 'busy', 'open_to_projects'];
 
+function displayLabel(value: string) {
+  return value.replace('_', ' ');
+}
+
 export default function SkillMapPage() {
   const [skills, setSkills] = useState<Skill[]>([]);
   const [mySkills, setMySkills] = useState<StudentSkill[]>([]);
@@ -106,13 +110,17 @@ export default function SkillMapPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="SkillMap" description="Discover student skills and manage your own skill profile." />
+      <PageHeader
+        title="SkillMap"
+        description="Build your student skill profile and discover classmates available for projects or peer support."
+      />
       {message ? <div className="alert-success">{message}</div> : null}
       {error ? <div className="alert-error">{error}</div> : null}
 
       <section className="grid gap-4 xl:grid-cols-2">
         <form className="panel space-y-4" onSubmit={handleAddSkill}>
-          <h2 className="section-title">Add Skill</h2>
+          <h2 className="section-title">All Skills</h2>
+          <p className="section-subtitle">Add a skill to the shared catalog if it is not already listed.</p>
           <label className="block">
             <span className="field-label">Skill name</span>
             <input className="input" value={newSkill.name} onChange={(e) => setNewSkill({ ...newSkill, name: e.target.value })} />
@@ -128,6 +136,7 @@ export default function SkillMapPage() {
 
         <form className="panel space-y-4" onSubmit={handleAttach}>
           <h2 className="section-title">Attach Skill To My Profile</h2>
+          <p className="section-subtitle">Choose your level and current availability for collaboration.</p>
           <label className="block">
             <span className="field-label">Skill</span>
             <select className="input" value={attachForm.skillId} onChange={(e) => setAttachForm({ ...attachForm, skillId: e.target.value })}>
@@ -155,7 +164,7 @@ export default function SkillMapPage() {
               <select className="input" value={attachForm.availability} onChange={(e) => setAttachForm({ ...attachForm, availability: e.target.value as SkillAvailability })}>
                 {availabilityValues.map((availability) => (
                   <option key={availability} value={availability}>
-                    {availability.replace('_', ' ')}
+                    {displayLabel(availability)}
                   </option>
                 ))}
               </select>
@@ -178,7 +187,7 @@ export default function SkillMapPage() {
                 <div>
                   <p className="font-medium">{skill.name}</p>
                   <p className="text-sm text-slate-500">
-                    {skill.level} · {skill.availability.replace('_', ' ')}
+                    {skill.level} - {displayLabel(skill.availability)}
                   </p>
                 </div>
                 <button className="btn-danger" type="button" onClick={() => void handleRemove(skill.skillId)}>
@@ -193,7 +202,7 @@ export default function SkillMapPage() {
       <section className="panel">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <h2 className="section-title">Student Skill Cards</h2>
-          <form className="flex gap-2" onSubmit={handleSearch}>
+          <form className="flex w-full gap-2 sm:w-auto" onSubmit={handleSearch}>
             <input className="input" placeholder="Search skill" value={search} onChange={(e) => setSearch(e.target.value)} />
             <button className="btn-secondary" type="submit">
               Search
@@ -204,7 +213,7 @@ export default function SkillMapPage() {
         {!isLoading && students.length === 0 ? <p className="empty-text mt-3">No student skills found.</p> : null}
         <div className="mt-4 grid gap-4 lg:grid-cols-2">
           {students.map((student) => (
-            <article key={student.userId} className="rounded-lg border border-slate-200 p-4">
+            <article key={student.userId} className="rounded-lg border border-slate-200 bg-white p-4">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="font-semibold">{student.fullName}</p>
@@ -214,7 +223,7 @@ export default function SkillMapPage() {
               <div className="mt-3 flex flex-wrap gap-2">
                 {student.skills.map((skill) => (
                   <span key={skill.id} className="badge">
-                    {skill.name} · {skill.level}
+                    {skill.name} - {skill.level}
                   </span>
                 ))}
               </div>
