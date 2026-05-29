@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { PageHeader } from '../components/common/PageHeader';
+import { useAuth } from '../context/AuthContext';
 import { getApiErrorMessage } from '../services/apiClient';
 import { stressService } from '../services/stressService';
 import type { StressRecord, StressSummary } from '../types/stress';
@@ -8,6 +9,7 @@ import { formatDate } from '../utils/formatDate';
 const stressLabels = ['Low', 'Mild', 'Medium', 'High', 'Very High'];
 
 export default function StressTrackerPage() {
+  const { user } = useAuth();
   const [records, setRecords] = useState<StressRecord[]>([]);
   const [summary, setSummary] = useState<StressSummary[]>([]);
   const [form, setForm] = useState({ subject: '', stress_level: 3, note: '' });
@@ -15,6 +17,7 @@ export default function StressTrackerPage() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const isGlobalView = user?.role === 'mentor' || user?.role === 'admin';
 
   async function loadData() {
     setError('');
@@ -60,7 +63,15 @@ export default function StressTrackerPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="ExamStress Tracker" description="Record exam pressure from 1 Low to 5 Very High." />
+      <PageHeader
+        title="ExamStress Tracker"
+        description={
+          isGlobalView
+            ? 'Mentor/admin view: review broader stress records and summaries while still being able to add your own check-in.'
+            : 'Student view: record your exam pressure from 1 Low to 5 Very High.'
+        }
+      />
+      <span className="badge">{isGlobalView ? 'Global wellbeing view' : 'Personal records'}</span>
       {message ? <div className="alert-success">{message}</div> : null}
       {error ? <div className="alert-error">{error}</div> : null}
 
@@ -104,7 +115,7 @@ export default function StressTrackerPage() {
 
       <section className="grid gap-4 lg:grid-cols-2">
         <div className="panel">
-          <h2 className="section-title">Summary</h2>
+          <h2 className="section-title">{isGlobalView ? 'Global Stress Summary' : 'My Stress Summary'}</h2>
           {summary.length === 0 ? (
             <p className="empty-text mt-3">No stress summary yet.</p>
           ) : (
@@ -121,7 +132,7 @@ export default function StressTrackerPage() {
           )}
         </div>
         <div className="panel">
-          <h2 className="section-title">Records</h2>
+          <h2 className="section-title">{isGlobalView ? 'Stress Records' : 'My Stress Records'}</h2>
           {isLoading ? <p className="empty-text mt-3">Loading records...</p> : null}
           {!isLoading && records.length === 0 ? <p className="empty-text mt-3">No stress records yet.</p> : null}
           <div className="mt-4 space-y-3">

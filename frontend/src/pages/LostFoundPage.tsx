@@ -152,7 +152,7 @@ export default function LostFoundPage() {
       ) : null}
       <section className="grid gap-4 lg:grid-cols-2">
         {items.map((item) => {
-          const canManage = user?.role === 'admin' || item.userId === user?.id;
+          const canManage = user?.role === 'admin';
 
           return (
             <article key={item.id} className="panel">
@@ -171,6 +171,9 @@ export default function LostFoundPage() {
               <p className="mt-4 text-sm leading-6 text-slate-700">{item.description}</p>
               {canManage ? (
                 <div className="mt-4 flex flex-wrap gap-2">
+                  <span className="self-center text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    Admin action
+                  </span>
                   {statuses.map((status) => (
                     <button key={status} className="btn-secondary" type="button" onClick={() => void handleStatus(item.id, status)}>
                       Mark {status}

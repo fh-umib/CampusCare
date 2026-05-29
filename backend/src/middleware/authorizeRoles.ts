@@ -10,10 +10,12 @@ export function authorizeRoles(...roles: UserRole[]) {
     }
 
     if (!roles.includes(request.currentUser.role)) {
-      next(new AppError(403, 'You do not have permission to access this resource'));
+      next(new AppError(403, 'You do not have permission to perform this action.'));
       return;
     }
 
     next();
   };
 }
+
+export const requireRole = authorizeRoles;

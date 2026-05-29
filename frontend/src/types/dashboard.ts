@@ -3,9 +3,12 @@ export type DashboardStats = {
   totalHelpRequests: number;
   openHelpRequests: number;
   totalSkills: number;
+  totalStudentSkills?: number;
   totalStressRecords: number;
   averageStressLevel: number;
   moodCounts: Record<string, number>;
+  totalMoodRecords?: number;
+  totalLostFoundItems?: number;
   lostFoundOpen: number;
   lostFoundResolved: number;
   recentActivity: Array<{
@@ -14,4 +17,3 @@ export type DashboardStats = {
     createdAt: string;
   }>;
 };
-

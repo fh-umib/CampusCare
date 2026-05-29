@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { PageHeader } from '../components/common/PageHeader';
+import { useAuth } from '../context/AuthContext';
 import { getApiErrorMessage } from '../services/apiClient';
 import { helpRequestService } from '../services/helpRequestService';
 import type { HelpRequest, HelpRequestCategory, HelpRequestStatus } from '../types/helpRequest';
@@ -22,6 +23,7 @@ function displayLabel(value: string) {
 }
 
 export default function HelpRequestsPage() {
+  const { user } = useAuth();
   const [requests, setRequests] = useState<HelpRequest[]>([]);
   const [filters, setFilters] = useState<{ status: HelpRequestStatus | ''; category: HelpRequestCategory | '' }>({
     status: '',
@@ -38,6 +40,7 @@ export default function HelpRequestsPage() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const canManageStatus = user?.role === 'mentor' || user?.role === 'admin';
 
   async function loadRequests() {
     setError('');
@@ -96,12 +99,27 @@ export default function HelpRequestsPage() {
     }
   }
 
+  async function handleStatus(id: string, status: HelpRequestStatus) {
+    try {
+      await helpRequestService.updateStatus(id, status);
+      setMessage('Help request status updated.');
+      await loadRequests();
+    } catch (err) {
+      setError(getApiErrorMessage(err));
+    }
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="Silent Help"
-        description="Create anonymous or named requests for academic, programming, teamwork, and stress support."
+        description={
+          canManageStatus
+            ? 'Mentor/admin support view: reply to requests and update their status.'
+            : 'Student view: create anonymous or named requests for academic, programming, teamwork, and stress support.'
+        }
       />
+      <div className="badge">{canManageStatus ? 'Requires mentor/admin for status changes' : 'Student view'}</div>
       {message ? <div className="alert-success">{message}</div> : null}
       {error ? <div className="alert-error">{error}</div> : null}
 
@@ -203,6 +221,22 @@ export default function HelpRequestsPage() {
                 Reply
               </button>
             </div>
+            {canManageStatus ? (
+              <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-4">
+                <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Protected action</span>
+                {statuses.map((status) => (
+                  <button
+                    key={status}
+                    className="btn-secondary"
+                    type="button"
+                    onClick={() => void handleStatus(request.id, status)}
+                    disabled={request.status === status}
+                  >
+                    Mark {status}
+                  </button>
+                ))}
+              </div>
+            ) : null}
           </article>
         ))}
       </section>

@@ -62,7 +62,7 @@ export const lostFoundService = {
     const item = await lostFoundService.getById(id);
 
     if (user.role !== 'admin' && item.userId !== user.id) {
-      throw new AppError(403, 'Only the creator or an admin can update this status');
+      throw new AppError(403, 'You do not have permission to perform this action.');
     }
 
     const status = requireEnum((payload as Record<string, unknown>).status, itemStatuses, 'status');

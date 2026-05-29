@@ -33,7 +33,16 @@ export default function ProfilePage() {
         </div>
         <div>
           <p className="field-label">Role</p>
-          <p className="font-medium capitalize">{user?.role}</p>
+          <div className="mt-1 flex flex-wrap gap-2">
+            <span className="badge-green">{user?.role}</span>
+            <span className="badge">
+              {user?.role === 'admin'
+                ? 'System management'
+                : user?.role === 'mentor'
+                  ? 'Support role'
+                  : 'Student account'}
+            </span>
+          </div>
         </div>
         <div>
           <p className="field-label">Created</p>

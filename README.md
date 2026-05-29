@@ -475,6 +475,12 @@ mentor@campuscare.test
 admin@campuscare.test
 ```
 
+Use these accounts to review role-aware data visibility:
+
+- Student login shows Flutura Hyseni's personal stress, mood, skills, help requests, and lost/found records.
+- Mentor login shows broader help requests, SkillMap data, stress summaries, and mood summaries.
+- Admin login shows global dashboard statistics and management actions.
+
 ## Testing
 
 Run a full project build:

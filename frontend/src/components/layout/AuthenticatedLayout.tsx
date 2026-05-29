@@ -11,6 +11,18 @@ const navItems = [
   { label: 'Profile', to: '/profile' }
 ];
 
+function roleLabel(role?: string) {
+  if (role === 'admin') {
+    return 'Admin dashboard and management actions';
+  }
+
+  if (role === 'mentor') {
+    return 'Mentor support view';
+  }
+
+  return 'Student workspace';
+}
+
 function initials(name?: string) {
   return (
     name
@@ -37,7 +49,7 @@ export function AuthenticatedLayout() {
         <div className="mb-8 rounded-lg bg-slate-950 p-4 text-white">
           <p className="text-xl font-semibold">CampusCare</p>
           <p className="mt-1 text-sm text-slate-300">Student support platform</p>
-          <p className="mt-3 text-xs leading-5 text-slate-400">Programming Club project</p>
+          <p className="mt-3 text-xs leading-5 text-slate-400">{roleLabel(user?.role)}</p>
         </div>
         <nav className="space-y-1">
           {navItems.map((item) => (
@@ -72,7 +84,7 @@ export function AuthenticatedLayout() {
             </div>
             <div className="flex items-center gap-3">
               <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-700 ring-1 ring-emerald-100">
-                {user?.role}
+                {user?.role} view
               </span>
               <button className="btn-secondary" type="button" onClick={handleLogout}>
                 Logout

@@ -34,9 +34,12 @@ export const dashboardRepository = {
       totalHelpRequests,
       openHelpRequests,
       totalSkills,
+      totalStudentSkills,
       totalStressRecords,
+      totalMoodRecords,
       averageStressResult,
       moodCountsResult,
+      totalLostFoundItems,
       lostFoundOpen,
       lostFoundResolved,
       recentActivityResult
@@ -45,7 +48,9 @@ export const dashboardRepository = {
       count(`SELECT COUNT(*) FROM help_requests ${userFilter}`, params),
       count(`SELECT COUNT(*) FROM help_requests ${scope.userId ? `${userFilter} AND` : 'WHERE'} status = 'open'`, params),
       count('SELECT COUNT(*) FROM skills'),
+      count(`SELECT COUNT(*) FROM student_skills ${userFilter}`, params),
       count(`SELECT COUNT(*) FROM stress_records ${userFilter}`, params),
+      count(`SELECT COUNT(*) FROM mood_records ${userFilter}`, params),
       queryDatabase<AverageRow>(
         `SELECT ROUND(AVG(stress_level)::numeric, 2) AS average
          FROM stress_records
@@ -60,6 +65,7 @@ export const dashboardRepository = {
          ORDER BY mood ASC`,
         params
       ),
+      count(`SELECT COUNT(*) FROM lost_found_items ${userFilter}`, params),
       count(
         `SELECT COUNT(*) FROM lost_found_items ${scope.userId ? `${userFilter} AND` : 'WHERE'} status = 'open'`,
         params
@@ -83,12 +89,15 @@ export const dashboardRepository = {
       totalHelpRequests,
       openHelpRequests,
       totalSkills,
+      totalStudentSkills,
       totalStressRecords,
+      totalMoodRecords,
       averageStressLevel: averageStressResult.rows[0]?.average ? Number(averageStressResult.rows[0].average) : 0,
       moodCounts: moodCountsResult.rows.reduce<Record<string, number>>((counts, row) => {
         counts[row.mood] = Number(row.count);
         return counts;
       }, {}),
+      totalLostFoundItems,
       lostFoundOpen,
       lostFoundResolved,
       recentActivity: recentActivityResult.rows.map((row) => ({

@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { PageHeader } from '../components/common/PageHeader';
+import { useAuth } from '../context/AuthContext';
 import { getApiErrorMessage } from '../services/apiClient';
 import { moodService } from '../services/moodService';
 import type { MoodRecord, MoodState, MoodSummary } from '../types/mood';
@@ -12,6 +13,7 @@ function displayLabel(value: string) {
 }
 
 export default function MoodCampusPage() {
+  const { user } = useAuth();
   const [records, setRecords] = useState<MoodRecord[]>([]);
   const [summary, setSummary] = useState<MoodSummary[]>([]);
   const [form, setForm] = useState({ mood: 'motivated' as MoodState, note: '' });
@@ -19,6 +21,7 @@ export default function MoodCampusPage() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const isGlobalView = user?.role === 'mentor' || user?.role === 'admin';
 
   async function loadData() {
     try {
@@ -56,8 +59,13 @@ export default function MoodCampusPage() {
     <div className="space-y-6">
       <PageHeader
         title="MoodCampus"
-        description="Record a weekly emotional state and notice wellbeing patterns over time."
+        description={
+          isGlobalView
+            ? 'Mentor/admin view: review broader MoodCampus trends while still being able to add your own check-in.'
+            : 'Student view: record a weekly emotional state and notice your wellbeing patterns over time.'
+        }
       />
+      <span className="badge">{isGlobalView ? 'Global mood view' : 'Personal records'}</span>
       {message ? <div className="alert-success">{message}</div> : null}
       {error ? <div className="alert-error">{error}</div> : null}
 
@@ -85,8 +93,10 @@ export default function MoodCampusPage() {
 
       <section className="grid gap-4 lg:grid-cols-2">
         <div className="panel">
-          <h2 className="section-title">Mood Summary</h2>
-          <p className="section-subtitle">Counts across recent MoodCampus records.</p>
+          <h2 className="section-title">{isGlobalView ? 'Global Mood Summary' : 'My Mood Summary'}</h2>
+          <p className="section-subtitle">
+            {isGlobalView ? 'Counts across visible MoodCampus records.' : 'Counts from your MoodCampus records.'}
+          </p>
           {summary.length === 0 ? (
             <div className="empty-state mt-4">No mood summary yet.</div>
           ) : (
@@ -101,7 +111,7 @@ export default function MoodCampusPage() {
           )}
         </div>
         <div className="panel">
-          <h2 className="section-title">Mood Records</h2>
+          <h2 className="section-title">{isGlobalView ? 'Mood Records' : 'My Mood Records'}</h2>
           {isLoading ? <div className="empty-state mt-4">Loading mood records...</div> : null}
           {!isLoading && records.length === 0 ? <div className="empty-state mt-4">No mood records yet.</div> : null}
           <div className="mt-4 space-y-3">

@@ -15,6 +15,10 @@ export const helpRequestService = {
   async reply(id: string, message: string) {
     const response = await apiClient.post<ApiResponse<unknown>>(`/help-requests/${id}/replies`, { message });
     return response.data.data;
+  },
+
+  async updateStatus(id: string, status: HelpRequestStatus) {
+    const response = await apiClient.patch<ApiResponse<HelpRequest>>(`/help-requests/${id}/status`, { status });
+    return response.data.data;
   }
 };
-

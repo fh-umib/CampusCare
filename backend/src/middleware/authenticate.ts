@@ -20,3 +20,5 @@ export async function authenticate(request: Request, _response: Response, next: 
     next(error);
   }
 }
+
+export const requireAuth = authenticate;
