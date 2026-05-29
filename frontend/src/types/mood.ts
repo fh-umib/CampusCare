@@ -2,8 +2,15 @@ export type MoodState = 'motivated' | 'tired' | 'stressed' | 'calm' | 'overwhelm
 
 export type MoodRecord = {
   id: string;
-  studentId: string;
+  userId: string;
+  studentName: string | null;
   mood: MoodState;
-  weekStartDate: string;
+  note: string | null;
+  recordedAt: string;
+};
+
+export type MoodSummary = {
+  mood: MoodState;
+  count: number;
 };
 

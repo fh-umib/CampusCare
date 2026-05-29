@@ -2,9 +2,11 @@ import type { UserRole } from './roles';
 
 export type AuthUser = {
   id: string;
-  name: string;
+  fullName: string;
   email: string;
   role: UserRole;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export type LoginPayload = {
@@ -13,8 +15,14 @@ export type LoginPayload = {
 };
 
 export type RegisterPayload = {
-  name: string;
+  fullName: string;
   email: string;
   password: string;
+  role?: Exclude<UserRole, 'admin'>;
+};
+
+export type AuthResult = {
+  token: string;
+  user: AuthUser;
 };
 

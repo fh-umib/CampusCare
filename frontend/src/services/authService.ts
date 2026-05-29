@@ -1,8 +1,24 @@
-import { apiClient } from './apiClient';
-import type { LoginPayload, RegisterPayload } from '../types/auth';
+import { apiClient, clearStoredToken, type ApiResponse } from './apiClient';
+import type { AuthResult, AuthUser, LoginPayload, RegisterPayload } from '../types/auth';
 
 export const authService = {
-  login: (payload: LoginPayload) => apiClient.post('/auth/login', payload),
-  register: (payload: RegisterPayload) => apiClient.post('/auth/register', payload)
+  async login(payload: LoginPayload) {
+    const response = await apiClient.post<ApiResponse<AuthResult>>('/auth/login', payload);
+    return response.data.data;
+  },
+
+  async register(payload: RegisterPayload) {
+    const response = await apiClient.post<ApiResponse<AuthResult>>('/auth/register', payload);
+    return response.data.data;
+  },
+
+  async getCurrentUser() {
+    const response = await apiClient.get<ApiResponse<{ user: AuthUser }>>('/auth/me');
+    return response.data.data.user;
+  },
+
+  logout() {
+    clearStoredToken();
+  }
 };
 

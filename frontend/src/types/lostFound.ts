@@ -1,11 +1,17 @@
-export type LostFoundStatus = 'lost' | 'found' | 'returned';
+export type LostFoundItemType = 'lost' | 'found';
+export type LostFoundStatus = 'open' | 'claimed' | 'resolved';
 
 export type LostFoundItem = {
   id: string;
+  userId: string | null;
   title: string;
   description: string;
-  date: string;
-  location: string;
+  location: string | null;
+  itemType: LostFoundItemType;
   status: LostFoundStatus;
+  itemDate: string | null;
+  reporterName: string | null;
+  createdAt: string;
+  updatedAt: string;
 };
 
