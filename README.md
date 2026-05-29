@@ -19,8 +19,9 @@ CampusCare is a full-stack student support platform designed for university stud
 13. [Environment Variables](#environment-variables)
 14. [Database Setup](#database-setup)
 15. [Testing](#testing)
-16. [Current Notes and Future Direction](#current-notes-and-future-direction)
-17. [Author](#author)
+16. [Additional Documentation](#additional-documentation)
+17. [Current Notes and Future Direction](#current-notes-and-future-direction)
+18. [Author](#author)
 
 ## Overview
 
@@ -112,6 +113,9 @@ CampusCare/
   package.json
   package-lock.json
   .gitignore
+  docs/
+    api-overview.md
+    testing-checklist.md
 
   backend/
     package.json
@@ -288,6 +292,7 @@ GET  /api/auth/me
 
 ```text
 GET   /api/help-requests
+GET   /api/help-requests/:id
 POST  /api/help-requests
 POST  /api/help-requests/:id/replies
 PATCH /api/help-requests/:id/status
@@ -324,6 +329,7 @@ GET  /api/mood/summary
 
 ```text
 GET   /api/lost-found
+GET   /api/lost-found/:id
 POST  /api/lost-found
 PATCH /api/lost-found/:id/status
 ```
@@ -496,6 +502,12 @@ Recommended manual checks:
 - Register/login through the frontend.
 - Create a help request, skill, stress record, mood record, and lost/found item.
 - Return to the dashboard and confirm statistics update.
+- Use `docs/testing-checklist.md` for the final QA checklist.
+
+## Additional Documentation
+
+- `docs/testing-checklist.md` contains the final setup, backend, frontend, role, UI, and build checklist.
+- `docs/api-overview.md` provides a concise overview of the main API groups.
 
 ## Current Notes and Future Direction
 
