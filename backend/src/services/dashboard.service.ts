@@ -1,6 +1,10 @@
+import { dashboardRepository } from '../repositories/dashboard.repository.js';
+import type { PublicUser } from '../types/user.js';
+import { canViewGlobalRecords, requireCurrentUser } from '../utils/moduleValidation.js';
+
 export const dashboardService = {
-  ready: async () => ({
-    modules: ['helpRequests', 'skills', 'stress', 'mood', 'lostFound'],
-    statisticsReady: false
-  })
+  stats: (currentUser: PublicUser | undefined) => {
+    const user = requireCurrentUser(currentUser);
+    return dashboardRepository.stats(canViewGlobalRecords(user.role) ? {} : { userId: user.id });
+  }
 };
