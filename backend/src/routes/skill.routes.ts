@@ -1,10 +1,7 @@
 import { Router } from 'express';
 import { skillController } from '../controllers/skill.controller.js';
-import { authenticate } from '../middleware/authenticate.js';
+import { asyncHandler } from '../utils/asyncHandler.js';
 
 export const skillRoutes = Router();
 
-skillRoutes.use(authenticate);
-skillRoutes.get('/', skillController.search);
-skillRoutes.post('/', skillController.addSkill);
-
+skillRoutes.get('/', asyncHandler(skillController.ready));

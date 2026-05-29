@@ -1,10 +1,13 @@
+import bcrypt from 'bcrypt';
+
+const saltRounds = 12;
+
 export const passwordUtils = {
-  hash: async (_plainTextPassword: string) => {
-    throw new Error('Password hashing will be implemented in Phase 2');
+  hash: async (plainTextPassword: string) => {
+    return bcrypt.hash(plainTextPassword, saltRounds);
   },
 
-  compare: async (_plainTextPassword: string, _passwordHash: string) => {
-    throw new Error('Password comparison will be implemented in Phase 2');
+  compare: async (plainTextPassword: string, passwordHash: string) => {
+    return bcrypt.compare(plainTextPassword, passwordHash);
   }
 };
-

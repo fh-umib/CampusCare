@@ -7,7 +7,6 @@ export const env = {
   nodeEnv: process.env.NODE_ENV ?? 'development',
   databaseUrl: process.env.DATABASE_URL ?? '',
   jwtSecret: process.env.JWT_SECRET ?? '',
-  jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? '1d',
-  clientOrigin: process.env.CLIENT_ORIGIN ?? 'http://localhost:5173'
+  jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? '7d',
+  clientUrl: process.env.CLIENT_URL ?? 'http://localhost:5173'
 };
-

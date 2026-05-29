@@ -1,13 +1,10 @@
 import type { Request, Response } from 'express';
 import { helpRequestService } from '../services/helpRequest.service.js';
+import { successResponse } from '../utils/apiResponse.js';
 
 export const helpRequestController = {
-  list: async (_request: Request, response: Response) => {
-    response.json(await helpRequestService.list());
-  },
-
-  create: async (request: Request, response: Response) => {
-    response.status(201).json(await helpRequestService.create(request.body));
+  ready: async (_request: Request, response: Response) => {
+    const data = await helpRequestService.ready();
+    successResponse(response, 'Help Requests module is ready', data);
   }
 };
-

@@ -1,10 +1,7 @@
 import { Router } from 'express';
 import { lostFoundController } from '../controllers/lostFound.controller.js';
-import { authenticate } from '../middleware/authenticate.js';
+import { asyncHandler } from '../utils/asyncHandler.js';
 
 export const lostFoundRoutes = Router();
 
-lostFoundRoutes.use(authenticate);
-lostFoundRoutes.get('/', lostFoundController.list);
-lostFoundRoutes.post('/', lostFoundController.create);
-
+lostFoundRoutes.get('/', asyncHandler(lostFoundController.ready));

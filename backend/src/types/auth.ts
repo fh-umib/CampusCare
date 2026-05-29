@@ -2,7 +2,7 @@ import type { UserRole } from './roles.js';
 
 export type AuthUser = {
   id: string;
-  name: string;
+  fullName: string;
   email: string;
   role: UserRole;
 };
@@ -12,3 +12,14 @@ export type JwtPayload = {
   role: UserRole;
 };
 
+export type RegisterInput = {
+  fullName: string;
+  email: string;
+  password: string;
+  role?: UserRole;
+};
+
+export type LoginInput = {
+  email: string;
+  password: string;
+};
