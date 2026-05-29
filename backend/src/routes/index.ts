@@ -1,0 +1,19 @@
+import { Router } from 'express';
+import { authRoutes } from './auth.routes.js';
+import { dashboardRoutes } from './dashboard.routes.js';
+import { helpRequestRoutes } from './helpRequest.routes.js';
+import { lostFoundRoutes } from './lostFound.routes.js';
+import { moodRoutes } from './mood.routes.js';
+import { skillRoutes } from './skill.routes.js';
+import { stressRoutes } from './stress.routes.js';
+
+export const apiRoutes = Router();
+
+apiRoutes.use('/auth', authRoutes);
+apiRoutes.use('/dashboard', dashboardRoutes);
+apiRoutes.use('/help-requests', helpRequestRoutes);
+apiRoutes.use('/skills', skillRoutes);
+apiRoutes.use('/stress-records', stressRoutes);
+apiRoutes.use('/moods', moodRoutes);
+apiRoutes.use('/lost-found', lostFoundRoutes);
+
