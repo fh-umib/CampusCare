@@ -3,6 +3,7 @@ import type { LoginInput, RegisterInput } from '../types/auth.js';
 import { AppError } from './httpError.js';
 
 const roles: UserRole[] = ['student', 'mentor', 'admin'];
+const publicRegistrationRoles: UserRole[] = ['student', 'mentor'];
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function validateRegisterPayload(payload: unknown): RegisterInput {
@@ -29,6 +30,10 @@ export function validateRegisterPayload(payload: unknown): RegisterInput {
     errors.push("role must be one of: student, mentor, admin");
   }
 
+  if (data.role === 'admin') {
+    errors.push('Admin accounts must be created through an authorized setup process');
+  }
+
   if (errors.length > 0) {
     throw new AppError(400, 'Registration validation failed', errors);
   }
@@ -37,7 +42,7 @@ export function validateRegisterPayload(payload: unknown): RegisterInput {
     fullName: data.fullName!.trim(),
     email: data.email!.trim().toLowerCase(),
     password: data.password!,
-    role: data.role ?? 'student'
+    role: publicRegistrationRoles.includes(data.role as UserRole) ? data.role : 'student'
   };
 }
 

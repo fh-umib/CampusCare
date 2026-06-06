@@ -10,6 +10,7 @@ Use this checklist before submitting, presenting, or continuing with a new devel
 - [ ] Create the PostgreSQL database named `campuscare`.
 - [ ] Run `backend/src/database/001_init_users.sql`.
 - [ ] Run `backend/src/database/002_init_modules.sql`.
+- [ ] Run `backend/src/database/004_user_profiles_and_engagement.sql`.
 - [ ] Run `backend/src/database/003_seed_demo_data.sql` if demo data is needed.
 - [ ] Start the backend with `npm run dev:backend`.
 - [ ] Start the frontend with `npm run dev:frontend`.
@@ -26,6 +27,8 @@ Use this checklist before submitting, presenting, or continuing with a new devel
 - [ ] Mood endpoints create records, list visible records, and return summaries.
 - [ ] Lost & Found endpoints list, create, view, and update statuses correctly.
 - [ ] `GET /api/dashboard/stats` returns role-aware dashboard data.
+- [ ] `GET /api/profile` returns the current user's onboarding profile.
+- [ ] `POST /api/profile/onboarding` saves role-specific onboarding data.
 
 ## C. Frontend Checks
 
@@ -36,6 +39,8 @@ Use this checklist before submitting, presenting, or continuing with a new devel
 - [ ] Logout clears the session and returns to the login flow.
 - [ ] Protected routes redirect unauthenticated users to `/login`.
 - [ ] Dashboard loads after login.
+- [ ] Role-first landing/register flow guides student and mentor users clearly.
+- [ ] Onboarding saves after registration or from the profile flow.
 - [ ] Silent Help can create requests and show existing requests.
 - [ ] SkillMap can add skills, attach my skills, remove my skills, and search student skill cards.
 - [ ] ExamStress Tracker can create records and the 1-5 slider updates correctly.

@@ -64,6 +64,14 @@ Used for lost/found item reporting.
 
 - `GET /dashboard/stats` returns role-aware dashboard statistics.
 
+## Profile and Onboarding
+
+Used for role-specific student, mentor, and admin profile context.
+
+- `GET /profile` returns the current user's onboarding profile.
+- `PATCH /profile` updates the current user's profile.
+- `POST /profile/onboarding` saves onboarding details and marks onboarding complete.
+
 ## Health
 
 - `GET /health` returns API and database status.

@@ -79,6 +79,75 @@ ON CONFLICT (user_id, skill_id) DO UPDATE
 SET level = EXCLUDED.level,
     availability = EXCLUDED.availability;
 
+INSERT INTO user_profiles (
+  user_id, study_year, department, reason_for_joining, support_interest,
+  expertise_areas, can_help_with, availability, mentoring_reason, preferred_support_type,
+  admin_position, admin_department_unit, admin_access_reason, onboarding_completed
+)
+VALUES
+  (
+    (SELECT id FROM users WHERE email = 'flutura.student@campuscare.test'),
+    '3',
+    'Computer Science and Engineering',
+    'I want one place to ask for help, show skills, and track pressure during exam weeks.',
+    'academic help',
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    TRUE
+  ),
+  (
+    (SELECT id FROM users WHERE email = 'mentor@campuscare.test'),
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    'Backend, databases, GitHub workflows, and project organization',
+    'SQL joins, API structure, GitHub merge conflicts, and project coordination',
+    'Available twice per week',
+    'I want to help students unblock technical problems earlier.',
+    'Replies to Silent Help requests and short project guidance',
+    NULL,
+    NULL,
+    NULL,
+    TRUE
+  ),
+  (
+    (SELECT id FROM users WHERE email = 'admin@campuscare.test'),
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    'Platform administrator',
+    'Faculty of Computer Science and Engineering',
+    'Monitor support activity, module usage, and lost/found statuses for the demo environment.',
+    TRUE
+  )
+ON CONFLICT (user_id) DO UPDATE
+SET study_year = EXCLUDED.study_year,
+    department = EXCLUDED.department,
+    reason_for_joining = EXCLUDED.reason_for_joining,
+    support_interest = EXCLUDED.support_interest,
+    expertise_areas = EXCLUDED.expertise_areas,
+    can_help_with = EXCLUDED.can_help_with,
+    availability = EXCLUDED.availability,
+    mentoring_reason = EXCLUDED.mentoring_reason,
+    preferred_support_type = EXCLUDED.preferred_support_type,
+    admin_position = EXCLUDED.admin_position,
+    admin_department_unit = EXCLUDED.admin_department_unit,
+    admin_access_reason = EXCLUDED.admin_access_reason,
+    onboarding_completed = EXCLUDED.onboarding_completed;
+
 INSERT INTO help_requests (id, user_id, title, category, description, is_anonymous, status, created_at)
 VALUES
   (

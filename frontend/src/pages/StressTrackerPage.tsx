@@ -75,6 +75,12 @@ export default function StressTrackerPage() {
         }
       />
       <span className="badge">{isGlobalView ? 'Global wellbeing view' : 'Personal records'}</span>
+      <section className="panel-soft">
+        <p className="text-sm leading-6 text-slate-700">
+          Stress records are a check-in, not a grade. Use 1 Low, 2 Mild, 3 Medium, 4 High, and 5 Very High to notice
+          pressure before exam weeks become overwhelming.
+        </p>
+      </section>
       {message ? <div className="alert-success">{message}</div> : null}
       {error ? <div className="alert-error">{error}</div> : null}
 

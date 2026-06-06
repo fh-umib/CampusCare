@@ -73,6 +73,7 @@ The project currently includes:
 | Lost & Found | Students report lost or found items with title, description, location, type, date, and status. |
 | Dashboard Statistics | Displays useful statistics and recent activity from the platform. |
 | Role-based access | Protected routes and backend middleware support student, mentor, and admin roles. |
+| Onboarding/Profile | Role-specific profile details make student, mentor, and admin experiences more useful. |
 
 ## Tech Stack
 
@@ -133,12 +134,14 @@ CampusCare/
         helpRequest.controller.ts
         lostFound.controller.ts
         mood.controller.ts
+        profile.controller.ts
         skill.controller.ts
         stress.controller.ts
       database/
         001_init_users.sql
         002_init_modules.sql
         003_seed_demo_data.sql
+        004_user_profiles_and_engagement.sql
       middleware/
         authenticate.ts
         authorizeRoles.ts
@@ -150,6 +153,7 @@ CampusCare/
         helpRequest.repository.ts
         lostFound.repository.ts
         mood.repository.ts
+        profile.repository.ts
         skill.repository.ts
         stress.repository.ts
         user.repository.ts
@@ -160,6 +164,7 @@ CampusCare/
         index.ts
         lostFound.routes.ts
         mood.routes.ts
+        profile.routes.ts
         skill.routes.ts
         stress.routes.ts
       services/
@@ -168,6 +173,7 @@ CampusCare/
         helpRequest.service.ts
         lostFound.service.ts
         mood.service.ts
+        profile.service.ts
         skill.service.ts
         stress.service.ts
       types/
@@ -176,6 +182,7 @@ CampusCare/
         helpRequest.ts
         lostFound.ts
         mood.ts
+        profile.ts
         roles.ts
         skill.ts
         stress.ts
@@ -213,6 +220,7 @@ CampusCare/
         LoginPage.tsx
         LostFoundPage.tsx
         MoodCampusPage.tsx
+        OnboardingPage.tsx
         ProfilePage.tsx
         RegisterPage.tsx
         SkillMapPage.tsx
@@ -227,6 +235,7 @@ CampusCare/
         helpRequestService.ts
         lostFoundService.ts
         moodService.ts
+        profileService.ts
         skillService.ts
         stressService.ts
       styles/
@@ -340,6 +349,14 @@ PATCH /api/lost-found/:id/status
 GET /api/dashboard/stats
 ```
 
+### Profile
+
+```text
+GET   /api/profile
+PATCH /api/profile
+POST  /api/profile/onboarding
+```
+
 ### Health
 
 ```text
@@ -382,6 +399,7 @@ Copy-Item frontend/.env.example frontend/.env
 ```bash
 psql -U username -d campuscare -f backend/src/database/001_init_users.sql
 psql -U username -d campuscare -f backend/src/database/002_init_modules.sql
+psql -U username -d campuscare -f backend/src/database/004_user_profiles_and_engagement.sql
 ```
 
 6. Optionally run demo seed data:
@@ -457,6 +475,7 @@ CREATE DATABASE campuscare;
 ```bash
 psql -U username -d campuscare -f backend/src/database/001_init_users.sql
 psql -U username -d campuscare -f backend/src/database/002_init_modules.sql
+psql -U username -d campuscare -f backend/src/database/004_user_profiles_and_engagement.sql
 ```
 
 3. Optional demo data:

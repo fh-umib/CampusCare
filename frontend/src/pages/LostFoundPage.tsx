@@ -100,6 +100,12 @@ export default function LostFoundPage() {
   return (
     <div className="space-y-6">
       <PageHeader title="Lost & Found" description="Report lost or found items and help return them to students quickly." />
+      <section className="panel-soft">
+        <p className="text-sm leading-6 text-slate-700">
+          Keep item reports specific: include the location, date, and enough detail for someone to recognize the item
+          without exposing private information.
+        </p>
+      </section>
       {message ? <div className="alert-success">{message}</div> : null}
       {error ? <div className="alert-error">{error}</div> : null}
 

@@ -70,6 +70,12 @@ export default function MoodCampusPage() {
         }
       />
       <span className="badge">{isGlobalView ? 'Global mood view' : 'Personal records'}</span>
+      <section className="panel-soft">
+        <p className="text-sm leading-6 text-slate-700">
+          MoodCampus keeps emotional check-ins respectful and simple. Choose the word that best fits your week and add
+          a note only if it helps you reflect.
+        </p>
+      </section>
       {message ? <div className="alert-success">{message}</div> : null}
       {error ? <div className="alert-error">{error}</div> : null}
 

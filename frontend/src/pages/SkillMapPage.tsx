@@ -123,6 +123,12 @@ export default function SkillMapPage() {
         title="SkillMap"
         description="Build your student skill profile and discover classmates available for projects or peer support."
       />
+      <section className="panel-soft">
+        <p className="text-sm leading-6 text-slate-700">
+          SkillMap makes practical strengths visible: add what you can do, show your level, and help others find the
+          right collaborator before a project gets stuck.
+        </p>
+      </section>
       {message ? <div className="alert-success">{message}</div> : null}
       {error ? <div className="alert-error">{error}</div> : null}
 
