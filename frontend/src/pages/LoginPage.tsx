@@ -1,7 +1,9 @@
 import { useState, type FormEvent } from 'react';
-import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getApiErrorMessage } from '../services/apiClient';
+import { CampusCareLogoMark } from '../components/brand/CampusCareLogoMark';
+import { AuthTopAction, AuthTopActionStyles } from '../components/auth/AuthTopAction';
 
 const rolePanels = {
   student: {
@@ -25,7 +27,7 @@ const rolePanels = {
 };
 
 export default function LoginPage() {
-  const { isAuthenticated, login } = useAuth();
+  const { login } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -40,10 +42,6 @@ export default function LoginPage() {
       ? (location.state as { message: string }).message
       : '';
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
-  }
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -67,21 +65,16 @@ export default function LoginPage() {
 
   return (
     <main className="gradient-shell min-h-screen px-4 py-4 md:px-6 md:py-5">
+      <AuthTopActionStyles />
       <section className="mx-auto max-w-5xl">
         <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
           <Link className="flex items-center gap-3 font-extrabold text-[#071527]" to="/">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#071527] text-xs font-black text-[#67e3d6]">
-              CC
-            </span>
+            <CampusCareLogoMark size={40} variant="light" />
             CampusCare
           </Link>
           <div className="flex flex-wrap gap-2">
-            <Link className="btn-secondary" to="/start">
-              Choose role
-            </Link>
-            <Link className="btn-secondary" to="/">
-              Back to landing
-            </Link>
+            <AuthTopAction accent icon="role" to="/start">Choose role</AuthTopAction>
+            <AuthTopAction icon="home" to="/">Back to landing</AuthTopAction>
           </div>
         </div>
 
@@ -148,13 +141,54 @@ export default function LoginPage() {
               </button>
             </form>
 
-            <div className="mt-4 grid gap-2 rounded-xl border border-slate-100 bg-slate-50 p-3 text-sm text-slate-600">
-              <p className="font-semibold text-slate-900">New to CampusCare?</p>
-              <p className="text-xs leading-5">Choose your role first so registration can guide you through the correct setup path.</p>
-              <Link className="btn-secondary w-full" to="/start">
-                Create an account
-              </Link>
-            </div>
+            {roleKey === 'admin' ? (
+              <div
+                className="mt-4 rounded-2xl border border-teal-200/80 p-4 text-sm text-slate-600 shadow-sm"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(13,158,138,.08), rgba(103,227,214,.12))'
+                }}
+              >
+                <div className="flex items-start gap-3">
+                  <span className="inline-flex h-10 w-10 flex-none items-center justify-center rounded-xl border border-teal-200 bg-teal-600/10 text-teal-700">
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 3.5 19 6v5.2c0 4.4-2.4 7.5-7 9.3-4.6-1.8-7-4.9-7-9.3V6l7-2.5Z" />
+                      <rect x="9" y="10" width="6" height="5" rx="1.2" />
+                      <path d="M10.5 10V8.8a1.5 1.5 0 0 1 3 0V10" />
+                    </svg>
+                  </span>
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-semibold text-[#0b1d35]">Admin workspace access</p>
+                      <span className="rounded-full border border-teal-200 bg-white/70 px-2 py-0.5 text-[0.62rem] font-extrabold uppercase tracking-wide text-teal-700">
+                        Restricted role
+                      </span>
+                    </div>
+                    <p className="mt-1 text-xs leading-5 text-slate-600">
+                      Admin accounts are created manually for platform management.
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                  <Link className="btn-secondary flex min-h-11 w-full items-center justify-center text-center" to="/start">
+                    Choose another role
+                  </Link>
+                  <Link className="btn-secondary flex min-h-11 w-full items-center justify-center text-center" to="/">
+                    Back to landing
+                  </Link>
+                </div>
+                <p className="mt-3 border-t border-teal-200/70 pt-3 text-xs text-slate-500">
+                  Student and mentor accounts can still be created normally.
+                </p>
+              </div>
+            ) : (
+              <div className="mt-4 grid gap-2 rounded-xl border border-slate-100 bg-slate-50 p-3 text-sm text-slate-600">
+                <p className="font-semibold text-slate-900">New to CampusCare?</p>
+                <p className="text-xs leading-5">Choose your role first so registration can guide you through the correct setup path.</p>
+                <Link className="btn-secondary w-full" to="/start">
+                  Create an account
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </section>

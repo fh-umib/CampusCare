@@ -1,5 +1,6 @@
 -- CampusCare demo seed data.
--- Demo-only password for seeded users: CampusCare123
+-- Student and mentor demo password: CampusCare123
+-- Approved admin login: fluturahysenni@gmail.com / 12345678
 -- Password hash generated with bcrypt. Do not use these credentials in production.
 -- For real usage, users should preferably be created through POST /api/auth/register.
 
@@ -21,13 +22,14 @@ VALUES
   ),
   (
     '33333333-3333-3333-3333-333333333333',
-    'Admin User',
-    'admin@campuscare.test',
-    '$2b$10$1kbPa8ZqxXAvmNzMk/Lqy.IK/6JRorckUqFn8SdsqxqbX6PXLqSG6',
+    'Flutura Hyseni',
+    'fluturahysenni@gmail.com',
+    '$2b$12$druNJ6xhQ2qon.0qQIcZVu5crQWtElVU3t/wuNxXxcDidJZkU5Ldy',
     'admin'
   )
 ON CONFLICT (email) DO UPDATE
 SET full_name = EXCLUDED.full_name,
+    password_hash = EXCLUDED.password_hash,
     role = EXCLUDED.role;
 
 INSERT INTO skills (id, name, category)
@@ -118,7 +120,7 @@ VALUES
     TRUE
   ),
   (
-    (SELECT id FROM users WHERE email = 'admin@campuscare.test'),
+    (SELECT id FROM users WHERE email = 'fluturahysenni@gmail.com'),
     NULL,
     NULL,
     NULL,
@@ -343,7 +345,7 @@ VALUES
   ),
   (
     '99999999-0000-0000-0000-000000000005',
-    (SELECT id FROM users WHERE email = 'admin@campuscare.test'),
+    (SELECT id FROM users WHERE email = 'fluturahysenni@gmail.com'),
     'Water Bottle',
     'Reusable water bottle found near classroom 104.',
     'Classroom 104',

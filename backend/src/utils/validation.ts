@@ -31,7 +31,7 @@ export function validateRegisterPayload(payload: unknown): RegisterInput {
   }
 
   if (data.role === 'admin') {
-    errors.push('Admin accounts must be created through an authorized setup process');
+    throw new AppError(403, 'Admin accounts are created manually.');
   }
 
   if (errors.length > 0) {

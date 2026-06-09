@@ -1,521 +1,279 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getApiErrorMessage } from '../services/apiClient';
+import { dashboardService } from '../services/dashboardService';
 import { profileService } from '../services/profileService';
 import { skillService } from '../services/skillService';
+import type { DashboardStats } from '../types/dashboard';
 import type { UserProfile } from '../types/profile';
 import type { StudentSkill } from '../types/skill';
 import { formatDate } from '../utils/formatDate';
 
-/* ─── DESIGN TOKENS ──────────────────────────────────────────── */
-const T = {
-  navy:    '#0b1d35',
-  navy2:   '#0f2647',
-  teal:    '#0d9e8a',
-  teal2:   '#0bbfaa',
-  cyan:    '#67e3d6',
-  bg:      '#f4f8fc',
-  card:    '#ffffff',
-  border:  '#dfeaf3',
-  muted:   '#64748b',
-  dark:    '#0b1d35',
-  g50:     '#f8fafc',
-  g100:    '#f1f5f9',
-  g200:    '#e2e8f0',
-  g400:    '#94a3b8',
-  blue:    '#2563eb',
-  amber:   '#d97706',
-  green:   '#059669',
-  purple:  '#7c3aed',
-  red:     '#dc2626',
-  fontD:   "'Sora', sans-serif",
-  fontB:   "'DM Sans', sans-serif",
-  rSm: 8, rMd: 14, rLg: 22, rXl: 32,
-  shadowSm: '0 1px 4px rgba(11,29,53,.06), 0 2px 8px rgba(11,29,53,.04)',
-  shadowMd: '0 4px 20px rgba(11,29,53,.10)',
-  shadowLg: '0 12px 40px rgba(11,29,53,.14)',
+type Role = 'student' | 'mentor' | 'admin';
+type IconName = 'profile' | 'email' | 'role' | 'calendar' | 'complete' | 'help' | 'skill' | 'stress' | 'mood' | 'lostFound' | 'activity' | 'settings' | 'guidance' | 'shield' | 'arrow';
+type ProfileField = { label: string; value: string | null | undefined; icon: IconName };
+type Action = { label: string; description: string; to: string; icon: IconName; color: string };
+type IdentityCard = { label: string; value: string; helper: string; icon: IconName; color: string };
+
+const colors = {
+  navy: '#0b1d35',
+  teal: '#0d9e8a',
+  cyan: '#67e3d6',
+  blue: '#2563eb',
+  amber: '#c88719',
+  green: '#059669',
+  violet: '#7650b5',
+  muted: '#64748b'
 };
 
-/* ─── HELPERS ────────────────────────────────────────────────── */
-function getInitials(name?: string) {
-  if (!name) return '?';
-  return name.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase();
+const iconPaths: Record<IconName, ReactNode> = {
+  profile: <><circle cx="12" cy="8" r="3.5" /><path d="M5 21c.5-4.5 2.8-7 7-7s6.5 2.5 7 7" /></>,
+  email: <><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m4 7 8 6 8-6" /></>,
+  role: <><path d="M12 3 5 6v5c0 4.7 2.8 8 7 10 4.2-2 7-5.3 7-10V6l-7-3Z" /><path d="m9 12 2 2 4-5" /></>,
+  calendar: <><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M8 3v4M16 3v4M3 10h18" /></>,
+  complete: <><circle cx="12" cy="12" r="9" /><path d="m8 12 2.5 2.5L16 9" /></>,
+  help: <><path d="M4 5.5h16v11H9l-5 4v-15Z" /><path d="M8 10h8M8 13h5" /></>,
+  skill: <><circle cx="6" cy="12" r="2.3" /><circle cx="18" cy="6" r="2.3" /><circle cx="18" cy="18" r="2.3" /><path d="m8.2 10.9 7.6-3.8M8.2 13.1l7.6 3.8" /></>,
+  stress: <><path d="M3 13h4l2-6 3.2 11 2.5-8 1.8 3H21" /><path d="M4 21h16" /></>,
+  mood: <><path d="M4 8c2.5-3.5 5.2-4.5 8-3 2.8-1.5 5.5-.5 8 3" /><path d="M4 16c2.5 3.5 5.2 4.5 8 3 2.8 1.5 5.5.5 8-3M7 12h10" /></>,
+  lostFound: <><path d="M12 22s7-6.3 7-12a7 7 0 1 0-14 0c0 5.7 7 12 7 12Z" /><circle cx="12" cy="10" r="2.4" /></>,
+  activity: <><rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="4" rx="1.5" /><rect x="14" y="11" width="7" height="10" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" /></>,
+  settings: <><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H3v-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3A1.7 1.7 0 0 0 10 3V3h4v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z" /></>,
+  guidance: <><path d="M9 18h6M10 22h4" /><path d="M8.3 15.2A7 7 0 1 1 15.7 15c-.8.6-1.2 1.3-1.2 2h-5c0-.8-.4-1.3-1.2-1.8Z" /></>,
+  shield: <><path d="M12 3 5 6v5c0 4.7 2.8 8 7 10 4.2-2 7-5.3 7-10V6l-7-3Z" /><path d="M9 12h6" /></>,
+  arrow: <path d="M5 12h14M14 7l5 5-5 5" />
+};
+
+function Icon({ name, size = 40, color = colors.teal, background = 'rgba(13,158,138,.1)' }: { name: IconName; size?: number; color?: string; background?: string }) {
+  return <span className="pf-icon" style={{ width: size, height: size, color, background }}><svg aria-hidden="true" width={size * .52} height={size * .52} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">{iconPaths[name]}</svg></span>;
 }
 
-function getRoleConfig(role?: string) {
-  if (role === 'admin') return {
-    label: 'Admin Workspace',
-    desc: 'Your platform management profile for monitoring CampusCare activity.',
-    badge: 'Admin',
-    color: T.navy,
-    bg: 'rgba(11,29,53,.1)',
-    border: 'rgba(11,29,53,.2)',
-  };
-  if (role === 'mentor') return {
-    label: 'Mentor Workspace',
-    desc: 'Your guidance profile for supporting students and following academic wellbeing trends.',
-    badge: 'Mentor',
-    color: T.blue,
-    bg: 'rgba(37,99,235,.1)',
-    border: 'rgba(37,99,235,.2)',
-  };
-  return {
-    label: 'Student Workspace',
-    desc: 'Your personal support, skills, and wellbeing identity inside CampusCare.',
-    badge: 'Student',
-    color: T.teal,
-    bg: 'rgba(13,158,138,.1)',
-    border: 'rgba(13,158,138,.2)',
-  };
+function initials(name?: string) {
+  return name?.split(' ').filter(Boolean).slice(0, 2).map((part) => part[0]).join('').toUpperCase() || 'U';
 }
 
-const SKILL_LEVEL_COLORS: Record<string, { color: string; bg: string; border: string }> = {
-  beginner:     { color: T.teal,   bg: 'rgba(13,158,138,.08)',   border: 'rgba(13,158,138,.2)' },
-  intermediate: { color: T.blue,   bg: 'rgba(37,99,235,.08)',    border: 'rgba(37,99,235,.2)' },
-  advanced:     { color: T.amber,  bg: 'rgba(217,119,6,.08)',     border: 'rgba(217,119,6,.2)' },
-  expert:       { color: T.purple, bg: 'rgba(124,58,237,.08)',    border: 'rgba(124,58,237,.2)' },
-};
+function displayLabel(value?: string | null) {
+  return value ? value.replace(/_/g, ' ') : 'Not added yet';
+}
 
-type InfoRow = { label: string; value?: string | null; icon: string };
+function SectionHeading({ eyebrow, title, description }: { eyebrow?: string; title: string; description: string }) {
+  return <div className="pf-heading">{eyebrow ? <span>{eyebrow}</span> : null}<h2>{title}</h2><p>{description}</p></div>;
+}
 
-/* ─── ROLE IDENTITY CARDS ────────────────────────────────────── */
-const IDENTITY_CARDS: Record<string, Array<{ title: string; desc: string; icon: string; color: string }>> = {
-  student: [
-    { title: 'Academic Support',      desc: 'Ask for help anonymously and get answers from mentors.',    icon: '💬', color: T.teal },
-    { title: 'Wellbeing Check-ins',   desc: 'Track stress and mood to understand your own patterns.',   icon: '🌙', color: T.purple },
-    { title: 'Skills & Collaboration',desc: 'Share your skills and discover who can help you grow.',    icon: '⚡', color: T.blue },
-    { title: 'Campus Reports',        desc: 'Report lost/found items and resolve practical issues.',    icon: '📍', color: T.green },
-  ],
-  mentor: [
-    { title: 'Student Guidance',      desc: 'Reply to help requests and support students meaningfully.', icon: '💬', color: T.teal },
-    { title: 'Stress/Mood Awareness', desc: 'Understand wellbeing trends to guide students better.',    icon: '📊', color: T.amber },
-    { title: 'Skill Discovery',       desc: 'Explore student skills and identify collaboration needs.', icon: '⚡', color: T.blue },
-    { title: 'Help Request Replies',  desc: 'Respond to open anonymous requests in the platform.',     icon: '🔔', color: T.red },
-  ],
-  admin: [
-    { title: 'Platform Monitoring',   desc: 'View global statistics and module activity at a glance.', icon: '📈', color: T.teal },
-    { title: 'Status Management',     desc: 'Manage open/closed statuses across all modules.',         icon: '⚙️', color: T.blue },
-    { title: 'User Activity Overview',desc: 'Track user engagement across students and mentors.',      icon: '👥', color: T.navy },
-    { title: 'Support Trend Awareness',desc:'Understand how students are using support features.',     icon: '🌐', color: T.purple },
-  ],
-};
+function EmptyState({ title, text, action }: { title: string; text: string; action?: { label: string; to: string } }) {
+  return <div className="pf-empty"><Icon name="profile" size={44} color="#94a3b8" background="#eef4f8" /><strong>{title}</strong><span>{text}</span>{action ? <Link to={action.to}>{action.label}</Link> : null}</div>;
+}
 
-const QUICK_ACTIONS: Record<string, Array<{ label: string; to: string; color: string }>> = {
-  student: [
-    { label: 'Ask for help',        to: '/silent-help',    color: T.teal },
-    { label: 'Add skill',           to: '/skill-map',      color: T.blue },
-    { label: 'Log stress',          to: '/stress-tracker', color: T.amber },
-    { label: 'Log mood',            to: '/mood-campus',    color: T.purple },
-    { label: 'Report lost/found',   to: '/lost-found',     color: T.green },
-    { label: 'Update onboarding',   to: '/onboarding',     color: T.muted },
-  ],
-  mentor: [
-    { label: 'Review requests',  to: '/silent-help',    color: T.teal },
-    { label: 'View SkillMap',    to: '/skill-map',      color: T.blue },
-    { label: 'Check stress',     to: '/stress-tracker', color: T.amber },
-    { label: 'Update profile',   to: '/onboarding',     color: T.muted },
-  ],
-  admin: [
-    { label: 'View dashboard',   to: '/dashboard',      color: T.teal },
-    { label: 'Review reports',   to: '/lost-found',     color: T.green },
-    { label: 'Monitor requests', to: '/silent-help',    color: T.amber },
-    { label: 'Skill overview',   to: '/skill-map',      color: T.blue },
-  ],
-};
+function roleFields(role: Role, profile: UserProfile | null): ProfileField[] {
+  if (role === 'mentor') return [
+    { label: 'Expertise areas', value: profile?.expertiseAreas, icon: 'skill' },
+    { label: 'Availability', value: profile?.availability, icon: 'calendar' },
+    { label: 'Support topics', value: profile?.canHelpWith, icon: 'help' },
+    { label: 'Preferred support', value: profile?.preferredSupportType, icon: 'guidance' },
+    { label: 'Mentoring reason', value: profile?.mentoringReason, icon: 'profile' }
+  ];
+  if (role === 'admin') return [
+    { label: 'Responsibility area', value: profile?.adminPosition, icon: 'shield' },
+    { label: 'Department / unit', value: profile?.adminDepartmentUnit, icon: 'activity' },
+    { label: 'Access reason', value: profile?.adminAccessReason, icon: 'role' }
+  ];
+  return [
+    { label: 'Study year', value: profile?.studyYear, icon: 'calendar' },
+    { label: 'Department / program', value: profile?.department, icon: 'profile' },
+    { label: 'Main support need', value: profile?.supportInterest, icon: 'help' },
+    { label: 'Reason for joining', value: profile?.reasonForJoining, icon: 'guidance' }
+  ];
+}
 
-/* ─── COMPONENT ──────────────────────────────────────────────── */
-export default function ProfilePage() {
-  const { user } = useAuth();
-  const [skills, setSkills] = useState<StudentSkill[]>([]);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [error, setError] = useState('');
+function roleActions(role: Role): Action[] {
+  if (role === 'mentor') return [
+    { label: 'Review requests', description: 'Support students needing guidance.', to: '/silent-help', icon: 'help', color: colors.teal },
+    { label: 'View SkillMap', description: 'Discover student strengths.', to: '/skill-map', icon: 'skill', color: colors.blue },
+    { label: 'Check stress trends', description: 'Review academic pressure.', to: '/stress-tracker', icon: 'stress', color: colors.amber },
+    { label: 'View mood patterns', description: 'Understand wellbeing signals.', to: '/mood-campus', icon: 'mood', color: colors.violet },
+    { label: 'Update profile', description: 'Refresh mentoring details.', to: '/onboarding', icon: 'settings', color: colors.muted }
+  ];
+  if (role === 'admin') return [
+    { label: 'View dashboard', description: 'Open the platform overview.', to: '/dashboard', icon: 'activity', color: colors.navy },
+    { label: 'Review help requests', description: 'Monitor support activity.', to: '/silent-help', icon: 'help', color: colors.teal },
+    { label: 'Check item reports', description: 'Review Lost & Found cases.', to: '/lost-found', icon: 'lostFound', color: colors.green },
+    { label: 'View platform trends', description: 'Review wellbeing signals.', to: '/stress-tracker', icon: 'stress', color: colors.amber },
+    { label: 'Update profile', description: 'Maintain admin context.', to: '/onboarding', icon: 'settings', color: colors.muted }
+  ];
+  return [
+    { label: 'Ask anonymously', description: 'Start a safe support request.', to: '/silent-help', icon: 'help', color: colors.teal },
+    { label: 'Add a skill', description: 'Grow your academic SkillMap.', to: '/skill-map', icon: 'skill', color: colors.blue },
+    { label: 'Track stress', description: 'Record exam pressure.', to: '/stress-tracker', icon: 'stress', color: colors.amber },
+    { label: 'Log mood', description: 'Reflect on your week.', to: '/mood-campus', icon: 'mood', color: colors.violet },
+    { label: 'Report item', description: 'Create a campus item report.', to: '/lost-found', icon: 'lostFound', color: colors.green },
+    { label: 'Update profile', description: 'Complete onboarding details.', to: '/onboarding', icon: 'settings', color: colors.muted }
+  ];
+}
 
-  useEffect(() => {
-    Promise.all([skillService.getMySkills(), profileService.getCurrentProfile()])
-      .then(([skillsData, profileData]) => {
-        setSkills(skillsData);
-        setProfile(profileData);
-      })
-      .catch((err: unknown) => setError(getApiErrorMessage(err)));
-  }, []);
+function Hero({ role, name, email }: { role: Role; name?: string; email?: string }) {
+  const content = role === 'student'
+    ? { eyebrow: 'Student profile', title: 'Student workspace', description: 'Student identity for academic support, shared skills, wellbeing reflection, and practical campus help.', statement: 'Your profile grows with the support you ask for, the skills you share, and the progress you track.' }
+    : role === 'mentor'
+      ? { eyebrow: 'Mentor profile', title: 'Mentor workspace', description: 'Guidance identity for supporting students and following academic wellbeing trends.', statement: 'This profile represents how you guide students with clarity, patience, and practical next steps.' }
+      : { eyebrow: 'Authorized admin profile', title: 'Admin console identity', description: 'Operational identity for monitoring CampusCare modules, activity, and support trends.', statement: 'Responsible access turns platform signals into safer, more useful student support.' };
+  return <section className="pf-hero pf-reveal"><div className="pf-avatar">{initials(name)}</div><div className="pf-hero-copy"><span className="pf-eyebrow">{content.eyebrow}</span><div className="pf-name-row"><h1>{name || 'CampusCare user'}</h1><span className={`pf-role pf-role-${role}`}>{role}</span><span className="pf-active"><i />{role === 'admin' ? 'Authorized' : 'Active'}</span></div><p className="pf-email">{email}</p><h2>{content.title}</h2><p>{content.description}</p><blockquote>{content.statement}</blockquote></div><div className="pf-hero-mark"><Icon name={role === 'student' ? 'profile' : role === 'mentor' ? 'guidance' : 'shield'} size={58} color={colors.cyan} background="rgba(103,227,214,.1)" /><span>CampusCare identity</span></div></section>;
+}
 
-  const role = user?.role ?? 'student';
-  const roleConfig = getRoleConfig(role);
-  const identityCards = IDENTITY_CARDS[role] ?? IDENTITY_CARDS.student;
-  const quickActions = QUICK_ACTIONS[role] ?? QUICK_ACTIONS.student;
+function Completeness({ fields, skills, profile, role }: { fields: ProfileField[]; skills: StudentSkill[]; profile: UserProfile | null; role: Role }) {
+  const checks = [...fields.map((field) => ({ label: field.label, complete: Boolean(field.value) })), ...(role === 'student' ? [{ label: 'Skills shared', complete: skills.length > 0 }] : [])];
+  const complete = checks.filter((item) => item.complete).length;
+  const percent = Math.round((complete / Math.max(1, checks.length)) * 100);
+  return <section className="pf-card pf-completeness"><div className="pf-complete-top"><SectionHeading eyebrow="Profile readiness" title="Profile completeness" description="Complete role details to make your CampusCare workspace more relevant." /><div className="pf-complete-ring" style={{ background: `conic-gradient(${percent >= 80 ? colors.green : percent >= 50 ? colors.teal : colors.amber} ${percent * 3.6}deg,#e8eff5 0)` }}><span><strong>{percent}%</strong>complete</span></div></div><div className="pf-progress"><span style={{ width: `${percent}%`, background: percent >= 80 ? colors.green : percent >= 50 ? colors.teal : colors.amber }} /></div><div className="pf-field-pills">{checks.map((item) => <span className={item.complete ? 'is-complete' : ''} key={item.label}><i />{item.label}</span>)}</div><Link className="pf-primary-link" to="/onboarding">{profile?.onboardingCompleted ? 'Update onboarding' : 'Complete onboarding'}<Icon name="arrow" size={22} color="#fff" background="transparent" /></Link></section>;
+}
 
-  /* Profile rows — same logic as original, untouched */
-  const profileRows: InfoRow[] =
-    role === 'mentor'
+function AccountCard({ role, name, email, createdAt, updatedAt }: { role: Role; name?: string; email?: string; createdAt?: string; updatedAt?: string }) {
+  const rows = [
+    { label: 'Full name', value: name, icon: 'profile' as IconName },
+    { label: 'Email', value: email, icon: 'email' as IconName },
+    { label: 'Account role', value: role, icon: 'role' as IconName },
+    { label: 'Joined CampusCare', value: createdAt ? formatDate(createdAt) : 'Not available', icon: 'calendar' as IconName },
+    { label: 'Account updated', value: updatedAt ? formatDate(updatedAt) : 'Not available', icon: 'settings' as IconName }
+  ];
+  return <section className="pf-card"><SectionHeading eyebrow="Account" title="Account information" description="Core identity details connected to your authenticated CampusCare account." /><div className="pf-account-list">{rows.map((row) => <div key={row.label}><Icon name={row.icon} size={34} color={colors.teal} background="#e8f8f5" /><span><small>{row.label}</small><strong>{row.value || 'Not available'}</strong></span></div>)}</div></section>;
+}
+
+function IdentityGrid({ fields, role, skills, stats }: { fields: ProfileField[]; role: Role; skills: StudentSkill[]; stats: DashboardStats | null }) {
+  const fallback = 'Not added yet';
+  let cards: IdentityCard[];
+  if (role === 'student') cards = [
+    { label: 'Study year', value: displayLabel(fields[0]?.value), helper: 'Current academic stage', icon: 'calendar', color: colors.blue },
+    { label: 'Department', value: displayLabel(fields[1]?.value), helper: 'Program or faculty area', icon: 'profile', color: colors.teal },
+    { label: 'Support need', value: displayLabel(fields[2]?.value), helper: 'Main CampusCare interest', icon: 'help', color: colors.violet },
+    { label: 'Skills shared', value: String(skills.length), helper: skills.length ? 'Visible on your SkillMap' : fallback, icon: 'skill', color: colors.green }
+  ];
+  else if (role === 'mentor') cards = [
+    { label: 'Expertise area', value: displayLabel(fields[0]?.value), helper: 'Academic guidance strength', icon: 'skill', color: colors.blue },
+    { label: 'Availability', value: displayLabel(fields[1]?.value), helper: 'Current mentoring window', icon: 'calendar', color: colors.teal },
+    { label: 'Support topics', value: displayLabel(fields[2]?.value), helper: 'Subjects students can ask about', icon: 'help', color: colors.violet },
+    { label: 'Open support', value: String(stats?.openHelpRequests ?? 0), helper: 'Requests visible for guidance', icon: 'guidance', color: colors.amber }
+  ];
+  else cards = [
+    { label: 'Responsibility area', value: displayLabel(fields[0]?.value), helper: 'Administrative scope', icon: 'shield', color: colors.navy },
+    { label: 'Department / unit', value: displayLabel(fields[1]?.value), helper: 'Operational context', icon: 'activity', color: colors.blue },
+    { label: 'Managed modules', value: '6 active modules', helper: 'CampusCare operational scope', icon: 'settings', color: colors.teal },
+    { label: 'Reports monitored', value: String((stats?.totalHelpRequests ?? 0) + (stats?.totalLostFoundItems ?? 0)), helper: 'Help and item reports', icon: 'lostFound', color: colors.amber }
+  ];
+  return <section><SectionHeading eyebrow="Role identity" title={role === 'student' ? 'Your student identity' : role === 'mentor' ? 'Your mentor guidance identity' : 'Your admin responsibility identity'} description="The profile context that shapes your role inside CampusCare." /><div className="pf-identity-grid">{cards.map((card, index) => <article className="pf-card pf-identity-card pf-lift pf-reveal" key={card.label} style={{ animationDelay: `${index * 45}ms` }}><Icon name={card.icon} color={card.color} background={`${card.color}14`} /><span>{card.label}</span><strong>{card.value}</strong><p>{card.helper}</p></article>)}</div></section>;
+}
+
+function ActivitySnapshot({ role, stats, skills }: { role: Role; stats: DashboardStats | null; skills: StudentSkill[] }) {
+  const moodTotal = stats?.totalMoodRecords ?? Object.values(stats?.moodCounts ?? {}).reduce((sum, count) => sum + count, 0);
+  const metrics = role === 'student'
+    ? [
+        { label: 'Help requests', value: stats?.totalHelpRequests ?? 0, helper: `${stats?.openHelpRequests ?? 0} open`, icon: 'help' as IconName, color: colors.teal },
+        { label: 'Skills', value: skills.length, helper: 'Shared profile skills', icon: 'skill' as IconName, color: colors.blue },
+        { label: 'Stress records', value: stats?.totalStressRecords ?? 0, helper: `${stats?.averageStressLevel?.toFixed(1) ?? '0.0'} average`, icon: 'stress' as IconName, color: colors.amber },
+        { label: 'Mood records', value: moodTotal, helper: 'Weekly reflections', icon: 'mood' as IconName, color: colors.violet },
+        { label: 'Lost / Found', value: stats?.totalLostFoundItems ?? 0, helper: `${stats?.lostFoundResolved ?? 0} resolved`, icon: 'lostFound' as IconName, color: colors.green }
+      ]
+    : role === 'mentor'
       ? [
-          { label: 'Expertise areas',       value: profile?.expertiseAreas,       icon: '🎓' },
-          { label: 'Can help with',          value: profile?.canHelpWith,          icon: '🤝' },
-          { label: 'Availability',           value: profile?.availability,         icon: '📅' },
-          { label: 'Mentoring reason',       value: profile?.mentoringReason,      icon: '💡' },
-          { label: 'Preferred support type', value: profile?.preferredSupportType, icon: '⭐' },
-        ]
-      : role === 'admin'
-      ? [
-          { label: 'Position',           value: profile?.adminPosition,         icon: '🏢' },
-          { label: 'Department / unit',  value: profile?.adminDepartmentUnit,   icon: '🗂️' },
-          { label: 'Access reason',      value: profile?.adminAccessReason,     icon: '🔑' },
+          { label: 'Open requests', value: stats?.openHelpRequests ?? 0, helper: 'Awaiting support', icon: 'help' as IconName, color: colors.teal },
+          { label: 'Skills tracked', value: stats?.totalStudentSkills ?? stats?.totalSkills ?? 0, helper: 'Student profile connections', icon: 'skill' as IconName, color: colors.blue },
+          { label: 'Stress signals', value: stats?.totalStressRecords ?? 0, helper: `${stats?.averageStressLevel?.toFixed(1) ?? '0.0'} average`, icon: 'stress' as IconName, color: colors.amber },
+          { label: 'Mood signals', value: moodTotal, helper: 'Visible check-ins', icon: 'mood' as IconName, color: colors.violet },
+          { label: 'Support activity', value: stats?.recentActivity?.length ?? 0, helper: 'Recent module updates', icon: 'activity' as IconName, color: colors.green }
         ]
       : [
-          { label: 'Study year',       value: profile?.studyYear,       icon: '📚' },
-          { label: 'Department',       value: profile?.department,      icon: '🏫' },
-          { label: 'Support interest', value: profile?.supportInterest, icon: '💬' },
-          { label: 'Reason for joining',value: profile?.reasonForJoining,icon: '✏️' },
+          { label: 'Total users', value: stats?.totalUsers ?? 0, helper: 'Registered accounts', icon: 'profile' as IconName, color: colors.navy },
+          { label: 'Help requests', value: stats?.totalHelpRequests ?? 0, helper: `${stats?.openHelpRequests ?? 0} open`, icon: 'help' as IconName, color: colors.teal },
+          { label: 'Skills added', value: stats?.totalStudentSkills ?? stats?.totalSkills ?? 0, helper: 'Profile connections', icon: 'skill' as IconName, color: colors.blue },
+          { label: 'Stress records', value: stats?.totalStressRecords ?? 0, helper: 'Academic pressure signals', icon: 'stress' as IconName, color: colors.amber },
+          { label: 'Mood records', value: moodTotal, helper: 'Wellbeing signals', icon: 'mood' as IconName, color: colors.violet },
+          { label: 'Lost / Found', value: stats?.totalLostFoundItems ?? 0, helper: `${stats?.lostFoundOpen ?? 0} open`, icon: 'lostFound' as IconName, color: colors.green }
         ];
+  return <section><SectionHeading eyebrow="Activity snapshot" title={role === 'student' ? 'Your CampusCare activity' : role === 'mentor' ? 'Your support context' : 'Platform responsibility snapshot'} description={role === 'student' ? 'A compact view of the modules shaping your CampusCare journey.' : 'Role-relevant activity visible through your current account.'} /><div className={`pf-activity-grid ${role}`}>{metrics.map((metric, index) => <article className="pf-card pf-activity-card pf-lift pf-reveal" key={metric.label} style={{ '--metric-color': metric.color, animationDelay: `${index * 40}ms` } as React.CSSProperties}><Icon name={metric.icon} color={metric.color} background={`${metric.color}14`} /><span>{metric.label}</span><strong>{metric.value}</strong><p>{metric.helper}</p><div><i style={{ width: `${Math.min(100, Math.max(8, Number(metric.value) * 10))}%` }} /></div></article>)}</div></section>;
+}
 
-  /* Completion score */
-  const filled = profileRows.filter(r => r.value).length;
-  const total  = profileRows.length + 2; // +name +email always filled
-  const pct    = Math.round(((filled + 2) / total) * 100);
+function ProgressJourney({ role, userCreatedAt, stats, skills, profileComplete }: { role: Role; userCreatedAt?: string; stats: DashboardStats | null; skills: StudentSkill[]; profileComplete: boolean }) {
+  const steps = role === 'student'
+    ? [
+        { label: 'Joined', complete: Boolean(userCreatedAt), helper: userCreatedAt ? formatDate(userCreatedAt) : 'Account created' },
+        { label: 'Added skill', complete: skills.length > 0, helper: skills.length ? `${skills.length} shared` : 'Not yet' },
+        { label: 'Logged stress', complete: Boolean(stats?.totalStressRecords), helper: `${stats?.totalStressRecords ?? 0} records` },
+        { label: 'Asked for help', complete: Boolean(stats?.totalHelpRequests), helper: `${stats?.totalHelpRequests ?? 0} requests` },
+        { label: 'Updated profile', complete: profileComplete, helper: profileComplete ? 'Onboarding complete' : 'Needs details' }
+      ]
+    : [
+        { label: 'Joined', complete: Boolean(userCreatedAt), helper: userCreatedAt ? formatDate(userCreatedAt) : 'Account created' },
+        { label: role === 'mentor' ? 'Guidance profile' : 'Admin context', complete: true, helper: 'Role active' },
+        { label: 'Viewed activity', complete: Boolean(stats?.recentActivity?.length), helper: `${stats?.recentActivity?.length ?? 0} recent items` },
+        { label: 'Support modules', complete: true, helper: 'Modules available' },
+        { label: 'Profile maintained', complete: profileComplete, helper: profileComplete ? 'Onboarding complete' : 'Needs details' }
+      ];
+  return <section className="pf-card pf-journey"><SectionHeading eyebrow="Progress path" title={role === 'student' ? 'Your support journey' : role === 'mentor' ? 'Your guidance path' : 'Your responsibility path'} description="Real milestones drawn from your available CampusCare activity." /><div className="pf-journey-line">{steps.map((step, index) => <div className={step.complete ? 'is-complete' : ''} key={step.label}><span><Icon name={step.complete ? 'complete' : 'activity'} size={34} color={step.complete ? colors.green : '#94a3b8'} background={step.complete ? '#ecfdf5' : '#eef4f8'} /></span><strong>{step.label}</strong><small>{step.helper}</small>{index < steps.length - 1 ? <i /> : null}</div>)}</div></section>;
+}
+
+function GuidanceCard({ role }: { role: Role }) {
+  const content = role === 'student'
+    ? { eyebrow: 'Personal identity', title: 'Your profile connects support, skills, and reflection.', items: ['Keep onboarding details current.', 'Share skills you actively practice.', 'Use check-ins to notice patterns.', 'Ask for support when it helps.'] }
+    : role === 'mentor'
+      ? { eyebrow: 'Mentor guidance style', title: 'Support students with calm, practical direction.', items: ['Listen first.', 'Reply clearly.', 'Suggest one next step.', 'Keep the tone supportive.'] }
+      : { eyebrow: 'Responsible platform use', title: 'Use CampusCare data to improve support, not judge individuals.', items: ['Protect student privacy.', 'Monitor trends responsibly.', 'Keep module information accurate.', 'Use insights for support planning.'] };
+  return <section className="pf-card pf-guidance"><Icon name={role === 'admin' ? 'shield' : 'guidance'} size={48} color={role === 'admin' ? colors.navy : colors.teal} background={role === 'admin' ? '#eef2f6' : '#e8f8f5'} /><div><span>{content.eyebrow}</span><h2>{content.title}</h2><ul>{content.items.map((item) => <li key={item}>{item}</li>)}</ul></div></section>;
+}
+
+function QuickActions({ actions }: { actions: Action[] }) {
+  return <section><SectionHeading eyebrow="Quick actions" title="Move through your workspace" description="Open the CampusCare modules most relevant to your role." /><div className="pf-actions">{actions.map((action) => <Link className="pf-card pf-action pf-lift" key={action.to} to={action.to}><Icon name={action.icon} color={action.color} background={`${action.color}14`} /><div><strong>{action.label}</strong><span>{action.description}</span></div><Icon name="arrow" size={26} color={colors.navy} background="transparent" /></Link>)}</div></section>;
+}
+
+export default function ProfilePage() {
+  const { user } = useAuth();
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [skills, setSkills] = useState<StudentSkill[]>([]);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const role: Role = user?.role === 'mentor' || user?.role === 'admin' ? user.role : 'student';
+
+  useEffect(() => {
+    Promise.all([profileService.getCurrentProfile(), skillService.getMySkills(), dashboardService.stats()])
+      .then(([profileData, skillData, statsData]) => {
+        setProfile(profileData);
+        setSkills(skillData);
+        setStats(statsData);
+      })
+      .catch((err: unknown) => setError(getApiErrorMessage(err)))
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  const fields = useMemo(() => roleFields(role, profile), [profile, role]);
+  const actions = useMemo(() => roleActions(role), [role]);
 
   return (
     <>
-      {/* Google Fonts */}
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-      <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet" />
-
       <style>{`
-        @keyframes pf-fade-up { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes pf-bar     { from{width:0%} to{width:${pct}%} }
-        .pf-card   { background:#fff; border:1px solid #dfeaf3; border-radius:22px; padding:1.75rem; }
-        .pf-card-hover:hover { box-shadow:0 4px 20px rgba(11,29,53,.10); transform:translateY(-2px); }
-        .pf-id-card:hover    { box-shadow:0 4px 20px rgba(11,29,53,.10); transform:translateY(-2px); border-color:rgba(13,158,138,.25) !important; }
-        .pf-qa:hover         { transform:translateY(-1px); box-shadow:0 1px 4px rgba(11,29,53,.06); }
-        .pf-skill:hover      { transform:translateY(-1px); }
-        .pf-anim-1 { animation: pf-fade-up .4s ease .05s both; }
-        .pf-anim-2 { animation: pf-fade-up .4s ease .10s both; }
-        .pf-anim-3 { animation: pf-fade-up .4s ease .15s both; }
-        .pf-anim-4 { animation: pf-fade-up .4s ease .20s both; }
-        .pf-anim-5 { animation: pf-fade-up .4s ease .25s both; }
-        .pf-anim-6 { animation: pf-fade-up .4s ease .30s both; }
-        .pf-anim-7 { animation: pf-fade-up .4s ease .35s both; }
-        .pf-bar-anim { animation: pf-bar .8s cubic-bezier(.4,0,.2,1) .4s both; }
+        @keyframes pfReveal{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}} @keyframes pfGrow{from{transform:scaleX(0)}to{transform:scaleX(1)}} @keyframes pfPulse{0%,100%{box-shadow:0 0 0 0 rgba(103,227,214,.25)}50%{box-shadow:0 0 0 6px rgba(103,227,214,0)}}
+        .pf-page{margin:-2rem;min-height:100vh;padding:2rem;overflow:hidden;color:#0b1d35;background:radial-gradient(circle at 92% 4%,rgba(13,158,138,.11),transparent 25rem),radial-gradient(circle at 0 48%,rgba(37,99,235,.07),transparent 28rem),linear-gradient(180deg,#f8fbff,#eef4f8);font-family:"DM Sans",sans-serif}.pf-page *{box-sizing:border-box}.pf-reveal{animation:pfReveal .45s ease both}.pf-card{min-width:0;border:1px solid #dfeaf3;border-radius:18px;background:rgba(255,255,255,.92);box-shadow:0 12px 32px rgba(15,23,42,.055);backdrop-filter:blur(12px)}.pf-lift{transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}.pf-lift:hover{transform:translateY(-3px);border-color:rgba(13,158,138,.28);box-shadow:0 18px 42px rgba(15,23,42,.1)}.pf-icon{display:inline-flex;flex:none;align-items:center;justify-content:center;border-radius:30%}
+        .pf-hero{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr) 180px;align-items:center;gap:1.4rem;min-height:250px;overflow:hidden;padding:2rem;border:1px solid rgba(255,255,255,.09);border-radius:24px;color:#fff;background:radial-gradient(circle at 88% 5%,rgba(103,227,214,.24),transparent 31%),linear-gradient(135deg,#071527,#0b1d35 56%,#0f3b52);box-shadow:0 20px 46px rgba(11,29,53,.18)}.pf-hero::after{content:"";position:absolute;right:-75px;bottom:-130px;width:330px;height:330px;border:1px solid rgba(103,227,214,.12);border-radius:50%}.pf-hero>*{position:relative;z-index:1}.pf-avatar{display:grid;width:86px;height:86px;place-items:center;border:2px solid rgba(103,227,214,.28);border-radius:26px;color:#67e3d6;background:linear-gradient(145deg,rgba(13,158,138,.25),rgba(103,227,214,.08));box-shadow:inset 0 0 0 8px rgba(255,255,255,.025);font-family:"Sora",sans-serif;font-size:1.45rem;font-weight:800}.pf-eyebrow{color:#bdf8ef;font-size:.65rem;font-weight:850;letter-spacing:.08em;text-transform:uppercase}.pf-name-row{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;margin:.35rem 0}.pf-name-row h1{margin:0;font-family:"Sora",sans-serif;font-size:clamp(1.5rem,3vw,2.1rem)}.pf-role,.pf-active{display:inline-flex;align-items:center;border-radius:999px;padding:.3rem .58rem;font-size:.58rem;font-weight:850;text-transform:uppercase}.pf-role-student{color:#bdf8ef;background:rgba(13,158,138,.14)}.pf-role-mentor{color:#cfe1ff;background:rgba(37,99,235,.16)}.pf-role-admin{color:#fff;background:rgba(255,255,255,.1)}.pf-active{gap:5px;color:#bdf8ef;background:rgba(13,158,138,.1)}.pf-active i{width:6px;height:6px;border-radius:50%;background:#67e3d6;animation:pfPulse 2s infinite}.pf-email{margin:0;color:rgba(255,255,255,.55)!important;font-size:.72rem!important}.pf-hero-copy h2{margin:.65rem 0 .2rem;color:#67e3d6;font-family:"Sora",sans-serif;font-size:.9rem}.pf-hero-copy>p{max-width:650px;margin:0;color:rgba(255,255,255,.65);font-size:.77rem;line-height:1.6}.pf-hero blockquote{margin:.7rem 0 0;border-left:2px solid rgba(103,227,214,.45);padding-left:.7rem;color:rgba(255,255,255,.55);font-size:.68rem;font-style:normal;line-height:1.5}.pf-hero-mark{display:grid;justify-items:center;gap:.55rem;color:rgba(255,255,255,.55);font-size:.62rem;text-align:center}
+        .pf-heading>span,.pf-identity-card>span,.pf-activity-card>span,.pf-guidance>div>span{display:block;color:#0d9e8a;font-size:.62rem;font-weight:850;letter-spacing:.08em;text-transform:uppercase}.pf-heading h2,.pf-guidance h2{margin:.25rem 0 0;font-family:"Sora",sans-serif;font-size:1.03rem}.pf-heading p{margin:.3rem 0 0;color:#64748b;font-size:.72rem;line-height:1.55}.pf-top-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:1rem;margin-top:1rem}.pf-completeness{padding:1.2rem}.pf-complete-top{display:grid;grid-template-columns:1fr auto;align-items:center;gap:1rem}.pf-complete-ring{position:relative;display:grid;width:90px;height:90px;place-items:center;border-radius:50%}.pf-complete-ring::after{content:"";position:absolute;inset:10px;border-radius:50%;background:#fff}.pf-complete-ring span{position:relative;z-index:1;display:grid;color:#94a3b8;font-size:.54rem;text-align:center}.pf-complete-ring strong{color:#0b1d35;font-family:"Sora",sans-serif;font-size:1.15rem}.pf-progress{height:8px;overflow:hidden;margin-top:.8rem;border-radius:999px;background:#e8eff5}.pf-progress span,.pf-activity-card>div:last-child i{display:block;height:100%;border-radius:999px;transform-origin:left;animation:pfGrow .75s ease both}.pf-field-pills{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.75rem}.pf-field-pills span{display:inline-flex;align-items:center;gap:5px;border:1px solid #e3ebf1;border-radius:999px;padding:.28rem .48rem;color:#7b8ba0;background:#f8fbfd;font-size:.57rem}.pf-field-pills i{width:6px;height:6px;border-radius:50%;background:#c88719}.pf-field-pills span.is-complete{color:#047857;background:#ecfdf5}.pf-field-pills span.is-complete i{background:#059669}.pf-primary-link{display:inline-flex;align-items:center;gap:.35rem;margin-top:.8rem;border-radius:9px;padding:.55rem .8rem;color:#fff;background:#0d9e8a;font-size:.67rem;font-weight:800;text-decoration:none}.pf-top-grid>.pf-card:last-child{padding:1.2rem}.pf-account-list{display:grid;gap:.45rem;margin-top:.9rem}.pf-account-list>div{display:flex;align-items:center;gap:.6rem;border-bottom:1px solid #edf2f7;padding:.45rem 0}.pf-account-list>div:last-child{border:0}.pf-account-list span{display:grid;min-width:0}.pf-account-list small{color:#94a3b8;font-size:.56rem;text-transform:uppercase}.pf-account-list strong{overflow:hidden;margin-top:.12rem;color:#334155;font-size:.68rem;text-overflow:ellipsis;text-transform:capitalize;white-space:nowrap}
+        .pf-section{margin-top:1.2rem}.pf-identity-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.75rem;margin-top:.75rem}.pf-identity-card{padding:1rem}.pf-identity-card>span{margin-top:.7rem;color:#64748b}.pf-identity-card>strong{display:block;margin:.3rem 0 .18rem;overflow:hidden;font-family:"Sora",sans-serif;font-size:.9rem;text-overflow:ellipsis;text-transform:capitalize;white-space:nowrap}.pf-identity-card p{margin:0;color:#94a3b8;font-size:.62rem}.pf-activity-grid{display:grid;gap:.75rem;margin-top:.75rem}.pf-activity-grid.student,.pf-activity-grid.mentor{grid-template-columns:repeat(5,minmax(0,1fr))}.pf-activity-grid.admin{grid-template-columns:repeat(6,minmax(0,1fr))}.pf-activity-card{padding:.9rem;border-top:3px solid var(--metric-color)}.pf-activity-card>span{margin-top:.65rem;color:#64748b}.pf-activity-card>strong{display:block;margin:.25rem 0;font-family:"Sora",sans-serif;font-size:1.35rem}.pf-activity-card p{margin:0;color:#94a3b8;font-size:.59rem}.pf-activity-card>div:last-child{height:4px;margin-top:.65rem;border-radius:999px;background:#e8eff5}.pf-activity-card>div:last-child i{background:var(--metric-color)}
+        .pf-middle-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:1rem;margin-top:1rem}.pf-journey{padding:1.2rem}.pf-journey-line{position:relative;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.35rem;margin-top:1rem}.pf-journey-line>div{position:relative;display:grid;justify-items:center;text-align:center}.pf-journey-line>div>span{position:relative;z-index:1;display:grid;place-items:center;border:4px solid #fff;border-radius:50%}.pf-journey-line strong{margin-top:.35rem;font-size:.62rem}.pf-journey-line small{margin-top:.12rem;color:#94a3b8;font-size:.54rem}.pf-journey-line>div>i{position:absolute;z-index:0;top:17px;left:60%;width:80%;height:2px;background:#dfe8ef}.pf-journey-line>div.is-complete>i{background:linear-gradient(90deg,#059669,#67e3d6)}.pf-guidance{display:grid;grid-template-columns:auto 1fr;align-items:start;gap:.8rem;padding:1.2rem}.pf-guidance ul{display:grid;gap:.38rem;margin:.7rem 0 0;padding:0;list-style:none}.pf-guidance li{position:relative;padding-left:14px;color:#64748b;font-size:.66rem}.pf-guidance li::before{content:"";position:absolute;top:.4rem;left:0;width:5px;height:5px;border-radius:50%;background:#0d9e8a}
+        .pf-onboarding{margin-top:1rem;padding:1.2rem}.pf-onboarding-head{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}.pf-onboarding-head a{flex:none;border:1px solid #dce6ed;border-radius:9px;padding:.5rem .7rem;color:#0b1d35;background:#fff;font-size:.64rem;font-weight:800;text-decoration:none}.pf-details-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.65rem;margin-top:.9rem}.pf-detail-card{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:start;gap:.55rem;border:1px solid #e5edf4;border-radius:11px;padding:.7rem;background:#f9fcfe}.pf-detail-card span{display:grid;min-width:0}.pf-detail-card small{color:#94a3b8;font-size:.56rem;font-weight:800;text-transform:uppercase}.pf-detail-card strong{display:-webkit-box;overflow:hidden;margin-top:.2rem;color:#334155;font-size:.68rem;line-height:1.45;-webkit-box-orient:vertical;-webkit-line-clamp:3}.pf-detail-card.is-missing strong{color:#a3afbd;font-style:italic;font-weight:500}.pf-skills{margin-top:1rem;padding:1.2rem}.pf-skills-head{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}.pf-skills-head a{color:#0d9e8a;font-size:.65rem;font-weight:800;text-decoration:none}.pf-skill-list{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.8rem}.pf-skill-list span{display:inline-flex;align-items:center;gap:.35rem;border:1px solid #dfeaf3;border-radius:9px;padding:.4rem .55rem;color:#334155;background:#f8fbfd;font-size:.65rem}.pf-skill-list small{color:#0d9e8a;text-transform:capitalize}
+        .pf-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.7rem;margin-top:.75rem}.pf-action{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:.65rem;padding:.75rem;color:#0b1d35;text-decoration:none}.pf-action div{display:grid}.pf-action strong{font-size:.68rem}.pf-action span{margin-top:.15rem;color:#94a3b8;font-size:.57rem}.pf-empty{display:grid;min-height:145px;place-items:center;align-content:center;gap:.4rem;margin-top:.8rem;border:1px dashed #d5e2ec;border-radius:12px;padding:1rem;background:#f8fbfd;text-align:center}.pf-empty strong{font-size:.73rem}.pf-empty>span:last-of-type{max-width:300px;color:#94a3b8;font-size:.63rem}.pf-empty a{margin-top:.3rem;color:#0d9e8a;font-size:.63rem;font-weight:800;text-decoration:none}.pf-error{margin-bottom:1rem;border:1px solid #fecaca;border-radius:10px;padding:.75rem;color:#b91c1c;background:#fef2f2;font-size:.74rem}.pf-loading{display:grid;min-height:260px;place-items:center;color:#64748b}
+        @media(max-width:1180px){.pf-activity-grid.student,.pf-activity-grid.admin{grid-template-columns:repeat(3,minmax(0,1fr))}.pf-identity-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:900px){.pf-hero{grid-template-columns:auto 1fr}.pf-hero-mark{display:none}.pf-top-grid,.pf-middle-grid{grid-template-columns:1fr}.pf-activity-grid.mentor{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:720px){.pf-page{margin:-1rem;padding:1rem}.pf-hero{grid-template-columns:1fr;padding:1.35rem}.pf-avatar{width:70px;height:70px;border-radius:20px}.pf-activity-grid.student,.pf-activity-grid.mentor,.pf-activity-grid.admin{grid-template-columns:repeat(2,minmax(0,1fr))}.pf-actions{grid-template-columns:1fr}.pf-onboarding-head,.pf-skills-head{display:block}.pf-onboarding-head a,.pf-skills-head a{display:inline-flex;margin-top:.6rem}.pf-journey-line{grid-template-columns:1fr;padding-left:2.7rem}.pf-journey-line>div{justify-items:start;text-align:left}.pf-journey-line>div>span{position:absolute;top:0;left:-2.7rem}.pf-journey-line>div{min-height:58px}.pf-journey-line>div>i{top:32px;bottom:-12px;left:-2.05rem;width:2px;height:auto}}@media(max-width:480px){.pf-identity-grid,.pf-activity-grid.student,.pf-activity-grid.mentor,.pf-activity-grid.admin{grid-template-columns:1fr}.pf-complete-top{grid-template-columns:1fr}.pf-complete-ring{width:82px;height:82px}.pf-name-row{align-items:flex-start}.pf-email{overflow-wrap:anywhere}}
       `}</style>
-
-      <div style={{ fontFamily: T.fontB, color: T.dark, minHeight: '100%', maxWidth: 1100, margin: '0 auto' }}>
-
-        {/* ── ERROR ───────────────────────────────────────────────── */}
-        {error && (
-          <div style={{ background: 'rgba(220,38,38,.07)', border: '1px solid rgba(220,38,38,.2)', borderRadius: T.rMd, padding: '1rem 1.25rem', color: T.red, fontSize: '.875rem', marginBottom: '1.5rem' }}>
-            {error}
-          </div>
+      <div className="pf-page">
+        {error ? <div className="pf-error">{error}</div> : null}
+        {isLoading ? <div className="pf-card pf-loading">Loading your CampusCare identity...</div> : (
+          <>
+            <Hero role={role} name={user?.fullName} email={user?.email} />
+            <div className="pf-top-grid"><Completeness fields={fields} skills={skills} profile={profile} role={role} /><AccountCard role={role} name={user?.fullName} email={user?.email} createdAt={user?.createdAt} updatedAt={user?.updatedAt || profile?.updatedAt} /></div>
+            <div className="pf-section"><IdentityGrid fields={fields} role={role} skills={skills} stats={stats} /></div>
+            <div className="pf-section"><ActivitySnapshot role={role} stats={stats} skills={skills} /></div>
+            <div className="pf-middle-grid"><ProgressJourney role={role} userCreatedAt={user?.createdAt} stats={stats} skills={skills} profileComplete={Boolean(profile?.onboardingCompleted)} /><GuidanceCard role={role} /></div>
+            <section className="pf-card pf-onboarding"><div className="pf-onboarding-head"><SectionHeading eyebrow="Onboarding details" title="Role preferences and context" description={profile?.onboardingCompleted ? 'These details shape the prompts and context shown across your workspace.' : 'Complete onboarding to personalize your CampusCare experience.'} /><Link to="/onboarding">Update onboarding</Link></div><div className="pf-details-grid">{fields.map((field) => <article className={`pf-detail-card ${field.value ? '' : 'is-missing'}`} key={field.label}><Icon name={field.icon} size={34} color={field.value ? colors.teal : '#94a3b8'} background={field.value ? '#e8f8f5' : '#eef4f8'} /><span><small>{field.label}</small><strong>{displayLabel(field.value)}</strong></span></article>)}</div></section>
+            <section className="pf-card pf-skills"><div className="pf-skills-head"><SectionHeading eyebrow="SkillMap identity" title={role === 'student' ? 'My shared skills' : 'Skills on this account'} description="Skills currently attached to your CampusCare profile." /><Link to="/skill-map">Manage skills</Link></div>{skills.length ? <div className="pf-skill-list">{skills.map((skill) => <span key={skill.skillId}><Icon name="skill" size={25} color={colors.teal} background="#e8f8f5" />{skill.name}<small>{displayLabel(skill.level)}</small></span>)}</div> : <EmptyState title="No skills added yet" text="Add your first skill to make your CampusCare identity more useful." action={{ label: 'Open SkillMap', to: '/skill-map' }} />}</section>
+            <div className="pf-section"><QuickActions actions={actions} /></div>
+          </>
         )}
-
-        {/* ━━━━ 1. HERO CARD ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-        <div className="pf-anim-1" style={{
-          background: `linear-gradient(135deg, ${T.navy2} 0%, ${T.navy} 100%)`,
-          borderRadius: T.rXl, padding: '2.5rem',
-          marginBottom: '1.25rem', position: 'relative', overflow: 'hidden',
-          boxShadow: T.shadowLg,
-        }}>
-          {/* Glow */}
-          <div style={{ position: 'absolute', top: -40, right: -40, width: 220, height: 220, borderRadius: '50%', background: 'rgba(13,158,138,.12)', pointerEvents: 'none' }} />
-          <div style={{ position: 'absolute', bottom: -30, left: -30, width: 140, height: 140, borderRadius: '50%', background: 'rgba(103,227,214,.06)', pointerEvents: 'none' }} />
-
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', alignItems: 'flex-start', position: 'relative' }}>
-            {/* Avatar */}
-            <div style={{
-              width: 72, height: 72, borderRadius: '50%', flexShrink: 0,
-              background: 'linear-gradient(135deg, rgba(13,158,138,.4), rgba(13,158,138,.2))',
-              border: '2px solid rgba(103,227,214,.3)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontFamily: T.fontD, fontSize: '1.4rem', fontWeight: 700, color: T.cyan,
-            }}>
-              {getInitials(user?.fullName)}
-            </div>
-
-            {/* Info */}
-            <div style={{ flex: 1, minWidth: 200 }}>
-              <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 10, marginBottom: '.5rem' }}>
-                <h1 style={{ fontFamily: T.fontD, fontSize: 'clamp(1.3rem,3vw,1.75rem)', fontWeight: 700, color: '#fff', margin: 0, letterSpacing: '-.02em' }}>
-                  {user?.fullName}
-                </h1>
-                <span style={{
-                  background: roleConfig.bg, color: roleConfig.color === T.navy ? T.cyan : roleConfig.color,
-                  border: `1px solid ${roleConfig.border}`, borderRadius: 999,
-                  padding: '.25rem .8rem', fontSize: '.7rem', fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase',
-                }}>{roleConfig.badge}</span>
-              </div>
-              <p style={{ color: 'rgba(255,255,255,.55)', fontSize: '.875rem', margin: '0 0 .5rem' }}>{user?.email}</p>
-              <p style={{ fontFamily: T.fontD, fontWeight: 600, color: T.cyan, fontSize: '.85rem', margin: '0 0 .25rem' }}>{roleConfig.label}</p>
-              <p style={{ color: 'rgba(255,255,255,.45)', fontSize: '.8rem', margin: 0, maxWidth: 480, lineHeight: 1.6 }}>{roleConfig.desc}</p>
-            </div>
-
-            {/* Status badge */}
-            <div style={{
-              background: 'rgba(13,158,138,.15)', border: '1px solid rgba(13,158,138,.25)',
-              borderRadius: T.rMd, padding: '.75rem 1.25rem', textAlign: 'center', flexShrink: 0,
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                <span style={{ width: 7, height: 7, borderRadius: '50%', background: T.cyan, display: 'inline-block' }} />
-                <span style={{ fontSize: '.7rem', fontWeight: 700, letterSpacing: '.07em', textTransform: 'uppercase', color: T.cyan }}>Active</span>
-              </div>
-              <p style={{ fontSize: '.75rem', color: 'rgba(255,255,255,.5)', margin: 0, lineHeight: 1.4 }}>CampusCare<br />profile</p>
-            </div>
-          </div>
-        </div>
-
-        {/* ━━━━ 2. COMPLETION + QUICK ACTIONS ROW ━━━━━━━━━━━━━━━━ */}
-        <div className="pf-anim-2" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%,320px),1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
-
-          {/* Completion */}
-          <div className="pf-card">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem' }}>
-              <div>
-                <p style={{ fontFamily: T.fontD, fontSize: '.9rem', fontWeight: 600, color: T.dark, marginBottom: '.25rem' }}>Profile Completeness</p>
-                <p style={{ fontSize: '.78rem', color: T.muted }}>Fill in your profile to get the most out of CampusCare.</p>
-              </div>
-              <span style={{ fontFamily: T.fontD, fontSize: '1.5rem', fontWeight: 700, color: pct >= 80 ? T.teal : pct >= 50 ? T.amber : T.red }}>{pct}%</span>
-            </div>
-            {/* Bar */}
-            <div style={{ height: 7, background: T.g100, borderRadius: 999, overflow: 'hidden', marginBottom: '1rem' }}>
-              <div className="pf-bar-anim" style={{ height: '100%', background: pct >= 80 ? T.teal : pct >= 50 ? T.amber : T.red, borderRadius: 999, width: `${pct}%` }} />
-            </div>
-            {/* Missing */}
-            {profileRows.filter(r => !r.value).length > 0 && (
-              <div style={{ marginBottom: '1rem' }}>
-                <p style={{ fontSize: '.72rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.07em', color: T.muted, marginBottom: '.5rem' }}>Missing</p>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '.4rem' }}>
-                  {profileRows.filter(r => !r.value).map(r => (
-                    <span key={r.label} style={{ background: T.g50, border: `1px solid ${T.g200}`, borderRadius: 999, padding: '.2rem .65rem', fontSize: '.72rem', color: T.muted }}>{r.label}</span>
-                  ))}
-                </div>
-              </div>
-            )}
-            <Link to="/onboarding" style={{
-              display: 'inline-flex', alignItems: 'center', gap: 6,
-              background: T.navy, color: '#fff', borderRadius: 999,
-              padding: '.5rem 1.25rem', fontSize: '.82rem', fontWeight: 500,
-              textDecoration: 'none', transition: 'all .18s',
-            }}>
-              {profile?.onboardingCompleted ? 'Update onboarding' : 'Complete onboarding'}
-            </Link>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="pf-card">
-            <p style={{ fontFamily: T.fontD, fontSize: '.9rem', fontWeight: 600, color: T.dark, marginBottom: '.25rem' }}>Quick Actions</p>
-            <p style={{ fontSize: '.78rem', color: T.muted, marginBottom: '1rem' }}>Jump straight to the modules you use most.</p>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '.5rem' }}>
-              {quickActions.map(a => (
-                <Link key={a.to} to={a.to} className="pf-qa" style={{
-                  display: 'inline-flex', alignItems: 'center',
-                  background: T.g50, border: `1px solid ${T.g200}`,
-                  borderLeft: `3px solid ${a.color}`,
-                  borderRadius: 999, padding: '.4rem 1rem',
-                  fontSize: '.78rem', fontWeight: 500, color: T.dark,
-                  textDecoration: 'none', transition: 'all .15s',
-                }}>{a.label}</Link>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* ━━━━ 3. PERSONAL INFO + ROLE IDENTITY ROW ━━━━━━━━━━━━━ */}
-        <div className="pf-anim-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%,340px),1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
-
-          {/* Personal Info */}
-          <div className="pf-card">
-            <p style={{ fontFamily: T.fontD, fontSize: '.9rem', fontWeight: 600, color: T.dark, marginBottom: '1.25rem' }}>Account Information</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '.75rem' }}>
-              {[
-                { icon: '👤', label: 'Full name',   value: user?.fullName },
-                { icon: '✉️', label: 'Email',       value: user?.email },
-                { icon: '🎭', label: 'Role',        value: role, badge: true },
-                { icon: '📅', label: 'Joined',      value: user?.createdAt ? formatDate(user.createdAt) : null },
-              ].map((row, i, arr) => (
-                <div key={row.label} style={{
-                  display: 'flex', alignItems: 'flex-start', gap: '.75rem',
-                  paddingBottom: i < arr.length - 1 ? '.75rem' : 0,
-                  borderBottom: i < arr.length - 1 ? `1px solid ${T.g100}` : 'none',
-                }}>
-                  <span style={{ fontSize: '1rem', flexShrink: 0, marginTop: 1 }}>{row.icon}</span>
-                  <div>
-                    <p style={{ fontSize: '.68rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.07em', color: T.g400, marginBottom: 2 }}>{row.label}</p>
-                    {row.badge ? (
-                      <span style={{
-                        background: roleConfig.bg, color: roleConfig.color,
-                        border: `1px solid ${roleConfig.border}`,
-                        borderRadius: 999, padding: '.2rem .7rem',
-                        fontSize: '.75rem', fontWeight: 600, textTransform: 'capitalize',
-                      }}>{row.value}</span>
-                    ) : (
-                      <p style={{ fontSize: '.875rem', fontWeight: 500, color: row.value ? T.dark : T.g400, margin: 0 }}>
-                        {row.value ?? 'Not available'}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Role Identity */}
-          <div className="pf-card" style={{ padding: '1.75rem 1.5rem' }}>
-            <p style={{ fontFamily: T.fontD, fontSize: '.9rem', fontWeight: 600, color: T.dark, marginBottom: '.25rem' }}>
-              {role === 'student' ? 'Your student support identity' : role === 'mentor' ? 'Your mentor support identity' : 'Your admin management identity'}
-            </p>
-            <p style={{ fontSize: '.78rem', color: T.muted, marginBottom: '1.25rem' }}>The areas you are active in on CampusCare.</p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '.625rem' }}>
-              {identityCards.map(card => (
-                <div key={card.title} className="pf-id-card" style={{
-                  background: T.g50, border: `1px solid ${T.border}`,
-                  borderRadius: T.rMd, padding: '1rem',
-                  transition: 'all .2s',
-                }}>
-                  <div style={{ fontSize: '1.25rem', marginBottom: '.5rem' }}>{card.icon}</div>
-                  <p style={{ fontFamily: T.fontD, fontSize: '.78rem', fontWeight: 600, color: T.dark, marginBottom: '.25rem' }}>{card.title}</p>
-                  <p style={{ fontSize: '.72rem', color: T.muted, lineHeight: 1.5, margin: 0 }}>{card.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* ━━━━ 4. ONBOARDING DETAILS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-        <div className="pf-card pf-anim-4" style={{ marginBottom: '1.25rem' }}>
-          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', marginBottom: '1.25rem' }}>
-            <div>
-              <p style={{ fontFamily: T.fontD, fontSize: '.9rem', fontWeight: 600, color: T.dark, marginBottom: '.25rem' }}>Onboarding Details</p>
-              <p style={{ fontSize: '.78rem', color: T.muted }}>
-                {profile?.onboardingCompleted ? 'These details help shape a more useful role experience.' : 'Complete onboarding to make CampusCare feel more personal.'}
-              </p>
-            </div>
-            <Link to="/onboarding" style={{
-              display: 'inline-flex', alignItems: 'center', gap: 6,
-              background: T.g50, border: `1px solid ${T.g200}`,
-              color: T.dark, borderRadius: 999,
-              padding: '.45rem 1.1rem', fontSize: '.8rem', fontWeight: 500,
-              textDecoration: 'none', transition: 'all .15s',
-            }}>Update onboarding</Link>
-          </div>
-
-          {profileRows.length > 0 ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%,240px),1fr))', gap: '.75rem' }}>
-              {profileRows.map(row => (
-                <div key={row.label} style={{
-                  background: T.g50, border: `1px solid ${T.g200}`,
-                  borderRadius: T.rMd, padding: '1rem',
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: '.4rem' }}>
-                    <span style={{ fontSize: '.875rem' }}>{row.icon}</span>
-                    <p style={{ fontSize: '.68rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.07em', color: T.g400, margin: 0 }}>{row.label}</p>
-                  </div>
-                  <p style={{ fontSize: '.875rem', fontWeight: row.value ? 500 : 400, color: row.value ? T.dark : T.g400, margin: 0, lineHeight: 1.55 }}>
-                    {row.value ?? <span style={{ fontStyle: 'italic' }}>Not added yet</span>}
-                  </p>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <EmptyState icon="✏️" title="No onboarding data yet" desc="Complete your onboarding to personalize CampusCare for your role." action={{ label: 'Start onboarding', to: '/onboarding' }} />
-          )}
-        </div>
-
-        {/* ━━━━ 5. SKILLS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-        <div className="pf-card pf-anim-5" style={{ marginBottom: '1.25rem' }}>
-          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', marginBottom: '1.25rem' }}>
-            <div>
-              <p style={{ fontFamily: T.fontD, fontSize: '.9rem', fontWeight: 600, color: T.dark, marginBottom: '.25rem' }}>My Skills</p>
-              <p style={{ fontSize: '.78rem', color: T.muted }}>Skills attached to your SkillMap profile.</p>
-            </div>
-            <Link to="/skill-map" style={{
-              display: 'inline-flex', alignItems: 'center', gap: 6,
-              background: T.g50, border: `1px solid ${T.g200}`,
-              color: T.dark, borderRadius: 999,
-              padding: '.45rem 1.1rem', fontSize: '.8rem', fontWeight: 500,
-              textDecoration: 'none', transition: 'all .15s',
-            }}>Manage skills</Link>
-          </div>
-
-          {skills.length === 0 ? (
-            <EmptyState icon="⚡" title="No skills added yet" desc="Add your first skill to let classmates and mentors discover how you can help." action={{ label: 'Add a skill', to: '/skill-map' }} />
-          ) : (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '.625rem' }}>
-              {skills.map(skill => {
-                const lvl = (skill.level ?? '').toLowerCase();
-                const c = SKILL_LEVEL_COLORS[lvl] ?? SKILL_LEVEL_COLORS.beginner;
-                return (
-                  <span key={skill.skillId} className="pf-skill" style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 6,
-                    background: c.bg, border: `1px solid ${c.border}`,
-                    color: c.color, borderRadius: 999,
-                    padding: '.3rem .9rem', fontSize: '.8rem', fontWeight: 500,
-                    transition: 'all .15s', cursor: 'default',
-                  }}>
-                    {skill.name}
-                    <span style={{ fontSize: '.68rem', opacity: .7, textTransform: 'capitalize' }}>{skill.level}</span>
-                  </span>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* ━━━━ 6. NEXT STEPS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-        <div className="pf-anim-6" style={{
-          background: `linear-gradient(135deg, ${T.navy2} 0%, ${T.navy} 100%)`,
-          borderRadius: T.rLg, padding: '1.75rem 2rem',
-          display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between',
-          alignItems: 'center', gap: '1.5rem',
-          boxShadow: T.shadowMd, position: 'relative', overflow: 'hidden',
-        }}>
-          <div style={{ position: 'absolute', top: -20, right: -20, width: 120, height: 120, borderRadius: '50%', background: 'rgba(13,158,138,.1)', pointerEvents: 'none' }} />
-          <div>
-            <p style={{ fontFamily: T.fontD, fontWeight: 600, color: '#fff', fontSize: '1rem', marginBottom: '.35rem' }}>Keep building your CampusCare profile</p>
-            <p style={{ color: 'rgba(255,255,255,.5)', fontSize: '.825rem', margin: 0, lineHeight: 1.6 }}>
-              A complete profile helps mentors, admins, and your future self understand your journey.
-            </p>
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '.625rem', flexShrink: 0 }}>
-            <Link to="/onboarding" style={{
-              display: 'inline-flex', alignItems: 'center',
-              background: T.teal, color: '#fff', borderRadius: 999,
-              padding: '.55rem 1.25rem', fontSize: '.85rem', fontWeight: 500,
-              textDecoration: 'none',
-            }}>Update profile</Link>
-            <Link to="/dashboard" style={{
-              display: 'inline-flex', alignItems: 'center',
-              background: 'rgba(255,255,255,.1)', color: '#fff',
-              border: '1px solid rgba(255,255,255,.18)', borderRadius: 999,
-              padding: '.55rem 1.25rem', fontSize: '.85rem', fontWeight: 500,
-              textDecoration: 'none',
-            }}>Go to dashboard</Link>
-          </div>
-        </div>
-
       </div>
     </>
-  );
-}
-
-/* ─── EMPTY STATE ────────────────────────────────────────────── */
-function EmptyState({ icon, title, desc, action }: {
-  icon: string; title: string; desc: string;
-  action?: { label: string; to: string };
-}) {
-  return (
-    <div style={{
-      background: '#f8fafc', border: '1px dashed #dfeaf3',
-      borderRadius: 14, padding: '2rem', textAlign: 'center',
-    }}>
-      <div style={{ fontSize: '1.75rem', marginBottom: '.75rem' }}>{icon}</div>
-      <p style={{ fontFamily: "'Sora', sans-serif", fontWeight: 600, fontSize: '.9rem', color: '#0b1d35', marginBottom: '.35rem' }}>{title}</p>
-      <p style={{ fontSize: '.825rem', color: '#64748b', marginBottom: action ? '1.25rem' : 0, lineHeight: 1.6 }}>{desc}</p>
-      {action && (
-        <Link to={action.to} style={{
-          display: 'inline-flex', alignItems: 'center',
-          background: '#0b1d35', color: '#fff', borderRadius: 999,
-          padding: '.45rem 1.25rem', fontSize: '.8rem', fontWeight: 500,
-          textDecoration: 'none',
-        }}>{action.label}</Link>
-      )}
-    </div>
   );
 }

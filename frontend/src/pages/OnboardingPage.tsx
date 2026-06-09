@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { CampusCareLogoMark } from '../components/brand/CampusCareLogoMark';
 import { useAuth } from '../context/AuthContext';
 import { getApiErrorMessage } from '../services/apiClient';
 import { profileService } from '../services/profileService';
@@ -90,6 +91,13 @@ export default function OnboardingPage() {
       <section className="dark-gradient overflow-hidden rounded-[2rem] p-6 text-white shadow-xl md:p-8">
         <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-end">
           <div>
+            <div className="mb-4 flex items-center gap-3">
+              <CampusCareLogoMark size={44} variant="dark" />
+              <div>
+                <p className="font-extrabold leading-tight text-white">CampusCare</p>
+                <p className="mt-1 text-xs text-white/50">Profile setup journey</p>
+              </div>
+            </div>
             <span className="rounded-full border border-cyan-200/20 bg-cyan-100/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-cyan-100">
               {roleTitle}
             </span>

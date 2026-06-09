@@ -5,6 +5,14 @@ import { tokenUtils } from '../utils/token.js';
 import { validateLoginPayload, validateRegisterPayload } from '../utils/validation.js';
 import { AppError } from '../utils/httpError.js';
 
+const APPROVED_ADMIN_EMAIL = 'fluturahysenni@gmail.com';
+
+function assertAdminIsAuthorized(user: User) {
+  if (user.role === 'admin' && user.email.toLowerCase() !== APPROVED_ADMIN_EMAIL) {
+    throw new AppError(403, 'This admin account is not authorized to access the admin workspace.');
+  }
+}
+
 function toPublicUser(user: User): PublicUser {
   return {
     id: user.id,
@@ -29,6 +37,11 @@ function createAuthResponse(user: User) {
 export const authService = {
   register: async (payload: unknown) => {
     const input = validateRegisterPayload(payload);
+
+    if (input.role === 'admin') {
+      throw new AppError(403, 'Admin accounts are created manually.');
+    }
+
     const existingUser = await authRepository.findByEmail(input.email);
 
     if (existingUser) {
@@ -60,6 +73,8 @@ export const authService = {
       throw new AppError(401, 'Invalid email or password');
     }
 
+    assertAdminIsAuthorized(user);
+
     return createAuthResponse(user);
   },
 
@@ -69,6 +84,8 @@ export const authService = {
     if (!user) {
       throw new AppError(404, 'User not found');
     }
+
+    assertAdminIsAuthorized(user);
 
     return toPublicUser(user);
   }

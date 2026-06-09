@@ -1,220 +1,512 @@
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { useEffect, useMemo, useState } from 'react';
-import type { CSSProperties } from 'react';
-import { PageHeader } from '../components/common/PageHeader';
 import { useAuth } from '../context/AuthContext';
 import { getApiErrorMessage } from '../services/apiClient';
 import { dashboardService } from '../services/dashboardService';
 import type { DashboardStats } from '../types/dashboard';
 import { formatDate } from '../utils/formatDate';
 
-/* ─── TYPES ─────────────────────────────────────────────────── */
-type StatCard = {
+type IconName =
+  | 'help'
+  | 'skills'
+  | 'stress'
+  | 'mood'
+  | 'lostFound'
+  | 'users'
+  | 'activity'
+  | 'reply'
+  | 'profile'
+  | 'arrow';
+
+type Metric = {
   label: string;
-  value: number;
-  description: string;
+  value: string;
+  helper: string;
+  icon: IconName;
+  color: string;
+  background: string;
 };
 
-type EngagementCard = {
-  title: string;
-  description: string;
-  to?: string;
-  action?: string;
-};
-
-function formatMetric(value: number) {
-  return Number.isInteger(value) ? String(value) : value.toFixed(2);
-}
-
-function roleIntro(role?: string) {
-  if (role === 'admin') {
-    return {
-      title: 'Admin Dashboard',
-      description:
-        'Global CampusCare activity, support load, wellbeing signals, and report status.',
-    };
-  }
-
-  if (role === 'mentor') {
-    return {
-      title: 'Mentor Dashboard',
-      description:
-        'Support-focused overview for help requests, student skills, and wellbeing trends.',
-    };
-  }
-
-  return {
-    title: 'Student Dashboard',
-    description:
-      'Your personal CampusCare activity across help requests, skills, stress, mood, and lost/found reports.',
-  };
-}
-
-/* ─── DESIGN TOKENS ─────────────────────────────────────────── */
-const T = {
+const colors = {
   navy: '#0b1d35',
-  navy2: '#0f2647',
+  navySoft: '#0f2647',
   teal: '#0d9e8a',
-  teal2: '#0bbfaa',
   cyan: '#67e3d6',
-  white: '#ffffff',
-
-  g50: '#f4f8fc',
-  g100: '#eef4f8',
-  g200: '#dce7f1',
-  g400: '#94a3b8',
-  g500: '#64748b',
-  g600: '#475569',
-  g800: '#1e293b',
-
   blue: '#2563eb',
   amber: '#d97706',
-  red: '#dc2626',
   green: '#059669',
-
-  fontDisplay: "'Sora', sans-serif",
-  fontBody: "'DM Sans', sans-serif",
-
-  radiusSm: 8,
-  radiusMd: 14,
-  radiusLg: 22,
-  radiusXl: 32,
-
-  shadowSm: '0 1px 4px rgba(11,29,53,.06), 0 2px 8px rgba(11,29,53,.04)',
-  shadowMd: '0 4px 20px rgba(11,29,53,.10)',
-  shadowLg: '0 12px 40px rgba(11,29,53,.14)',
-
-  pageBg:
-    'radial-gradient(circle at top right, rgba(13,158,138,.10), transparent 28rem), radial-gradient(circle at top left, rgba(37,99,235,.08), transparent 26rem), linear-gradient(180deg, #f8fbff 0%, #f3f7fb 48%, #eef4f8 100%)',
-
-  cardBg: 'rgba(255,255,255,.88)',
-  cardShadow: '0 14px 34px rgba(15, 23, 42, .07)',
-  cardBorder: '#dfeaf3',
+  violet: '#7c3aed',
+  red: '#dc2626',
+  muted: '#64748b',
+  border: '#dfeaf3'
 };
 
-/* ─── MODULE META ───────────────────────────────────────────── */
-const MODULE_META: Record<string, { color: string; bg: string; border: string; icon: string }> = {
-  'My Help Requests': {
-    color: T.teal,
-    bg: 'rgba(13,158,138,.1)',
-    border: 'rgba(13,158,138,.2)',
-    icon: '💬',
-  },
-  'Open Help Requests': {
-    color: T.red,
-    bg: 'rgba(220,38,38,.08)',
-    border: 'rgba(220,38,38,.18)',
-    icon: '🔔',
-  },
-  'Help Requests': {
-    color: T.teal,
-    bg: 'rgba(13,158,138,.1)',
-    border: 'rgba(13,158,138,.2)',
-    icon: '💬',
-  },
-  'My Skills': {
-    color: T.blue,
-    bg: 'rgba(37,99,235,.08)',
-    border: 'rgba(37,99,235,.18)',
-    icon: '⚡',
-  },
-  'SkillMap Skills': {
-    color: T.blue,
-    bg: 'rgba(37,99,235,.08)',
-    border: 'rgba(37,99,235,.18)',
-    icon: '⚡',
-  },
-  'Student Skill Profiles': {
-    color: T.blue,
-    bg: 'rgba(37,99,235,.08)',
-    border: 'rgba(37,99,235,.18)',
-    icon: '⚡',
-  },
-  'Skill Profiles': {
-    color: T.blue,
-    bg: 'rgba(37,99,235,.08)',
-    border: 'rgba(37,99,235,.18)',
-    icon: '⚡',
-  },
-  'Skills Added': {
-    color: T.blue,
-    bg: 'rgba(37,99,235,.08)',
-    border: 'rgba(37,99,235,.18)',
-    icon: '⚡',
-  },
-  'My Stress Records': {
-    color: T.amber,
-    bg: 'rgba(217,119,6,.08)',
-    border: 'rgba(217,119,6,.18)',
-    icon: '📊',
-  },
-  'Stress Records': {
-    color: T.amber,
-    bg: 'rgba(217,119,6,.08)',
-    border: 'rgba(217,119,6,.18)',
-    icon: '📊',
-  },
-  'Average Stress': {
-    color: T.amber,
-    bg: 'rgba(217,119,6,.08)',
-    border: 'rgba(217,119,6,.18)',
-    icon: '📈',
-  },
-  'My Mood Records': {
-    color: '#7c3aed',
-    bg: 'rgba(124,58,237,.08)',
-    border: 'rgba(124,58,237,.18)',
-    icon: '🌙',
-  },
-  'Mood Records': {
-    color: '#7c3aed',
-    bg: 'rgba(124,58,237,.08)',
-    border: 'rgba(124,58,237,.18)',
-    icon: '🌙',
-  },
-  'My Lost/Found Reports': {
-    color: T.green,
-    bg: 'rgba(5,150,105,.08)',
-    border: 'rgba(5,150,105,.18)',
-    icon: '📍',
-  },
-  'Lost/Found Items': {
-    color: T.green,
-    bg: 'rgba(5,150,105,.08)',
-    border: 'rgba(5,150,105,.18)',
-    icon: '📍',
-  },
-  'Resolved Reports': {
-    color: T.green,
-    bg: 'rgba(5,150,105,.08)',
-    border: 'rgba(5,150,105,.18)',
-    icon: '✅',
-  },
-  'Total Users': {
-    color: T.navy,
-    bg: 'rgba(11,29,53,.06)',
-    border: 'rgba(11,29,53,.12)',
-    icon: '👥',
-  },
+const iconPaths: Record<IconName, ReactNode> = {
+  help: (
+    <>
+      <path d="M4 5.5h16v11H9l-5 4v-15Z" />
+      <path d="M8 10h8M8 13h5" />
+    </>
+  ),
+  skills: (
+    <>
+      <circle cx="6" cy="12" r="2.3" />
+      <circle cx="18" cy="6" r="2.3" />
+      <circle cx="18" cy="18" r="2.3" />
+      <path d="m8.2 10.9 7.6-3.8M8.2 13.1l7.6 3.8" />
+    </>
+  ),
+  stress: (
+    <>
+      <path d="M3 13h4l2-6 3.2 11 2.5-8 1.8 3H21" />
+      <path d="M4 21h16" />
+    </>
+  ),
+  mood: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M8.2 10h.1M15.7 10h.1M7.8 15c1.2 1.5 2.6 2.2 4.2 2.2s3-.7 4.2-2.2" />
+    </>
+  ),
+  lostFound: (
+    <>
+      <path d="M12 22s7-6.3 7-12a7 7 0 1 0-14 0c0 5.7 7 12 7 12Z" />
+      <circle cx="12" cy="10" r="2.4" />
+    </>
+  ),
+  users: (
+    <>
+      <circle cx="9" cy="8" r="3" />
+      <circle cx="17" cy="9" r="2.2" />
+      <path d="M3.5 20c.4-4 2.4-6 5.5-6s5.1 2 5.5 6M14 15c3.5-.4 5.6 1.3 6.2 4.5" />
+    </>
+  ),
+  activity: (
+    <>
+      <rect x="3" y="3" width="7" height="7" rx="1.5" />
+      <rect x="14" y="3" width="7" height="4" rx="1.5" />
+      <rect x="14" y="11" width="7" height="10" rx="1.5" />
+      <rect x="3" y="14" width="7" height="7" rx="1.5" />
+    </>
+  ),
+  reply: (
+    <>
+      <path d="M9 8 4 12l5 4" />
+      <path d="M5 12h8c4 0 6 2 6 6" />
+    </>
+  ),
+  profile: (
+    <>
+      <circle cx="12" cy="8" r="3.5" />
+      <path d="M5 21c.5-4.5 2.8-7 7-7s6.5 2.5 7 7" />
+    </>
+  ),
+  arrow: <path d="M5 12h14M14 7l5 5-5 5" />
 };
 
-const MOOD_COLORS: Record<string, string> = {
-  calm: T.teal,
-  motivated: T.blue,
-  tired: T.amber,
-  stressed: T.red,
-  overwhelmed: '#7c3aed',
-};
+function Icon({
+  name,
+  size = 40,
+  color = colors.teal,
+  background = 'rgba(13,158,138,.09)'
+}: {
+  name: IconName;
+  size?: number;
+  color?: string;
+  background?: string;
+}) {
+  return (
+    <span
+      className="db-icon"
+      style={{
+        width: size,
+        height: size,
+        borderRadius: Math.round(size * 0.3),
+        color,
+        background
+      }}
+    >
+      <svg
+        aria-hidden="true"
+        width={size * 0.52}
+        height={size * 0.52}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        {iconPaths[name]}
+      </svg>
+    </span>
+  );
+}
 
-const QUICK_ACTIONS = [
-  { label: 'Ask for help', to: '/silent-help', color: T.teal },
-  { label: 'Add skill', to: '/skill-map', color: T.blue },
-  { label: 'Log stress', to: '/stress-tracker', color: T.amber },
-  { label: 'Log mood', to: '/mood-campus', color: '#7c3aed' },
-  { label: 'Report item', to: '/lost-found', color: T.green },
-];
+function formatMetric(value: number) {
+  return Number.isInteger(value) ? String(value) : value.toFixed(1);
+}
 
-/* ─── COMPONENT ─────────────────────────────────────────────── */
+function dominantMood(moodCounts: Record<string, number>) {
+  const entries = Object.entries(moodCounts);
+  if (!entries.length) return 'No check-in';
+  return entries.sort((a, b) => b[1] - a[1])[0][0].replace('_', ' ');
+}
+
+function metricCard(metric: Metric, index: number) {
+  return (
+    <article className="db-card db-lift db-reveal db-metric" key={metric.label} style={{ animationDelay: `${index * 45}ms` }}>
+      <div className="db-metric-top">
+        <Icon name={metric.icon} color={metric.color} background={metric.background} />
+        <span className="db-metric-line" style={{ background: metric.color }} />
+      </div>
+      <p className="db-label">{metric.label}</p>
+      <p className="db-value" style={{ color: metric.color }}>{metric.value}</p>
+      <p className="db-helper">{metric.helper}</p>
+    </article>
+  );
+}
+
+function SectionHeading({ title, subtitle }: { title: string; subtitle: string }) {
+  return (
+    <div className="db-section-heading">
+      <div>
+        <h2>{title}</h2>
+        <p>{subtitle}</p>
+      </div>
+    </div>
+  );
+}
+
+function StressMeter({ average, records }: { average: number; records: number }) {
+  const level = Math.min(5, Math.max(0, average));
+  const label = level === 0 ? 'No records' : level < 2 ? 'Low' : level < 3 ? 'Mild' : level < 4 ? 'Medium' : level < 5 ? 'High' : 'Very high';
+
+  return (
+    <div className="db-card db-chart-card">
+      <SectionHeading title="Stress signal" subtitle={`${records} recorded check-in${records === 1 ? '' : 's'} reflected in the current average.`} />
+      <div className="db-stress-reading">
+        <div>
+          <span className="db-label">Average level</span>
+          <strong>{level ? level.toFixed(1) : '0.0'} / 5</strong>
+        </div>
+        <span className="db-status db-status-amber">{label}</span>
+      </div>
+      <div className="db-level-track">
+        {[1, 2, 3, 4, 5].map((step) => (
+          <span
+            key={step}
+            className="db-level-step"
+            style={{
+              background: level >= step ? (step < 3 ? colors.teal : step < 5 ? colors.amber : colors.red) : '#e7eef5'
+            }}
+          />
+        ))}
+      </div>
+      <div className="db-level-labels">
+        <span>Low</span>
+        <span>Medium</span>
+        <span>Very high</span>
+      </div>
+    </div>
+  );
+}
+
+function MoodSummary({ moodCounts, personal }: { moodCounts: Record<string, number>; personal: boolean }) {
+  const entries = Object.entries(moodCounts).sort((a, b) => b[1] - a[1]);
+  const total = entries.reduce((sum, [, count]) => sum + count, 0);
+  const palette: Record<string, string> = {
+    calm: colors.teal,
+    motivated: colors.blue,
+    tired: colors.amber,
+    stressed: colors.red,
+    overwhelmed: colors.violet
+  };
+
+  return (
+    <div className="db-card db-chart-card">
+      <SectionHeading
+        title={personal ? 'My mood summary' : 'Campus mood summary'}
+        subtitle={personal ? 'Your recorded MoodCampus check-ins.' : 'Aggregated mood records for support awareness.'}
+      />
+      {!entries.length ? (
+        <div className="db-empty">No mood records yet.</div>
+      ) : (
+        <div className="db-mood-layout">
+          <div
+            className="db-donut"
+            style={{
+              background: `conic-gradient(${entries
+                .map(([mood, count], index) => {
+                  const before = entries.slice(0, index).reduce((sum, [, value]) => sum + value, 0);
+                  const start = (before / total) * 100;
+                  const end = ((before + count) / total) * 100;
+                  return `${palette[mood] ?? colors.muted} ${start}% ${end}%`;
+                })
+                .join(',')})`
+            }}
+          >
+            <span><strong>{total}</strong> check-ins</span>
+          </div>
+          <div className="db-mood-list">
+            {entries.map(([mood, count]) => (
+              <div key={mood}>
+                <div className="db-row-between">
+                  <span className="db-mood-name"><i style={{ background: palette[mood] ?? colors.muted }} />{mood.replace('_', ' ')}</span>
+                  <strong>{count}</strong>
+                </div>
+                <div className="db-progress">
+                  <span style={{ width: `${Math.max(5, (count / total) * 100)}%`, background: palette[mood] ?? colors.muted }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function RecentActivity({ stats, personal }: { stats: DashboardStats; personal: boolean }) {
+  return (
+    <div className="db-card db-chart-card">
+      <SectionHeading title="Recent activity" subtitle={personal ? 'Your latest CampusCare updates.' : 'Latest activity across visible CampusCare modules.'} />
+      {stats.recentActivity?.length ? (
+        <div className="db-activity-list">
+          {stats.recentActivity.slice(0, 6).map((activity, index) => {
+            const icon: IconName = activity.type.includes('help')
+              ? 'help'
+              : activity.type.includes('mood')
+                ? 'mood'
+                : activity.type.includes('stress')
+                  ? 'stress'
+                  : activity.type.includes('skill')
+                    ? 'skills'
+                    : 'lostFound';
+            return (
+              <div className="db-activity-item" key={`${activity.type}-${activity.createdAt}-${index}`}>
+                <Icon name={icon} size={34} />
+                <div>
+                  <strong>{activity.title}</strong>
+                  <span>{activity.type.replace(/_/g, ' ')} · {formatDate(activity.createdAt)}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="db-empty">No recent activity yet.</div>
+      )}
+    </div>
+  );
+}
+
+function Hero({
+  role,
+  name,
+  stats
+}: {
+  role: 'student' | 'mentor' | 'admin';
+  name?: string;
+  stats: DashboardStats;
+}) {
+  const firstName = name?.split(' ')[0] || 'Student';
+  const content = role === 'student'
+    ? {
+        eyebrow: 'Student workspace',
+        title: `Welcome back, ${firstName}`,
+        description: `You have ${stats.totalHelpRequests} help request${stats.totalHelpRequests === 1 ? '' : 's'}, ${stats.totalStudentSkills ?? 0} shared skill${(stats.totalStudentSkills ?? 0) === 1 ? '' : 's'}, and a ${dominantMood(stats.moodCounts)} mood snapshot.`,
+        primary: { label: 'Ask anonymously', to: '/silent-help' },
+        secondary: { label: 'Log mood', to: '/mood-campus' }
+      }
+    : role === 'mentor'
+      ? {
+          eyebrow: 'Mentor guidance console',
+          title: `${stats.openHelpRequests} request${stats.openHelpRequests === 1 ? '' : 's'} waiting for guidance`,
+          description: 'Review support needs with care. Replies and status updates help students find a clear next step.',
+          primary: { label: 'Open queue', to: '/silent-help' },
+          secondary: { label: 'View wellbeing', to: '/stress-tracker' }
+        }
+      : {
+          eyebrow: 'Admin platform overview',
+          title: 'Platform health, at a glance',
+          description: `${stats.totalUsers} users and ${stats.totalHelpRequests + stats.totalStressRecords + (stats.totalMoodRecords ?? 0) + (stats.totalLostFoundItems ?? 0)} recorded module activities are visible in the current overview.`,
+          primary: { label: 'Review requests', to: '/silent-help' },
+          secondary: { label: 'Manage reports', to: '/lost-found' }
+        };
+
+  return (
+    <section className="db-hero db-reveal">
+      <div className="db-hero-content">
+        <span className="db-hero-eyebrow"><i />{content.eyebrow}</span>
+        <h1>{content.title}</h1>
+        <p>{content.description}</p>
+        <div className="db-hero-actions">
+          <Link className="db-btn db-btn-primary" to={content.primary.to}>{content.primary.label}<Icon name="arrow" size={24} color="#ffffff" background="transparent" /></Link>
+          <Link className="db-btn db-btn-glass" to={content.secondary.to}>{content.secondary.label}</Link>
+        </div>
+      </div>
+      <div className="db-hero-signal">
+        <div className="db-signal-ring"><Icon name={role === 'admin' ? 'activity' : role === 'mentor' ? 'reply' : 'profile'} size={54} color={colors.cyan} background="rgba(103,227,214,.1)" /></div>
+        <span className="db-live"><i />{role === 'admin' ? 'Modules operational' : 'Workspace active'}</span>
+      </div>
+    </section>
+  );
+}
+
+function StudentDashboard({ stats }: { stats: DashboardStats }) {
+  const mood = dominantMood(stats.moodCounts);
+  const metrics: Metric[] = [
+    { label: 'My Help Requests', value: formatMetric(stats.totalHelpRequests), helper: `${stats.openHelpRequests} currently open`, icon: 'help', color: colors.teal, background: 'rgba(13,158,138,.09)' },
+    { label: 'My Skills', value: formatMetric(stats.totalStudentSkills ?? 0), helper: 'Skills on your profile', icon: 'skills', color: colors.blue, background: 'rgba(37,99,235,.08)' },
+    { label: 'Current Stress', value: `${formatMetric(stats.averageStressLevel)} / 5`, helper: `${stats.totalStressRecords} recorded check-ins`, icon: 'stress', color: colors.amber, background: 'rgba(217,119,6,.09)' },
+    { label: 'This Week Mood', value: mood, helper: `${stats.totalMoodRecords ?? Object.values(stats.moodCounts).reduce((sum, count) => sum + count, 0)} mood records`, icon: 'mood', color: colors.violet, background: 'rgba(124,58,237,.08)' },
+    { label: 'Lost / Found', value: formatMetric(stats.totalLostFoundItems ?? 0), helper: `${stats.lostFoundResolved} resolved reports`, icon: 'lostFound', color: colors.green, background: 'rgba(5,150,105,.08)' }
+  ];
+  const actions = [
+    { label: 'Ask anonymously', detail: 'Start a safe support request.', to: '/silent-help', icon: 'help' as IconName },
+    { label: "Log this week's mood", detail: 'Add a respectful weekly check-in.', to: '/mood-campus', icon: 'mood' as IconName },
+    { label: 'Track stress', detail: 'Record pressure from 1 to 5.', to: '/stress-tracker', icon: 'stress' as IconName },
+    { label: 'Report item', detail: 'Create a lost or found report.', to: '/lost-found', icon: 'lostFound' as IconName }
+  ];
+
+  return (
+    <>
+      <div className="db-metric-grid db-student-metrics">{metrics.map(metricCard)}</div>
+      <section className="db-space">
+        <SectionHeading title="Quick actions" subtitle="Small actions that keep your CampusCare workspace useful." />
+        <div className="db-action-grid">
+          {actions.map((action, index) => (
+            <Link className="db-action-card db-lift db-reveal" key={action.to} style={{ animationDelay: `${index * 55}ms` }} to={action.to}>
+              <Icon name={action.icon} />
+              <div><strong>{action.label}</strong><span>{action.detail}</span></div>
+              <Icon name="arrow" size={28} color={colors.navy} background="transparent" />
+            </Link>
+          ))}
+        </div>
+      </section>
+      <div className="db-content-grid">
+        <StressMeter average={stats.averageStressLevel} records={stats.totalStressRecords} />
+        <MoodSummary moodCounts={stats.moodCounts} personal />
+      </div>
+      <div className="db-content-grid db-space">
+        <div className="db-card db-insight-card">
+          <div><Icon name="help" size={46} /></div>
+          <div>
+            <span className="db-label">Wellbeing insight</span>
+            <h2>Small check-ins can make a difficult week easier to understand.</h2>
+            <p>Silent Help stays available when a question feels difficult to ask publicly. Share only what feels comfortable.</p>
+            <Link to="/silent-help">Open Silent Help <span>→</span></Link>
+          </div>
+        </div>
+        <RecentActivity stats={stats} personal />
+      </div>
+    </>
+  );
+}
+
+function MentorDashboard({ stats }: { stats: DashboardStats }) {
+  const supported = Math.max(0, stats.totalHelpRequests - stats.openHelpRequests);
+  const metrics: Metric[] = [
+    { label: 'Open Requests', value: formatMetric(stats.openHelpRequests), helper: 'Currently needing attention', icon: 'help', color: colors.red, background: 'rgba(220,38,38,.07)' },
+    { label: 'Support Progress', value: formatMetric(supported), helper: 'Requests no longer open', icon: 'reply', color: colors.teal, background: 'rgba(13,158,138,.09)' },
+    { label: 'Skills Tracked', value: formatMetric(stats.totalStudentSkills ?? stats.totalSkills), helper: `${stats.totalSkills} skills in the catalog`, icon: 'skills', color: colors.blue, background: 'rgba(37,99,235,.08)' },
+    { label: 'Average Stress', value: `${formatMetric(stats.averageStressLevel)} / 5`, helper: `${stats.totalStressRecords} support signals`, icon: 'stress', color: colors.amber, background: 'rgba(217,119,6,.09)' }
+  ];
+  const urgency = [
+    { label: 'High attention', count: Math.min(stats.openHelpRequests, Math.ceil(stats.openHelpRequests * 0.3)), color: colors.red },
+    { label: 'Standard queue', count: Math.max(0, stats.openHelpRequests - Math.ceil(stats.openHelpRequests * 0.3)), color: colors.amber },
+    { label: 'Progressed', count: supported, color: colors.teal }
+  ];
+
+  return (
+    <>
+      <div className="db-metric-grid db-mentor-metrics">{metrics.map(metricCard)}</div>
+      <div className="db-content-grid db-space">
+        <div className="db-card db-chart-card">
+          <SectionHeading title="Support queue" subtitle="A workload view calculated from current help-request status totals." />
+          <div className="db-queue-list">
+            {urgency.map((item) => (
+              <div className="db-queue-row" key={item.label}>
+                <span><i style={{ background: item.color }} />{item.label}</span>
+                <strong>{item.count}</strong>
+              </div>
+            ))}
+          </div>
+          <Link className="db-inline-link" to="/silent-help">Review help requests <span>→</span></Link>
+        </div>
+        <StressMeter average={stats.averageStressLevel} records={stats.totalStressRecords} />
+      </div>
+      <div className="db-content-grid db-space">
+        <MoodSummary moodCounts={stats.moodCounts} personal={false} />
+        <div className="db-card db-chart-card">
+          <SectionHeading title="SkillMap overview" subtitle="Skills available across the catalog and student profiles." />
+          <div className="db-skill-overview">
+            <Icon name="skills" size={58} color={colors.blue} background="rgba(37,99,235,.08)" />
+            <div><strong>{stats.totalSkills}</strong><span>catalog skills</span></div>
+            <div><strong>{stats.totalStudentSkills ?? 0}</strong><span>profile connections</span></div>
+          </div>
+          <Link className="db-inline-link" to="/skill-map">Open SkillMap <span>→</span></Link>
+        </div>
+      </div>
+      <div className="db-space"><RecentActivity stats={stats} personal={false} /></div>
+    </>
+  );
+}
+
+function AdminDashboard({ stats }: { stats: DashboardStats }) {
+  const moodTotal = stats.totalMoodRecords ?? Object.values(stats.moodCounts).reduce((sum, count) => sum + count, 0);
+  const metrics: Metric[] = [
+    { label: 'Total Users', value: formatMetric(stats.totalUsers), helper: 'Registered platform accounts', icon: 'users', color: colors.navy, background: 'rgba(11,29,53,.07)' },
+    { label: 'Help Requests', value: formatMetric(stats.totalHelpRequests), helper: `${stats.openHelpRequests} currently open`, icon: 'help', color: colors.teal, background: 'rgba(13,158,138,.09)' },
+    { label: 'Skills Added', value: formatMetric(stats.totalSkills), helper: `${stats.totalStudentSkills ?? 0} profile connections`, icon: 'skills', color: colors.blue, background: 'rgba(37,99,235,.08)' },
+    { label: 'Stress Reports', value: formatMetric(stats.totalStressRecords), helper: `${formatMetric(stats.averageStressLevel)} average level`, icon: 'stress', color: colors.amber, background: 'rgba(217,119,6,.09)' },
+    { label: 'Mood Reports', value: formatMetric(moodTotal), helper: `${Object.keys(stats.moodCounts).length} mood categories`, icon: 'mood', color: colors.violet, background: 'rgba(124,58,237,.08)' },
+    { label: 'Lost / Found', value: formatMetric(stats.totalLostFoundItems ?? 0), helper: `${stats.lostFoundOpen} currently open`, icon: 'lostFound', color: colors.green, background: 'rgba(5,150,105,.08)' }
+  ];
+  const modules = [
+    { label: 'Help requests', value: stats.totalHelpRequests, color: colors.teal },
+    { label: 'Skill profiles', value: stats.totalStudentSkills ?? 0, color: colors.blue },
+    { label: 'Stress records', value: stats.totalStressRecords, color: colors.amber },
+    { label: 'Mood records', value: moodTotal, color: colors.violet },
+    { label: 'Lost / found', value: stats.totalLostFoundItems ?? 0, color: colors.green }
+  ];
+  const maxModule = Math.max(1, ...modules.map((module) => module.value));
+
+  return (
+    <>
+      <div className="db-metric-grid db-admin-metrics">{metrics.map(metricCard)}</div>
+      <div className="db-admin-grid db-space">
+        <div className="db-card db-chart-card db-module-chart">
+          <SectionHeading title="Module activity" subtitle="Current record totals across CampusCare modules." />
+          <div className="db-bars">
+            {modules.map((module) => (
+              <div key={module.label}>
+                <div className="db-row-between"><span>{module.label}</span><strong>{module.value}</strong></div>
+                <div className="db-progress"><span style={{ width: `${Math.max(4, (module.value / maxModule) * 100)}%`, background: module.color }} /></div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="db-card db-chart-card">
+          <SectionHeading title="Operational status" subtitle="Open and resolved work requiring administrative awareness." />
+          <div className="db-operation-grid">
+            <div><span className="db-status db-status-red">Open support</span><strong>{stats.openHelpRequests}</strong><small>help requests</small></div>
+            <div><span className="db-status db-status-amber">Open reports</span><strong>{stats.lostFoundOpen}</strong><small>lost / found</small></div>
+            <div><span className="db-status db-status-green">Resolved</span><strong>{stats.lostFoundResolved}</strong><small>campus reports</small></div>
+            <div><span className="db-status db-status-blue">System</span><strong>OK</strong><small>modules available</small></div>
+          </div>
+        </div>
+      </div>
+      <div className="db-content-grid db-space">
+        <MoodSummary moodCounts={stats.moodCounts} personal={false} />
+        <StressMeter average={stats.averageStressLevel} records={stats.totalStressRecords} />
+      </div>
+      <div className="db-space"><RecentActivity stats={stats} personal={false} /></div>
+    </>
+  );
+}
+
 export default function DashboardPage() {
   const { user } = useAuth();
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -229,993 +521,128 @@ export default function DashboardPage() {
       .finally(() => setIsLoading(false));
   }, []);
 
-  const moodTotal = useMemo(() => {
-    return (
-      stats?.totalMoodRecords ??
-      Object.values(stats?.moodCounts ?? {}).reduce((total, count) => total + count, 0)
-    );
-  }, [stats]);
-
-  const cards = useMemo<StatCard[]>(() => {
-    if (!stats) return [];
-
-    if (user?.role === 'admin') {
-      return [
-        {
-          label: 'Total Users',
-          value: stats.totalUsers,
-          description: 'Registered students, mentors, and admins',
-        },
-        {
-          label: 'Help Requests',
-          value: stats.totalHelpRequests,
-          description: 'All submitted help requests',
-        },
-        {
-          label: 'Open Help Requests',
-          value: stats.openHelpRequests,
-          description: 'Requests needing attention',
-        },
-        {
-          label: 'Skills Added',
-          value: stats.totalSkills,
-          description: 'Shared SkillMap catalog entries',
-        },
-        {
-          label: 'Skill Profiles',
-          value: stats.totalStudentSkills ?? 0,
-          description: 'Skills attached to user profiles',
-        },
-        {
-          label: 'Stress Records',
-          value: stats.totalStressRecords,
-          description: 'ExamStress check-ins',
-        },
-        {
-          label: 'Mood Records',
-          value: moodTotal,
-          description: 'MoodCampus check-ins',
-        },
-        {
-          label: 'Lost/Found Items',
-          value: stats.totalLostFoundItems ?? 0,
-          description: 'All lost/found reports',
-        },
-        {
-          label: 'Average Stress',
-          value: stats.averageStressLevel,
-          description: 'Average recorded stress level',
-        },
-      ];
-    }
-
-    if (user?.role === 'mentor') {
-      return [
-        {
-          label: 'Open Help Requests',
-          value: stats.openHelpRequests,
-          description: 'Students waiting for support',
-        },
-        {
-          label: 'Help Requests',
-          value: stats.totalHelpRequests,
-          description: 'Support conversations visible to mentors',
-        },
-        {
-          label: 'SkillMap Skills',
-          value: stats.totalSkills,
-          description: 'Skills available for collaboration',
-        },
-        {
-          label: 'Student Skill Profiles',
-          value: stats.totalStudentSkills ?? 0,
-          description: 'Students showing practical skills',
-        },
-        {
-          label: 'Average Stress',
-          value: stats.averageStressLevel,
-          description: 'Overall wellbeing signal',
-        },
-        {
-          label: 'Stress Records',
-          value: stats.totalStressRecords,
-          description: 'Stress check-ins available',
-        },
-        {
-          label: 'Mood Records',
-          value: moodTotal,
-          description: 'Mood check-ins available',
-        },
-      ];
-    }
-
-    return [
-      {
-        label: 'My Help Requests',
-        value: stats.totalHelpRequests,
-        description: 'Support requests connected to you',
-      },
-      {
-        label: 'My Skills',
-        value: stats.totalStudentSkills ?? 0,
-        description: 'Skills attached to your SkillMap profile',
-      },
-      {
-        label: 'My Stress Records',
-        value: stats.totalStressRecords,
-        description: 'Your ExamStress check-ins',
-      },
-      {
-        label: 'My Mood Records',
-        value: moodTotal,
-        description: 'Your MoodCampus entries',
-      },
-      {
-        label: 'My Lost/Found Reports',
-        value: stats.totalLostFoundItems ?? 0,
-        description: 'Lost/found reports connected to you',
-      },
-      {
-        label: 'Resolved Reports',
-        value: stats.lostFoundResolved,
-        description: 'Your resolved lost/found reports',
-      },
-      {
-        label: 'Average Stress',
-        value: stats.averageStressLevel,
-        description: 'Your average stress level',
-      },
-    ];
-  }, [moodTotal, stats, user?.role]);
-
-  const intro = roleIntro(user?.role);
-
-  const engagementCards: EngagementCard[] =
-    user?.role === 'admin'
-      ? [
-          {
-            title: 'Platform activity overview',
-            description:
-              'Watch open support requests, lost/found reports, and module activity from one place.',
-          },
-          {
-            title: 'Modules needing attention',
-            description: `${stats?.openHelpRequests ?? 0} open help requests · ${
-              stats?.lostFoundOpen ?? 0
-            } open lost/found reports.`,
-          },
-          {
-            title: 'Role-aware management',
-            description: 'Admin controls appear only where status management is implemented.',
-            to: '/lost-found',
-            action: 'Review reports',
-          },
-        ]
-      : user?.role === 'mentor'
-        ? [
-            {
-              title: 'Requests needing attention',
-              description: `${stats?.openHelpRequests ?? 0} open requests may need a supportive reply.`,
-              to: '/silent-help',
-              action: 'Review requests',
-            },
-            {
-              title: 'Watch for stress patterns',
-              description:
-                'Use stress and mood summaries as signals for guidance, not judgment.',
-              to: '/stress-tracker',
-              action: 'View stress',
-            },
-            {
-              title: 'Support impact',
-              description:
-                'Reply to anonymous requests and help students find the right direction.',
-            },
-          ]
-        : [
-            {
-              title: 'How are you feeling today?',
-              description: 'Small check-ins can help you understand your week.',
-              to: '/mood-campus',
-              action: 'Log mood',
-            },
-            {
-              title: 'Need help with something?',
-              description: 'You are not alone. You can ask anonymously.',
-              to: '/silent-help',
-              action: 'Ask for help',
-            },
-            {
-              title: 'Your skills can help another student',
-              description:
-                'Add one skill so classmates and mentors can discover what you are good at.',
-              to: '/skill-map',
-              action: 'Add skill',
-            },
-          ];
-
-  const roleBadgeStyle = getRoleBadgeStyle(user?.role);
-
-  const greeting =
-    user?.role === 'student'
-      ? `Welcome back, ${user?.fullName?.split(' ')[0] ?? 'Student'}`
-      : user?.role === 'mentor'
-        ? 'Good to see you, Mentor'
-        : 'Admin overview';
-
-  const bannerTip =
-    user?.role === 'student'
-      ? "Today's tip: if a question feels too small to ask publicly, it still belongs in Silent Help."
-      : user?.role === 'mentor'
-        ? 'Reply to anonymous requests, watch for stress patterns, and help students find the right next step.'
-        : 'Use the dashboard as a quick signal board for open support needs, module activity, and resolved reports.';
+  const role = useMemo<'student' | 'mentor' | 'admin'>(() => {
+    if (user?.role === 'mentor' || user?.role === 'admin') return user.role;
+    return 'student';
+  }, [user?.role]);
 
   return (
     <>
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-      <link
-        href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap"
-        rel="stylesheet"
-      />
-
       <style>{`
-        @keyframes db-fade-up {
-          from {
-            opacity: 0;
-            transform: translateY(14px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .db-stat:hover {
-          box-shadow: 0 18px 45px rgba(15,23,42,.10);
-          transform: translateY(-3px);
-          border-color: rgba(13,158,138,.28) !important;
-        }
-
-        .db-engage:hover {
-          box-shadow: 0 18px 45px rgba(15,23,42,.10);
-          transform: translateY(-3px);
-          border-color: rgba(13,158,138,.30) !important;
-        }
-
-        .db-action:hover {
-          transform: translateY(-1px);
-          box-shadow: ${T.shadowSm};
-        }
-
-        .db-mood-bar {
-          transition: width .6s cubic-bezier(.4,0,.2,1);
-        }
-
-        @media (max-width: 720px) {
-          .dashboard-page-shell {
-            margin: -1rem !important;
-            padding: 1rem !important;
-          }
-        }
+        @keyframes dbReveal { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes dbProgress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+        @keyframes dbPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(103,227,214,.35); } 50% { box-shadow: 0 0 0 5px rgba(103,227,214,0); } }
+        .db-page { margin: -2rem; min-height: 100vh; padding: 2rem; color: #0b1d35; background: radial-gradient(circle at 92% 2%,rgba(13,158,138,.12),transparent 25rem),radial-gradient(circle at 0 45%,rgba(37,99,235,.07),transparent 28rem),linear-gradient(180deg,#f8fbff,#eef4f8); font-family: "DM Sans",sans-serif; }
+        .db-page * { box-sizing: border-box; }
+        .db-reveal { animation: dbReveal .45s ease both; }
+        .db-space { margin-top: 1.25rem; }
+        .db-card { border: 1px solid #dfeaf3; border-radius: 18px; background: rgba(255,255,255,.9); box-shadow: 0 12px 32px rgba(15,23,42,.055); backdrop-filter: blur(12px); }
+        .db-lift { transition: transform .2s ease,box-shadow .2s ease,border-color .2s ease; }
+        .db-lift:hover { transform: translateY(-3px); border-color: rgba(13,158,138,.3); box-shadow: 0 18px 42px rgba(15,23,42,.1); }
+        .db-icon { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .db-hero { position: relative; overflow: hidden; display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 2rem; min-height: 230px; padding: 2rem; border: 1px solid rgba(255,255,255,.09); border-radius: 24px; color: white; background: radial-gradient(circle at 86% 5%,rgba(103,227,214,.25),transparent 30%),linear-gradient(135deg,#071527,#0b1d35 55%,#0f3b52); box-shadow: 0 20px 46px rgba(11,29,53,.18); }
+        .db-hero::after { content:""; position:absolute; right:-60px; bottom:-90px; width:260px; height:260px; border-radius:50%; border:1px solid rgba(103,227,214,.14); }
+        .db-hero-content { position:relative; z-index:1; max-width:760px; }
+        .db-hero-eyebrow { display:inline-flex; align-items:center; gap:7px; border:1px solid rgba(103,227,214,.22); border-radius:999px; padding:.35rem .75rem; background:rgba(103,227,214,.08); color:#bdf8ef; font-size:.68rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+        .db-hero-eyebrow i,.db-live i { width:7px; height:7px; border-radius:50%; background:#67e3d6; animation:dbPulse 2s infinite; }
+        .db-hero h1 { margin:.9rem 0 .55rem; font-family:"Sora",sans-serif; font-size:clamp(1.65rem,3vw,2.45rem); line-height:1.15; letter-spacing:-.025em; }
+        .db-hero p { max-width:670px; margin:0; color:rgba(255,255,255,.65); font-size:.9rem; line-height:1.7; }
+        .db-hero-actions { display:flex; flex-wrap:wrap; gap:.65rem; margin-top:1.2rem; }
+        .db-btn { display:inline-flex; min-height:42px; align-items:center; justify-content:center; gap:7px; border-radius:11px; padding:.55rem 1rem; color:white; font-size:.8rem; font-weight:750; text-decoration:none; transition:.18s ease; }
+        .db-btn:hover { transform:translateY(-2px); }
+        .db-btn-primary { background:#0d9e8a; box-shadow:0 8px 20px rgba(13,158,138,.22); }
+        .db-btn-glass { border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.08); }
+        .db-hero-signal { position:relative; z-index:1; display:grid; justify-items:center; gap:.75rem; min-width:150px; }
+        .db-signal-ring { display:flex; align-items:center; justify-content:center; width:110px; height:110px; border:1px solid rgba(103,227,214,.2); border-radius:50%; background:rgba(255,255,255,.05); box-shadow:inset 0 0 0 12px rgba(255,255,255,.025); }
+        .db-live { display:inline-flex; align-items:center; gap:7px; border-radius:999px; padding:.35rem .7rem; background:rgba(255,255,255,.07); color:rgba(255,255,255,.72); font-size:.68rem; font-weight:700; }
+        .db-metric-grid { display:grid; gap:1rem; margin-top:1.25rem; }
+        .db-student-metrics { grid-template-columns:repeat(5,minmax(0,1fr)); }
+        .db-mentor-metrics { grid-template-columns:repeat(4,minmax(0,1fr)); }
+        .db-admin-metrics { grid-template-columns:repeat(6,minmax(0,1fr)); }
+        .db-metric { min-width:0; padding:1rem; }
+        .db-metric-top { display:flex; align-items:center; justify-content:space-between; gap:.75rem; }
+        .db-metric-line { width:34px; height:3px; border-radius:999px; opacity:.75; }
+        .db-label { display:block; margin-top:.8rem; color:#64748b; font-size:.65rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; }
+        .db-value { margin:.35rem 0 .25rem; overflow:hidden; font-family:"Sora",sans-serif; font-size:1.55rem; font-weight:750; line-height:1.1; text-overflow:ellipsis; text-transform:capitalize; white-space:nowrap; }
+        .db-helper { margin:0; color:#94a3b8; font-size:.7rem; line-height:1.45; }
+        .db-section-heading { display:flex; align-items:flex-end; justify-content:space-between; gap:1rem; margin-bottom:1rem; }
+        .db-section-heading h2 { margin:0; font-family:"Sora",sans-serif; font-size:1rem; font-weight:700; color:#0b1d35; }
+        .db-section-heading p { margin:.25rem 0 0; color:#64748b; font-size:.76rem; line-height:1.5; }
+        .db-action-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:1rem; }
+        .db-action-card { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:.8rem; min-width:0; padding:1rem; color:#0b1d35; text-decoration:none; }
+        .db-action-card strong,.db-action-card span { display:block; }
+        .db-action-card strong { font-size:.82rem; }
+        .db-action-card span { margin-top:.2rem; color:#64748b; font-size:.69rem; line-height:1.4; }
+        .db-content-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; }
+        .db-admin-grid { display:grid; grid-template-columns:1.2fr .8fr; gap:1rem; }
+        .db-chart-card { min-width:0; padding:1.25rem; }
+        .db-stress-reading { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:1rem; border:1px solid #e8eff5; border-radius:13px; background:#f8fbfd; }
+        .db-stress-reading .db-label { margin:0 0 .2rem; }
+        .db-stress-reading strong { font-family:"Sora",sans-serif; font-size:1.6rem; }
+        .db-status { display:inline-flex; align-items:center; border-radius:999px; padding:.3rem .65rem; font-size:.65rem; font-weight:800; }
+        .db-status-amber { background:#fff7ed; color:#b45309; }
+        .db-status-red { background:#fef2f2; color:#b91c1c; }
+        .db-status-green { background:#ecfdf5; color:#047857; }
+        .db-status-blue { background:#eff6ff; color:#1d4ed8; }
+        .db-level-track { display:grid; grid-template-columns:repeat(5,1fr); gap:.35rem; margin-top:1rem; }
+        .db-level-step { height:10px; border-radius:999px; transition:background .3s ease; }
+        .db-level-labels { display:flex; justify-content:space-between; margin-top:.45rem; color:#94a3b8; font-size:.62rem; }
+        .db-mood-layout { display:grid; grid-template-columns:150px minmax(0,1fr); align-items:center; gap:1.5rem; }
+        .db-donut { position:relative; display:grid; place-items:center; width:140px; height:140px; border-radius:50%; }
+        .db-donut::after { content:""; position:absolute; inset:18px; border-radius:50%; background:white; }
+        .db-donut span { position:relative; z-index:1; display:grid; color:#64748b; font-size:.64rem; text-align:center; }
+        .db-donut strong { color:#0b1d35; font-family:"Sora",sans-serif; font-size:1.5rem; }
+        .db-mood-list { display:grid; gap:.65rem; }
+        .db-row-between { display:flex; align-items:center; justify-content:space-between; gap:1rem; color:#64748b; font-size:.72rem; }
+        .db-row-between strong { color:#0b1d35; }
+        .db-mood-name { display:flex; align-items:center; gap:7px; text-transform:capitalize; }
+        .db-mood-name i { width:7px; height:7px; border-radius:50%; }
+        .db-progress { height:6px; margin-top:.3rem; overflow:hidden; border-radius:999px; background:#e8eff5; }
+        .db-progress span { display:block; height:100%; border-radius:999px; transform-origin:left; animation:dbProgress .7s ease both; }
+        .db-empty { display:grid; place-items:center; min-height:150px; border:1px dashed #d7e3ed; border-radius:13px; color:#94a3b8; font-size:.78rem; background:#f8fbfd; }
+        .db-insight-card { display:grid; grid-template-columns:auto minmax(0,1fr); align-items:start; gap:1rem; padding:1.25rem; }
+        .db-insight-card .db-label { margin:0; }
+        .db-insight-card h2 { margin:.35rem 0; font-family:"Sora",sans-serif; font-size:1rem; line-height:1.45; }
+        .db-insight-card p { margin:0; color:#64748b; font-size:.76rem; line-height:1.6; }
+        .db-insight-card a,.db-inline-link { display:inline-flex; gap:6px; margin-top:.8rem; color:#0d9e8a; font-size:.75rem; font-weight:800; text-decoration:none; }
+        .db-activity-list { display:grid; }
+        .db-activity-item { display:flex; align-items:flex-start; gap:.75rem; padding:.7rem 0; border-bottom:1px solid #edf2f7; }
+        .db-activity-item:last-child { border-bottom:0; }
+        .db-activity-item strong,.db-activity-item span { display:block; }
+        .db-activity-item strong { color:#0b1d35; font-size:.78rem; }
+        .db-activity-item span { margin-top:.2rem; color:#94a3b8; font-size:.67rem; text-transform:capitalize; }
+        .db-queue-list { display:grid; gap:.5rem; }
+        .db-queue-row { display:flex; align-items:center; justify-content:space-between; border:1px solid #e8eff5; border-radius:11px; padding:.7rem .8rem; background:#f8fbfd; font-size:.76rem; }
+        .db-queue-row span { display:flex; align-items:center; gap:8px; color:#64748b; }
+        .db-queue-row i { width:8px; height:8px; border-radius:50%; }
+        .db-queue-row strong { font-family:"Sora",sans-serif; }
+        .db-skill-overview { display:grid; grid-template-columns:auto 1fr 1fr; align-items:center; gap:1rem; padding:1rem; border:1px solid #e8eff5; border-radius:13px; background:#f8fbfd; }
+        .db-skill-overview div { display:grid; }
+        .db-skill-overview strong { font-family:"Sora",sans-serif; font-size:1.4rem; }
+        .db-skill-overview span { color:#64748b; font-size:.66rem; }
+        .db-bars { display:grid; gap:.9rem; }
+        .db-operation-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.7rem; }
+        .db-operation-grid > div { display:grid; align-content:start; min-height:115px; border:1px solid #e8eff5; border-radius:13px; padding:.8rem; background:#f8fbfd; }
+        .db-operation-grid strong { margin-top:.7rem; font-family:"Sora",sans-serif; font-size:1.45rem; }
+        .db-operation-grid small { margin-top:.15rem; color:#94a3b8; font-size:.65rem; }
+        @media(max-width:1180px) { .db-student-metrics,.db-admin-metrics { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+        @media(max-width:920px) { .db-mentor-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); } .db-action-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .db-admin-grid { grid-template-columns:1fr; } }
+        @media(max-width:720px) { .db-page { margin:-1rem; padding:1rem; } .db-hero { grid-template-columns:1fr; padding:1.35rem; } .db-hero-signal { display:none; } .db-student-metrics,.db-admin-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); } .db-content-grid { grid-template-columns:1fr; } .db-mood-layout { grid-template-columns:1fr; justify-items:center; width:100%; } .db-mood-list { width:100%; } }
+        @media(max-width:460px) { .db-student-metrics,.db-mentor-metrics,.db-admin-metrics,.db-action-grid { grid-template-columns:1fr; } .db-operation-grid { grid-template-columns:1fr; } .db-skill-overview { grid-template-columns:auto 1fr; } .db-skill-overview div:last-child { grid-column:2; } }
       `}</style>
 
-      <div
-        className="dashboard-page-shell"
-        style={{
-          fontFamily: T.fontBody,
-          color: T.navy,
-          minHeight: '100vh',
-          margin: '-2rem',
-          padding: '2rem',
-          background: T.pageBg,
-          position: 'relative',
-          overflow: 'hidden',
-        }}
-      >
-        <div
-          style={{
-            position: 'absolute',
-            top: 120,
-            right: 80,
-            width: 260,
-            height: 260,
-            borderRadius: '50%',
-            background: 'rgba(13,158,138,.08)',
-            filter: 'blur(8px)',
-            pointerEvents: 'none',
-          }}
-        />
-
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 80,
-            left: 280,
-            width: 220,
-            height: 220,
-            borderRadius: '50%',
-            background: 'rgba(37,99,235,.06)',
-            filter: 'blur(10px)',
-            pointerEvents: 'none',
-          }}
-        />
-
-        <div style={{ position: 'relative', zIndex: 1 }}>
-          <div style={{ display: 'none' }}>
-            <PageHeader title={intro.title} description={intro.description} />
-          </div>
-
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              justifyContent: 'space-between',
-              alignItems: 'flex-start',
-              gap: '1rem',
-              marginBottom: '1.75rem',
-              animation: 'db-fade-up .4s ease both',
-            }}
-          >
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                <h1
-                  style={{
-                    fontFamily: T.fontDisplay,
-                    fontSize: 'clamp(1.4rem,3vw,1.9rem)',
-                    fontWeight: 700,
-                    letterSpacing: '-.02em',
-                    color: T.navy,
-                    margin: 0,
-                  }}
-                >
-                  {intro.title}
-                </h1>
-                <span style={roleBadgeStyle}>{user?.role}</span>
-              </div>
-
-              <p
-                style={{
-                  fontSize: '.9rem',
-                  color: T.g600,
-                  lineHeight: 1.6,
-                  margin: 0,
-                }}
-              >
-                {intro.description}
-              </p>
-            </div>
-
-            <Link
-              to={user?.role === 'student' ? '/onboarding' : '/profile'}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 6,
-                background: T.navy,
-                color: T.white,
-                borderRadius: 999,
-                padding: '.55rem 1.25rem',
-                fontSize: '.85rem',
-                fontWeight: 500,
-                textDecoration: 'none',
-                flexShrink: 0,
-                transition: 'all .18s',
-              }}
-            >
-              {user?.role === 'student' ? 'Update onboarding' : 'View profile'}
-            </Link>
-          </div>
-
-          <div
-            style={{
-              background:
-                'radial-gradient(circle at top right, rgba(45,212,191,.22), transparent 28%), linear-gradient(135deg, #0b1d35 0%, #102a46 48%, #133b5c 100%)',
-              borderRadius: T.radiusLg,
-              padding: '1.5rem 2rem',
-              marginBottom: '1.75rem',
-              position: 'relative',
-              overflow: 'hidden',
-              boxShadow: '0 18px 45px rgba(11,29,53,.18)',
-              border: '1px solid rgba(255,255,255,.08)',
-              animation: 'db-fade-up .45s ease both',
-            }}
-          >
-            <div
-              style={{
-                position: 'absolute',
-                top: -20,
-                right: -20,
-                width: 160,
-                height: 160,
-                borderRadius: '50%',
-                background: 'rgba(13,158,138,.12)',
-                pointerEvents: 'none',
-              }}
-            />
-
-            <p
-              style={{
-                fontFamily: T.fontDisplay,
-                fontWeight: 600,
-                color: T.white,
-                fontSize: '1rem',
-                margin: 0,
-              }}
-            >
-              {greeting}
-            </p>
-
-            <p
-              style={{
-                color: 'rgba(255,255,255,.62)',
-                fontSize: '.85rem',
-                margin: '.5rem 0 0',
-                lineHeight: 1.65,
-                maxWidth: 700,
-              }}
-            >
-              {bannerTip}
-            </p>
-          </div>
-
-          {isLoading && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.75rem' }}>
-              {[...Array(3)].map((_, index) => (
-                <div
-                  key={index}
-                  style={{
-                    height: 80,
-                    borderRadius: T.radiusMd,
-                    background: T.g100,
-                    animation: `db-fade-up .3s ease ${index * 0.06}s both`,
-                  }}
-                />
-              ))}
-            </div>
-          )}
-
-          {error && (
-            <div
-              style={{
-                background: 'rgba(220,38,38,.07)',
-                border: '1px solid rgba(220,38,38,.2)',
-                borderRadius: T.radiusMd,
-                padding: '1rem 1.25rem',
-                color: T.red,
-                fontSize: '.875rem',
-                marginBottom: '1.75rem',
-              }}
-            >
-              {error}
-            </div>
-          )}
-
-          {stats && (
-            <>
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%,260px),1fr))',
-                  gap: '1rem',
-                  marginBottom: '1.75rem',
-                }}
-              >
-                {engagementCards.map((card, index) => (
-                  <div
-                    key={card.title}
-                    className="db-engage"
-                    style={{
-                      background: T.cardBg,
-                      border: `1px solid ${T.cardBorder}`,
-                      boxShadow: T.cardShadow,
-                      backdropFilter: 'blur(10px)',
-                      borderRadius: T.radiusMd,
-                      padding: '1.25rem 1.5rem',
-                      transition: 'all .2s',
-                      cursor: card.to ? 'pointer' : 'default',
-                      animation: `db-fade-up .4s ease ${index * 0.07}s both`,
-                    }}
-                  >
-                    <p
-                      style={{
-                        fontFamily: T.fontDisplay,
-                        fontSize: '.9rem',
-                        fontWeight: 600,
-                        color: T.navy,
-                        marginBottom: '.5rem',
-                      }}
-                    >
-                      {card.title}
-                    </p>
-
-                    <p
-                      style={{
-                        fontSize: '.825rem',
-                        color: T.g600,
-                        lineHeight: 1.65,
-                        marginBottom: card.to ? '1rem' : 0,
-                      }}
-                    >
-                      {card.description}
-                    </p>
-
-                    {card.to && (
-                      <Link
-                        to={card.to}
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: 5,
-                          background: T.g50,
-                          border: `1px solid ${T.g200}`,
-                          color: T.navy,
-                          borderRadius: 999,
-                          padding: '.35rem .9rem',
-                          fontSize: '.78rem',
-                          fontWeight: 500,
-                          textDecoration: 'none',
-                          transition: 'all .15s',
-                        }}
-                      >
-                        {card.action} →
-                      </Link>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%,190px),1fr))',
-                  gap: '1rem',
-                  marginBottom: '1.75rem',
-                }}
-              >
-                {cards.map((card, index) => {
-                  const meta =
-                    MODULE_META[card.label] ?? {
-                      color: T.teal,
-                      bg: 'rgba(13,158,138,.08)',
-                      border: 'rgba(13,158,138,.18)',
-                      icon: '·',
-                    };
-
-                  const isEmpty = card.value === 0;
-
-                  return (
-                    <article
-                      key={card.label}
-                      className="db-stat"
-                      style={{
-                        background: T.cardBg,
-                        border: `1px solid ${T.cardBorder}`,
-                        boxShadow: T.cardShadow,
-                        backdropFilter: 'blur(10px)',
-                        borderRadius: T.radiusMd,
-                        padding: '1.25rem',
-                        transition: 'all .2s',
-                        position: 'relative',
-                        overflow: 'hidden',
-                        animation: `db-fade-up .4s ease ${index * 0.05}s both`,
-                      }}
-                    >
-                      <div
-                        style={{
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          right: 0,
-                          height: 3,
-                          background: isEmpty ? T.g200 : meta.color,
-                          borderRadius: '14px 14px 0 0',
-                          opacity: isEmpty ? 0.4 : 1,
-                        }}
-                      />
-
-                      <div
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          width: 34,
-                          height: 34,
-                          borderRadius: 9,
-                          background: isEmpty ? T.g100 : meta.bg,
-                          border: `1px solid ${isEmpty ? T.g200 : meta.border}`,
-                          fontSize: '1rem',
-                          marginBottom: '.75rem',
-                        }}
-                      >
-                        {meta.icon}
-                      </div>
-
-                      <p
-                        style={{
-                          fontSize: '.7rem',
-                          fontWeight: 600,
-                          textTransform: 'uppercase',
-                          letterSpacing: '.07em',
-                          color: isEmpty ? T.g400 : T.g600,
-                          marginBottom: '.35rem',
-                        }}
-                      >
-                        {card.label}
-                      </p>
-
-                      <p
-                        style={{
-                          fontFamily: T.fontDisplay,
-                          fontSize: '1.9rem',
-                          fontWeight: 700,
-                          color: isEmpty ? T.g400 : meta.color,
-                          lineHeight: 1,
-                          marginBottom: '.35rem',
-                        }}
-                      >
-                        {formatMetric(card.value)}
-                      </p>
-
-                      <p
-                        style={{
-                          fontSize: '.72rem',
-                          color: T.g400,
-                          lineHeight: 1.5,
-                        }}
-                      >
-                        {isEmpty ? 'No data yet' : card.description}
-                      </p>
-                    </article>
-                  );
-                })}
-              </div>
-
-              {user?.role === 'student' && (
-                <div
-                  style={{
-                    background: T.cardBg,
-                    border: `1px solid ${T.cardBorder}`,
-                    boxShadow: T.cardShadow,
-                    backdropFilter: 'blur(10px)',
-                    borderRadius: T.radiusMd,
-                    padding: '1.5rem',
-                    marginBottom: '1.75rem',
-                    animation: 'db-fade-up .4s ease .2s both',
-                  }}
-                >
-                  <p
-                    style={{
-                      fontFamily: T.fontDisplay,
-                      fontSize: '.9rem',
-                      fontWeight: 600,
-                      color: T.navy,
-                      marginBottom: '.35rem',
-                    }}
-                  >
-                    Quick Actions
-                  </p>
-
-                  <p
-                    style={{
-                      fontSize: '.8rem',
-                      color: T.g500,
-                      marginBottom: '1rem',
-                    }}
-                  >
-                    Continue the main student flow from here.
-                  </p>
-
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '.625rem' }}>
-                    {QUICK_ACTIONS.map((action) => (
-                      <Link
-                        key={action.to}
-                        to={action.to}
-                        className="db-action"
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: 6,
-                          background: T.g50,
-                          border: `1px solid ${T.g200}`,
-                          borderLeft: `3px solid ${action.color}`,
-                          borderRadius: 999,
-                          padding: '.45rem 1.1rem',
-                          fontSize: '.8rem',
-                          fontWeight: 500,
-                          color: T.navy,
-                          textDecoration: 'none',
-                          transition: 'all .15s',
-                        }}
-                      >
-                        {action.label}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%,320px),1fr))',
-                  gap: '1rem',
-                }}
-              >
-                <div
-                  style={{
-                    background: T.cardBg,
-                    border: `1px solid ${T.cardBorder}`,
-                    boxShadow: T.cardShadow,
-                    backdropFilter: 'blur(10px)',
-                    borderRadius: T.radiusMd,
-                    padding: '1.5rem',
-                    animation: 'db-fade-up .4s ease .25s both',
-                  }}
-                >
-                  <p
-                    style={{
-                      fontFamily: T.fontDisplay,
-                      fontSize: '.9rem',
-                      fontWeight: 600,
-                      color: T.navy,
-                      marginBottom: '.3rem',
-                    }}
-                  >
-                    Mood Summary
-                  </p>
-
-                  <p
-                    style={{
-                      fontSize: '.78rem',
-                      color: T.g500,
-                      marginBottom: '1.25rem',
-                    }}
-                  >
-                    {user?.role === 'student'
-                      ? 'Your MoodCampus records.'
-                      : 'MoodCampus counts for support awareness.'}
-                  </p>
-
-                  {Object.keys(stats.moodCounts ?? {}).length === 0 ? (
-                    <div
-                      style={{
-                        background: T.g50,
-                        borderRadius: T.radiusSm,
-                        padding: '1.5rem',
-                        textAlign: 'center',
-                        color: T.g400,
-                        fontSize: '.825rem',
-                      }}
-                    >
-                      No mood records yet.
-                    </div>
-                  ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '.625rem' }}>
-                      {(() => {
-                        const entries = Object.entries(stats.moodCounts ?? {});
-                        const max = Math.max(...entries.map(([, value]) => value));
-
-                        return entries.map(([mood, count]) => {
-                          const percentage = max > 0 ? Math.round((count / max) * 100) : 0;
-                          const color = MOOD_COLORS[mood] ?? T.g400;
-
-                          return (
-                            <div key={mood}>
-                              <div
-                                style={{
-                                  display: 'flex',
-                                  justifyContent: 'space-between',
-                                  marginBottom: 4,
-                                }}
-                              >
-                                <span
-                                  style={{
-                                    fontSize: '.8rem',
-                                    fontWeight: 500,
-                                    color: T.navy,
-                                    textTransform: 'capitalize',
-                                  }}
-                                >
-                                  {mood.replace('_', ' ')}
-                                </span>
-
-                                <span
-                                  style={{
-                                    fontSize: '.8rem',
-                                    fontWeight: 600,
-                                    color,
-                                  }}
-                                >
-                                  {count}
-                                </span>
-                              </div>
-
-                              <div
-                                style={{
-                                  height: 6,
-                                  background: T.g100,
-                                  borderRadius: 999,
-                                  overflow: 'hidden',
-                                }}
-                              >
-                                <div
-                                  className="db-mood-bar"
-                                  style={{
-                                    height: '100%',
-                                    width: `${percentage}%`,
-                                    background: color,
-                                    borderRadius: 999,
-                                  }}
-                                />
-                              </div>
-                            </div>
-                          );
-                        });
-                      })()}
-                    </div>
-                  )}
-                </div>
-
-                <div
-                  style={{
-                    background: T.cardBg,
-                    border: `1px solid ${T.cardBorder}`,
-                    boxShadow: T.cardShadow,
-                    backdropFilter: 'blur(10px)',
-                    borderRadius: T.radiusMd,
-                    padding: '1.5rem',
-                    animation: 'db-fade-up .4s ease .3s both',
-                  }}
-                >
-                  <p
-                    style={{
-                      fontFamily: T.fontDisplay,
-                      fontSize: '.9rem',
-                      fontWeight: 600,
-                      color: T.navy,
-                      marginBottom: '.3rem',
-                    }}
-                  >
-                    Recent Activity
-                  </p>
-
-                  <p
-                    style={{
-                      fontSize: '.78rem',
-                      color: T.g500,
-                      marginBottom: '1.25rem',
-                    }}
-                  >
-                    {user?.role === 'student'
-                      ? 'Your latest CampusCare activity.'
-                      : 'Latest platform support and report activity.'}
-                  </p>
-
-                  {stats.recentActivity?.length ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '.75rem' }}>
-                      {stats.recentActivity.map((activity, index) => {
-                        const typeColor = activity.type.includes('help')
-                          ? T.teal
-                          : activity.type.includes('mood')
-                            ? '#7c3aed'
-                            : activity.type.includes('stress')
-                              ? T.amber
-                              : activity.type.includes('skill')
-                                ? T.blue
-                                : T.green;
-
-                        return (
-                          <div
-                            key={`${activity.type}-${activity.createdAt}-${index}`}
-                            style={{
-                              display: 'flex',
-                              gap: '0.75rem',
-                              alignItems: 'flex-start',
-                              paddingBottom: '.75rem',
-                              borderBottom:
-                                index < stats.recentActivity!.length - 1
-                                  ? `1px solid ${T.g100}`
-                                  : 'none',
-                            }}
-                          >
-                            <div
-                              style={{
-                                width: 8,
-                                height: 8,
-                                borderRadius: '50%',
-                                background: typeColor,
-                                flexShrink: 0,
-                                marginTop: 6,
-                              }}
-                            />
-
-                            <div>
-                              <p
-                                style={{
-                                  fontSize: '.85rem',
-                                  fontWeight: 500,
-                                  color: T.navy,
-                                  marginBottom: 2,
-                                }}
-                              >
-                                {activity.title}
-                              </p>
-
-                              <p
-                                style={{
-                                  fontSize: '.75rem',
-                                  color: T.g400,
-                                }}
-                              >
-                                {activity.type.replace('_', ' ')} ·{' '}
-                                {formatDate(activity.createdAt)}
-                              </p>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <div
-                      style={{
-                        background: T.g50,
-                        borderRadius: T.radiusSm,
-                        padding: '1.5rem',
-                        textAlign: 'center',
-                        color: T.g400,
-                        fontSize: '.825rem',
-                      }}
-                    >
-                      No recent activity yet.
-                    </div>
-                  )}
-                </div>
-              </div>
-            </>
-          )}
-        </div>
+      <div className="db-page">
+        {isLoading ? <div className="db-card db-empty">Loading your CampusCare dashboard...</div> : null}
+        {error ? <div className="alert-error">{error}</div> : null}
+        {stats ? (
+          <>
+            <Hero role={role} name={user?.fullName} stats={stats} />
+            {role === 'student' ? <StudentDashboard stats={stats} /> : null}
+            {role === 'mentor' ? <MentorDashboard stats={stats} /> : null}
+            {role === 'admin' ? <AdminDashboard stats={stats} /> : null}
+          </>
+        ) : null}
       </div>
     </>
   );
-}
-
-/* ─── HELPERS ───────────────────────────────────────────────── */
-function getRoleBadgeStyle(role?: string): CSSProperties {
-  const base: CSSProperties = {
-    display: 'inline-flex',
-    alignItems: 'center',
-    borderRadius: 999,
-    padding: '.25rem .8rem',
-    fontSize: '.7rem',
-    fontWeight: 700,
-    letterSpacing: '.06em',
-    textTransform: 'uppercase',
-    border: '1px solid transparent',
-  };
-
-  if (role === 'admin') {
-    return {
-      ...base,
-      background: 'rgba(11,29,53,.08)',
-      color: '#0b1d35',
-      borderColor: 'rgba(11,29,53,.15)',
-    };
-  }
-
-  if (role === 'mentor') {
-    return {
-      ...base,
-      background: 'rgba(37,99,235,.1)',
-      color: '#2563eb',
-      borderColor: 'rgba(37,99,235,.2)',
-    };
-  }
-
-  return {
-    ...base,
-    background: 'rgba(13,158,138,.1)',
-    color: '#0d9e8a',
-    borderColor: 'rgba(13,158,138,.2)',
-  };
 }
