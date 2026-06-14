@@ -264,7 +264,16 @@ Copy-Item frontend/.env.example frontend/.env
 
 Update `backend/.env` with your local PostgreSQL connection and a secure JWT secret. Never commit real `.env` files.
 
-Run the SQL migrations in `backend/src/database/` in numeric order. Demo seed data is optional.
+Run the required schema migrations using the order documented in `backend/src/database/README.md`.
+
+To add safe local demo users and a small set of module records:
+
+```bash
+cd backend
+npm run seed
+```
+
+The demo seed is for local development only. It hashes passwords with bcrypt and can be run repeatedly without duplicating its records.
 
 ### 3. Start the backend
 
