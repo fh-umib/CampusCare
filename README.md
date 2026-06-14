@@ -248,7 +248,23 @@ npm install
 
 ### 2. Configure PostgreSQL
 
-Create a database named `campuscare`, copy the example environment files, and run the SQL migrations in `backend/src/database/` in numeric order. Demo seed data is optional.
+Create a database named `campuscare`, then copy the safe example environment files:
+
+```bash
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
+```
+
+On Windows PowerShell:
+
+```powershell
+Copy-Item backend/.env.example backend/.env
+Copy-Item frontend/.env.example frontend/.env
+```
+
+Update `backend/.env` with your local PostgreSQL connection and a secure JWT secret. Never commit real `.env` files.
+
+Run the SQL migrations in `backend/src/database/` in numeric order. Demo seed data is optional.
 
 ### 3. Start the backend
 
@@ -290,7 +306,7 @@ The project requires backend and frontend environment files. Real secrets and lo
 PORT=5000
 NODE_ENV=development
 DATABASE_URL=postgresql://username:password@localhost:5432/campuscare
-JWT_SECRET=your_jwt_secret
+JWT_SECRET=replace_with_secure_jwt_secret
 JWT_EXPIRES_IN=7d
 CLIENT_URL=http://localhost:5173
 ```
