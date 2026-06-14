@@ -1,561 +1,327 @@
-# CampusCare - Student Support, Skills & Wellbeing Platform
+# CampusCare – Student Support Platform
 
-CampusCare is a full-stack student support platform designed for university students. It combines anonymous help requests, SkillMap, exam stress tracking, weekly mood tracking, lost & found reports, and dashboard insights.
+CampusCare is a full-stack, role-aware student support platform for university environments. It helps students ask for anonymous help, track exam stress, reflect on mood, share skills, and organize lost and found reports. Mentors and admins use focused workspaces to review support activity, guide students, and monitor platform trends.
+
+---
 
 ## Table of Contents
 
-1. [Overview](#overview)
-2. [Project Goal](#project-goal)
-3. [Current Project State](#current-project-state)
-4. [Main Users](#main-users)
-5. [Core Functionalities](#core-functionalities)
-6. [Tech Stack](#tech-stack)
-7. [Project Structure](#project-structure)
-8. [Backend Architecture](#backend-architecture)
-9. [Frontend Structure](#frontend-structure)
-10. [Main Modules](#main-modules)
-11. [API Endpoints](#api-endpoints)
-12. [How to Run the Project](#how-to-run-the-project)
-13. [Environment Variables](#environment-variables)
-14. [Database Setup](#database-setup)
-15. [Testing](#testing)
-16. [Additional Documentation](#additional-documentation)
-17. [Current Notes and Future Direction](#current-notes-and-future-direction)
-18. [Author](#author)
+- [Overview](#overview)
+- [Project Goal](#project-goal)
+- [Current Project State](#current-project-state)
+- [Main Users](#main-users)
+- [Core Functionalities](#core-functionalities)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Backend Architecture](#backend-architecture)
+- [Frontend Structure](#frontend-structure)
+- [Main Modules](#main-modules)
+- [How to Run the Project](#how-to-run-the-project)
+- [Environment Variables](#environment-variables)
+- [Current Notes and Future Direction](#current-notes-and-future-direction)
+- [Author](#author)
+
+---
 
 ## Overview
 
-CampusCare supports students academically, emotionally, and practically inside the faculty. The platform gives students a safer place to request help, share skills, track exam stress, record weekly mood, and report lost or found items. It also provides dashboard insights for a clearer view of student activity and campus needs.
+CampusCare is designed as a digital faculty support platform where students can access academic, emotional, and practical support in one place.
 
-The project is built as a professional full-stack application with a React frontend, Node/Express backend, PostgreSQL database, JWT authentication, and a layered backend architecture.
+The system includes:
+
+- A public landing page and role-entry flow
+- Authenticated Student, Mentor, and Admin workspaces
+- Module-based academic, wellbeing, and campus support
+- Role-aware dashboards and notifications
+
+---
 
 ## Project Goal
 
-| Goal | Description |
+| Goal | Meaning |
 | --- | --- |
-| Safer student support | Allow students to ask for help anonymously when they feel uncomfortable asking publicly. |
-| Better collaboration | Help students and mentors respond to academic, technical, and project-related requests. |
-| Better visibility of student skills | Make it easier to discover students with skills such as React, SQL, C#, GitHub, or presentation. |
-| Stress and mood awareness | Track stress levels and weekly emotional states to understand wellbeing patterns. |
-| Organized lost & found reporting | Centralize lost and found items inside the faculty. |
-| More useful dashboard insights | Show meaningful statistics about support requests, skills, stress, mood, and lost/found reports. |
+| Academic support | Students can ask for help safely through Silent Help. |
+| Wellbeing reflection | Students can track exam stress and mood patterns. |
+| Skill visibility | Students can share and confirm academic skills. |
+| Campus organization | Lost and found reports are managed in one place. |
+| Role-aware guidance | Mentors and admins can review support activity with better context. |
+
+---
 
 ## Current Project State
 
-The project currently includes:
+CampusCare has evolved into a working full-stack application with:
 
-- Working full-stack project structure.
-- Connected React frontend.
-- Node.js and Express.js backend.
-- PostgreSQL database schema.
-- JWT authentication with bcrypt password hashing.
-- Working module APIs.
-- Working frontend forms and pages.
-- Successful root build with frontend and backend.
+- React and TypeScript frontend
+- Node.js and Express backend
+- PostgreSQL database
+- JWT authentication and role-based access
+- Responsive desktop and mobile interface
+- Role-aware notifications
+- Loading, empty, error, and branded 404 states
+- Final frontend polish and mobile navigation improvements
+
+The current version is functional and ready for further testing, documentation, and future deployment preparation.
+
+---
 
 ## Main Users
 
-| User | Description |
+| User Type | Description |
 | --- | --- |
-| Student | Registers, logs in, creates help requests, adds skills, records stress and mood, and reports lost/found items. |
-| Mentor | Logs in, views student activity, replies to help requests, and supports students academically or technically. |
-| Admin | Manages the platform at a higher level and can view broader dashboard information. |
+| Student | Uses a personal workspace to ask for help, track stress and mood, share skills, and manage reports. |
+| Mentor | Reviews student support needs and follows guidance-related activity. |
+| Admin | Uses protected access to monitor platform activity, modules, and support trends. |
+
+Admin accounts are created manually. Public admin registration is restricted.
+
+---
 
 ## Core Functionalities
 
-| Functionality | Description |
+| Module / Area | Functionality |
 | --- | --- |
-| Authentication | Student, mentor, and admin login/register using JWT authentication. |
-| Silent Help | Students can create anonymous or named help requests and receive replies. |
-| SkillMap | Students can add skills, attach skills to their profile, and search student skill cards. |
-| ExamStress Tracker | Students record stress levels from 1 to 5 and view summaries. |
-| MoodCampus | Students record weekly mood states such as motivated, tired, stressed, calm, or overwhelmed. |
-| Lost & Found | Students report lost or found items with title, description, location, type, date, and status. |
-| Dashboard Statistics | Displays useful statistics and recent activity from the platform. |
-| Role-based access | Protected routes and backend middleware support student, mentor, and admin roles. |
-| Onboarding/Profile | Role-specific profile details make student, mentor, and admin experiences more useful. |
+| Silent Help | Anonymous academic and support requests with replies and status tracking. |
+| ExamStress | Exam pressure and subject-based stress tracking. |
+| MoodCampus | Mood reflection and wellbeing pattern tracking. |
+| SkillMap | Student skill sharing and friendly skill checks. |
+| Lost & Found | Campus item reporting and status organization. |
+| Dashboard | Role-aware overview for Student, Mentor, and Admin users. |
+| Profile | User identity, onboarding readiness, skills, and role details. |
+| Notifications | Activity bell with personal and role-aware updates. |
+| Forgot Password | Safe recovery-request flow for the current project version. |
+| 404 Page | Branded Not Found page for unavailable routes. |
+
+---
 
 ## Tech Stack
 
 ### Backend
 
-- Node.js
-- Express.js
-- TypeScript
-- PostgreSQL
-- pg
-- JWT
-- bcrypt
-- dotenv
-- cors
+| Technology | Purpose |
+| --- | --- |
+| Node.js | Backend runtime |
+| Express.js | API and server structure |
+| TypeScript | Strong typing |
+| PostgreSQL | Main database |
+| pg | PostgreSQL connection |
+| JWT | Authentication |
+| bcrypt | Password hashing |
+| dotenv | Environment configuration |
+| cors | Cross-origin request handling |
 
 ### Frontend
 
-- React
-- TypeScript
-- Vite
-- React Router DOM
-- Axios
-- Tailwind CSS and project CSS utilities
+| Technology | Purpose |
+| --- | --- |
+| React | User interface |
+| TypeScript | Frontend type safety |
+| Vite | Development and build tooling |
+| React Router DOM | Public and protected routing |
+| Axios | Backend API communication |
+| Tailwind CSS and CSS | Custom styling and responsive design |
 
 ### Development Tools
 
-- VS Code
-- Git & GitHub
-- Postman
-- pgAdmin
-- Codex
+| Tool | Usage |
+| --- | --- |
+| Git and GitHub | Version control |
+| VS Code | Development environment |
+| Postman | API testing |
+| pgAdmin / PostgreSQL tools | Database inspection and testing |
+
+---
 
 ## Project Structure
 
 ```text
 CampusCare/
-  README.md
-  package.json
-  package-lock.json
-  .gitignore
-  docs/
-    api-overview.md
-    testing-checklist.md
-
-  backend/
-    package.json
-    tsconfig.json
-    .env.example
-    src/
-      app.ts
-      server.ts
-      config/
-        database.ts
-        env.ts
-      controllers/
-        auth.controller.ts
-        dashboard.controller.ts
-        helpRequest.controller.ts
-        lostFound.controller.ts
-        mood.controller.ts
-        profile.controller.ts
-        skill.controller.ts
-        stress.controller.ts
-      database/
-        001_init_users.sql
-        002_init_modules.sql
-        003_seed_demo_data.sql
-        004_user_profiles_and_engagement.sql
-        005_configure_approved_admin.sql
-        006_notifications.sql
-      middleware/
-        authenticate.ts
-        authorizeRoles.ts
-        errorHandler.ts
-        notFoundHandler.ts
-      repositories/
-        auth.repository.ts
-        dashboard.repository.ts
-        helpRequest.repository.ts
-        lostFound.repository.ts
-        mood.repository.ts
-        profile.repository.ts
-        skill.repository.ts
-        stress.repository.ts
-        user.repository.ts
-      routes/
-        auth.routes.ts
-        dashboard.routes.ts
-        helpRequest.routes.ts
-        index.ts
-        lostFound.routes.ts
-        mood.routes.ts
-        profile.routes.ts
-        skill.routes.ts
-        stress.routes.ts
-      services/
-        auth.service.ts
-        dashboard.service.ts
-        helpRequest.service.ts
-        lostFound.service.ts
-        mood.service.ts
-        profile.service.ts
-        skill.service.ts
-        stress.service.ts
-      types/
-        auth.ts
-        express.d.ts
-        helpRequest.ts
-        lostFound.ts
-        mood.ts
-        profile.ts
-        roles.ts
-        skill.ts
-        stress.ts
-        user.ts
-      utils/
-        apiResponse.ts
-        asyncHandler.ts
-        httpError.ts
-        moduleValidation.ts
-        password.ts
-        token.ts
-        validation.ts
-
-  frontend/
-    package.json
-    tsconfig.json
-    vite.config.ts
-    tailwind.config.ts
-    postcss.config.js
-    .env.example
-    src/
-      App.tsx
-      main.tsx
-      vite-env.d.ts
-      assets/
-      components/
-        common/
-        layout/
-      context/
-        AuthContext.tsx
-      pages/
-        DashboardPage.tsx
-        HelpRequestsPage.tsx
-        LandingPage.tsx
-        LoginPage.tsx
-        LostFoundPage.tsx
-        MoodCampusPage.tsx
-        OnboardingPage.tsx
-        ProfilePage.tsx
-        RegisterPage.tsx
-        SkillMapPage.tsx
-        StressTrackerPage.tsx
-      routes/
-        AppRoutes.tsx
-        ProtectedRoute.tsx
-      services/
-        apiClient.ts
-        authService.ts
-        dashboardService.ts
-        helpRequestService.ts
-        lostFoundService.ts
-        moodService.ts
-        profileService.ts
-        skillService.ts
-        stressService.ts
-      styles/
-        index.css
-      types/
-      utils/
-        formatDate.ts
+|-- backend/
+|   |-- src/
+|   |   |-- config/
+|   |   |-- controllers/
+|   |   |-- database/
+|   |   |-- middleware/
+|   |   |-- repositories/
+|   |   |-- routes/
+|   |   |-- services/
+|   |   |-- types/
+|   |   |-- utils/
+|   |   |-- app.ts
+|   |   `-- server.ts
+|   |-- .env.example
+|   `-- package.json
+|-- frontend/
+|   |-- src/
+|   |   |-- assets/
+|   |   |-- components/
+|   |   |-- context/
+|   |   |-- pages/
+|   |   |-- routes/
+|   |   |-- services/
+|   |   |-- styles/
+|   |   |-- types/
+|   |   |-- utils/
+|   |   |-- App.tsx
+|   |   `-- main.tsx
+|   |-- .env.example
+|   |-- package.json
+|   `-- vite.config.ts
+|-- docs/
+|   |-- api-overview.md
+|   `-- testing-checklist.md
+|-- .gitignore
+|-- package.json
+`-- README.md
 ```
+
+---
 
 ## Backend Architecture
 
-Backend flow:
+The backend follows a layered structure:
 
 ```text
 Request -> Route -> Controller -> Service -> Repository -> PostgreSQL
 ```
 
-| Layer | Responsibility |
-| --- | --- |
-| Route | Defines API endpoints and attaches middleware. |
-| Controller | Receives HTTP requests and returns consistent API responses. |
-| Service | Handles business logic, validation, permissions, and workflow decisions. |
-| Repository | Handles PostgreSQL queries with parameterized SQL. |
-| Middleware | Handles authentication, authorization, errors, and not-found routes. |
-| Utils | Shared helpers for responses, JWT, password hashing, errors, and validation. |
+- **Routes** define API endpoints and attach middleware.
+- **Controllers** handle request and response flow.
+- **Services** contain reusable business and permission logic.
+- **Repositories** communicate with PostgreSQL using parameterized queries.
+- **Middleware** protects authenticated and role-restricted routes.
+- **JWT** is used for protected access, while admin account creation remains manual.
+
+---
 
 ## Frontend Structure
 
-| Folder | Purpose |
-| --- | --- |
-| pages | Main route pages such as Dashboard, Silent Help, SkillMap, ExamStress, MoodCampus, Lost & Found, and Profile. |
-| routes | React Router configuration and protected route handling. |
-| services | Axios API clients for backend endpoints. |
-| context | Authentication state, token storage, and current user refresh logic. |
-| types | TypeScript types for auth, dashboard, modules, roles, and API data. |
-| utils | Shared frontend helpers such as date formatting. |
-| styles | Tailwind CSS imports and shared UI utility classes. |
-| components | Reusable UI and layout components. |
+- **Public pages:** Landing, Role Entry, Login, Register, Forgot Password, and Not Found
+- **Internal pages:** Dashboard, Silent Help, ExamStress, MoodCampus, SkillMap, Lost & Found, and Profile
+- **Shared layout:** Sidebar, topbar, mobile navigation, and notification bell
+- **Reusable UI:** Loading, empty, success, and error states
+- **Services and context:** Axios API access, authentication state, and typed module data
+
+---
 
 ## Main Modules
 
-| Module | Purpose |
-| --- | --- |
-| Silent Help | Anonymous or named academic and technical support requests with replies. |
-| SkillMap | Student skill catalog, personal skill profiles, and skill-based student search. |
-| ExamStress Tracker | Stress level records and summaries by subject. |
-| MoodCampus | Weekly mood tracking and mood counts. |
-| Lost & Found | Lost/found item reporting and status management. |
-| Dashboard | Statistics and recent activity for platform insight. |
-| Authentication/Profile | Login, registration, current user session, logout, and profile information. |
+### Silent Help
 
-## API Endpoints
+Anonymous support-request flow for students, with review and response visibility for mentors and admins.
 
-### Auth
+### ExamStress
 
-```text
-POST /api/auth/register
-POST /api/auth/login
-GET  /api/auth/me
-```
+Subject-based stress tracking that helps students notice academic pressure patterns.
 
-### Help Requests
+### MoodCampus
 
-```text
-GET   /api/help-requests
-GET   /api/help-requests/:id
-POST  /api/help-requests
-POST  /api/help-requests/:id/replies
-PATCH /api/help-requests/:id/status
-```
+Respectful mood reflection for personal and broader wellbeing awareness.
 
-### Skills
+### SkillMap
 
-```text
-GET    /api/skills
-POST   /api/skills
-GET    /api/skills/students
-GET    /api/skills/my-skills
-POST   /api/skills/my-skills
-DELETE /api/skills/my-skills/:skillId
-```
-
-### Stress
-
-```text
-GET  /api/stress
-POST /api/stress
-GET  /api/stress/summary
-```
-
-### Mood
-
-```text
-GET  /api/mood
-POST /api/mood
-GET  /api/mood/summary
-```
+Skill-sharing workspace where students add skills and complete friendly skill checks.
 
 ### Lost & Found
 
-```text
-GET   /api/lost-found
-GET   /api/lost-found/:id
-POST  /api/lost-found
-PATCH /api/lost-found/:id/status
-```
+Campus item reporting and status organization for lost and found belongings.
 
-### Dashboard
+### Notifications
 
-```text
-GET /api/dashboard/stats
-```
+Personal and role-aware activity updates shown through the internal notification bell.
 
 ### Profile
 
-```text
-GET   /api/profile
-PATCH /api/profile
-POST  /api/profile/onboarding
-```
+User identity, onboarding information, skills, and role-based readiness details.
 
-### Health
-
-```text
-GET /api/health
-```
+---
 
 ## How to Run the Project
 
-1. Clone the repository:
+### 1. Install dependencies
 
-```bash
-git clone <repository-url>
-cd CampusCare
-```
-
-2. Install dependencies:
+From the project root:
 
 ```bash
 npm install
 ```
 
-3. Create environment files:
+### 2. Configure PostgreSQL
+
+Create a database named `campuscare`, copy the example environment files, and run the SQL migrations in `backend/src/database/` in numeric order. Demo seed data is optional.
+
+### 3. Start the backend
 
 ```bash
-cp backend/.env.example backend/.env
-cp frontend/.env.example frontend/.env
+cd backend
+npm run dev
 ```
 
-On Windows PowerShell:
+### 4. Start the frontend
 
-```powershell
-Copy-Item backend/.env.example backend/.env
-Copy-Item frontend/.env.example frontend/.env
-```
-
-4. Create a PostgreSQL database named `campuscare`.
-
-5. Run migrations:
+In another terminal:
 
 ```bash
-psql -U username -d campuscare -f backend/src/database/001_init_users.sql
-psql -U username -d campuscare -f backend/src/database/002_init_modules.sql
-psql -U username -d campuscare -f backend/src/database/004_user_profiles_and_engagement.sql
-psql -U username -d campuscare -f backend/src/database/005_configure_approved_admin.sql
-psql -U username -d campuscare -f backend/src/database/006_notifications.sql
+cd frontend
+npm run dev
 ```
 
-Alternatively, after configuring `backend/.env`, apply the notifications migration with:
+Default local addresses:
 
-```bash
-npm run migrate:notifications --workspace backend
-```
+- Frontend: `http://localhost:5173`
+- Backend: `http://localhost:5000`
+- Health route: `http://localhost:5000/api/health`
 
-6. Optionally run demo seed data:
-
-```bash
-psql -U username -d campuscare -f backend/src/database/003_seed_demo_data.sql
-```
-
-7. Start the backend:
-
-```bash
-npm run dev:backend
-```
-
-8. Start the frontend:
-
-```bash
-npm run dev:frontend
-```
-
-Default URLs:
-
-```text
-Frontend: http://localhost:5173
-Backend:  http://localhost:5000/api
-Health:   http://localhost:5000/api/health
-```
-
-## Environment Variables
-
-### Backend
-
-Defined in `backend/.env.example`:
-
-```env
-PORT=5000
-NODE_ENV=development
-DATABASE_URL=postgresql://username:password@localhost:5432/campuscare
-JWT_SECRET=your_jwt_secret_here
-JWT_EXPIRES_IN=7d
-CLIENT_URL=http://localhost:5173
-```
-
-| Variable | Purpose |
-| --- | --- |
-| PORT | Backend server port. |
-| NODE_ENV | Runtime environment, usually `development` locally. |
-| DATABASE_URL | PostgreSQL connection string. |
-| JWT_SECRET | Secret used to sign JWT tokens. |
-| JWT_EXPIRES_IN | Token expiration time. |
-| CLIENT_URL | Frontend origin allowed by CORS. |
-
-### Frontend
-
-Defined in `frontend/.env.example`:
-
-```env
-VITE_API_BASE_URL=http://localhost:5000/api
-```
-
-`.env` files must not be pushed to GitHub. They may contain local database URLs or secrets.
-
-## Database Setup
-
-1. Create the database:
-
-```sql
-CREATE DATABASE campuscare;
-```
-
-2. Run the migrations in order:
-
-```bash
-psql -U username -d campuscare -f backend/src/database/001_init_users.sql
-psql -U username -d campuscare -f backend/src/database/002_init_modules.sql
-psql -U username -d campuscare -f backend/src/database/004_user_profiles_and_engagement.sql
-psql -U username -d campuscare -f backend/src/database/005_configure_approved_admin.sql
-psql -U username -d campuscare -f backend/src/database/006_notifications.sql
-```
-
-3. Optional demo data:
-
-```bash
-psql -U username -d campuscare -f backend/src/database/003_seed_demo_data.sql
-```
-
-The same SQL files can also be opened and executed through pgAdmin Query Tool.
-
-Seeded demo users use the demo-only password:
-
-```text
-CampusCare123
-```
-
-Seeded accounts:
-
-```text
-flutura.student@campuscare.test
-mentor@campuscare.test
-admin@campuscare.test
-```
-
-Use these accounts to review role-aware data visibility:
-
-- Student login shows Flutura Hyseni's personal stress, mood, skills, help requests, and lost/found records.
-- Mentor login shows broader help requests, SkillMap data, stress summaries, and mood summaries.
-- Admin login shows global dashboard statistics and management actions.
-
-## Testing
-
-Run a full project build:
+The complete project can be checked from the root with:
 
 ```bash
 npm run build
 ```
 
-Recommended manual checks:
+---
 
-- Use `GET /api/health` to confirm the API and database status.
-- Use Postman to test auth and module endpoints.
-- Register/login through the frontend.
-- Create a help request, skill, stress record, mood record, and lost/found item.
-- Return to the dashboard and confirm statistics update.
-- Use `docs/testing-checklist.md` for the final QA checklist.
+## Environment Variables
 
-## Additional Documentation
+The project requires backend and frontend environment files. Real secrets and local `.env` files must not be committed to GitHub.
 
-- `docs/testing-checklist.md` contains the final setup, backend, frontend, role, UI, and build checklist.
-- `docs/api-overview.md` provides a concise overview of the main API groups.
+### Backend example
+
+```env
+PORT=5000
+NODE_ENV=development
+DATABASE_URL=postgresql://username:password@localhost:5432/campuscare
+JWT_SECRET=your_jwt_secret
+JWT_EXPIRES_IN=7d
+CLIENT_URL=http://localhost:5173
+```
+
+### Frontend example
+
+```env
+VITE_API_BASE_URL=http://localhost:5000/api
+```
+
+Use `backend/.env.example` and `frontend/.env.example` as the configuration references.
+
+---
 
 ## Current Notes and Future Direction
 
-Future improvements may include:
+- The project currently supports its core full-stack workflows.
+- Admin accounts are created manually.
+- Password recovery can later be connected to a production email service.
+- Future work may include deployment, expanded analytics, reporting, and accessibility improvements.
 
-- Richer UI polish.
-- Stronger admin dashboard.
-- Mentor workflow improvements.
-- Notifications.
-- Deployment.
-- Improved analytics.
-- Accessibility improvements.
-- Mobile responsiveness improvements.
+---
 
 ## Author
 
-Flutura Hyseni  
-Software Engineering Student  
-University of Mitrovica "Isa Boletini"  
+Developed by:
+
+**Flutura Hyseni**
+
+University project:
+
 Faculty of Computer Science and Engineering
+
+University of Mitrovica “Isa Boletini”
