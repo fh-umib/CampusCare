@@ -43,6 +43,15 @@ a {
   outline-offset: 3px;
 }
 
+.mobile-module-nav {
+  scrollbar-width: none;
+  overscroll-behavior-inline: contain;
+}
+
+.mobile-module-nav::-webkit-scrollbar {
+  display: none;
+}
+
 ::selection {
   background: #b8f5ec;
   color: #071527;

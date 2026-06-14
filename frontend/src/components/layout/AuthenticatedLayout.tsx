@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { CampusCareLogoMark } from '../brand/CampusCareLogoMark';
 import { NotificationBell } from './NotificationBell';
 import { useAuth } from '../../context/AuthContext';
@@ -39,6 +39,9 @@ const navigationGroups: Array<{ label: string; items: NavItem[] }> = [
 ];
 
 const navItems = navigationGroups.flatMap((group) => group.items);
+const mobileBottomItems = navItems.filter((item) =>
+  ['dashboard', 'help', 'stress', 'mood', 'skills', 'profile'].includes(item.icon)
+);
 
 const iconPaths: Record<NavIconName, ReactNode> = {
   dashboard: (
@@ -144,7 +147,10 @@ function initials(name?: string) {
 
 export function AuthenticatedLayout() {
   const { logout, user } = useAuth();
+  const { pathname } = useLocation();
   const navigate = useNavigate();
+  const isCurrentItem = (item: NavItem, isActive: boolean) =>
+    isActive || (item.to === '/skill-map' && pathname === '/skillmap');
 
   function handleLogout() {
     logout();
@@ -193,7 +199,7 @@ export function AuthenticatedLayout() {
                     to={item.to}
                     className={({ isActive }) =>
                       `group relative flex min-h-9 items-center gap-3 overflow-hidden rounded-xl border px-3 py-2 text-sm font-semibold transition duration-200 ${
-                        isActive
+                        isCurrentItem(item, isActive)
                           ? 'border-teal-300/20 bg-gradient-to-r from-teal-400/15 to-cyan-300/[0.06] text-white shadow-lg shadow-black/10'
                           : 'border-transparent text-white/55 hover:border-white/[0.06] hover:bg-white/[0.055] hover:text-white'
                       }`
@@ -203,11 +209,11 @@ export function AuthenticatedLayout() {
                       <>
                         <span
                           className={`absolute inset-y-2 left-0 w-[3px] rounded-r-full transition ${
-                            isActive ? 'bg-[#67e3d6]' : 'bg-transparent'
+                            isCurrentItem(item, isActive) ? 'bg-[#67e3d6]' : 'bg-transparent'
                           }`}
                         />
                         <span className={`flex h-7 w-7 items-center justify-center rounded-lg transition ${
-                          isActive
+                          isCurrentItem(item, isActive)
                             ? 'bg-teal-300/10 text-[#67e3d6]'
                             : 'text-white/35 group-hover:bg-white/[0.04] group-hover:text-cyan-100'
                         }`}>
@@ -278,14 +284,19 @@ export function AuthenticatedLayout() {
               </button>
             </div>
           </div>
-          <nav aria-label="Mobile module navigation" className="mt-3 flex gap-2 overflow-x-auto lg:hidden">
+          <nav
+            aria-label="Mobile module navigation"
+            className="mobile-module-nav mt-3 flex snap-x gap-2 overflow-x-auto px-0.5 pb-1 lg:hidden"
+          >
             {navItems.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
                 className={({ isActive }) =>
-                  `inline-flex items-center gap-2 whitespace-nowrap rounded-md px-3 py-2 text-sm ${
-                    isActive ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600'
+                  `inline-flex min-h-10 shrink-0 snap-start items-center gap-2 whitespace-nowrap rounded-xl border px-3 py-2 text-sm font-semibold transition ${
+                    isCurrentItem(item, isActive)
+                      ? 'border-teal-200 bg-teal-50 text-teal-700'
+                      : 'border-transparent text-slate-600 hover:border-slate-200 hover:bg-white'
                   }`
                 }
               >
@@ -295,24 +306,37 @@ export function AuthenticatedLayout() {
             ))}
           </nav>
         </header>
-        <main className="mx-auto max-w-7xl px-4 py-6 pb-24 md:px-8 lg:pb-8" id="main-content">
+        <main className="mx-auto max-w-7xl px-4 py-6 pb-28 md:px-8 lg:pb-8" id="main-content">
           <Outlet />
         </main>
       </div>
 
-      <nav aria-label="Quick mobile navigation" className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-5 border-t border-slate-200 bg-white/95 px-2 py-2 shadow-lg backdrop-blur lg:hidden">
-        {navItems.slice(0, 5).map((item) => (
+      <nav
+        aria-label="Quick mobile navigation"
+        className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-6 gap-1 border-t border-slate-200 bg-white/95 px-2.5 py-2 shadow-[0_-8px_24px_rgba(15,23,42,.08)] backdrop-blur lg:hidden"
+      >
+        {mobileBottomItems.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
             className={({ isActive }) =>
-              `flex flex-col items-center justify-center gap-1 rounded-md px-2 py-2 text-center text-[11px] font-semibold ${
-                isActive ? 'bg-emerald-50 text-emerald-700' : 'text-slate-500'
+              `flex min-h-12 min-w-0 flex-col items-center justify-center gap-1 rounded-xl border px-1 py-1.5 text-center text-[10px] font-bold transition ${
+                isCurrentItem(item, isActive)
+                  ? 'border-teal-100 bg-teal-50 text-teal-700 shadow-sm'
+                  : 'border-transparent text-slate-500 hover:bg-slate-50 hover:text-slate-700'
               }`
             }
           >
-            <NavIcon name={item.icon} size={16} />
-            {item.label === 'ExamStress' ? 'Stress' : item.label === 'Silent Help' ? 'Help' : item.label}
+            <NavIcon name={item.icon} size={17} />
+            <span className="max-w-full truncate">
+              {item.label === 'ExamStress'
+                ? 'Stress'
+                : item.label === 'Silent Help'
+                  ? 'Help'
+                  : item.label === 'MoodCampus'
+                    ? 'Mood'
+                    : item.label}
+            </span>
           </NavLink>
         ))}
       </nav>
