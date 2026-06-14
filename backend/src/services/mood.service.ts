@@ -1,4 +1,5 @@
 import { moodRepository } from '../repositories/mood.repository.js';
+import { notificationService } from './notification.service.js';
 import type { MoodState } from '../types/mood.js';
 import type { PublicUser } from '../types/user.js';
 import { canViewGlobalRecords, optionalString, requireCurrentUser, requireEnum } from '../utils/moduleValidation.js';
@@ -15,15 +16,24 @@ export const moodService = {
     return moodRepository.findRecords(scopeFor(user));
   },
 
-  create: (payload: unknown, currentUser: PublicUser | undefined) => {
+  create: async (payload: unknown, currentUser: PublicUser | undefined) => {
     const user = requireCurrentUser(currentUser);
     const data = payload as Record<string, unknown>;
 
-    return moodRepository.create({
+    const mood = requireEnum(data.mood, moodValues, 'mood');
+    const created = await moodRepository.create({
       userId: user.id,
-      mood: requireEnum(data.mood, moodValues, 'mood'),
+      mood,
       note: optionalString(data.note, 'note')
     });
+    await notificationService.create({
+      userId: user.id,
+      type: 'mood',
+      title: 'Mood reflection saved',
+      message: `Your ${mood} MoodCampus check-in was recorded.`,
+      link: '/mood-campus'
+    });
+    return created;
   },
 
   summary: (currentUser: PublicUser | undefined) => {

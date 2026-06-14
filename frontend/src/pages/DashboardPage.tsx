@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
+import { EmptyState, type EmptyStateIcon } from '../components/ui/EmptyState';
+import { PageLoadingState } from '../components/ui/LoadingStates';
 import { useAuth } from '../context/AuthContext';
 import { getApiErrorMessage } from '../services/apiClient';
 import { dashboardService } from '../services/dashboardService';
@@ -230,7 +232,14 @@ function MoodSummary({ moodCounts, personal }: { moodCounts: Record<string, numb
         subtitle={personal ? 'Your recorded MoodCampus check-ins.' : 'Aggregated mood records for support awareness.'}
       />
       {!entries.length ? (
-        <div className="db-empty">No mood records yet.</div>
+        <EmptyState
+          compact
+          icon="mood"
+          title="No mood reflections yet"
+          description={personal ? 'Record a weekly mood check-in to notice your wellbeing pattern.' : 'Mood patterns will appear after check-ins are recorded.'}
+          actionLabel={personal ? 'Log mood' : undefined}
+          actionTo={personal ? '/mood-campus' : undefined}
+        />
       ) : (
         <div className="db-mood-layout">
           <div
@@ -295,7 +304,12 @@ function RecentActivity({ stats, personal }: { stats: DashboardStats; personal: 
           })}
         </div>
       ) : (
-        <div className="db-empty">No recent activity yet.</div>
+        <EmptyState
+          compact
+          icon="activity"
+          title={personal ? 'No activity yet' : 'No activity recorded yet'}
+          description={personal ? 'Your CampusCare activity will appear as you use support, skills, wellbeing, and campus reports.' : 'CampusCare activity will appear as users begin using the modules.'}
+        />
       )}
     </div>
   );
@@ -369,10 +383,28 @@ function StudentDashboard({ stats }: { stats: DashboardStats }) {
     { label: 'Track stress', detail: 'Record pressure from 1 to 5.', to: '/stress-tracker', icon: 'stress' as IconName },
     { label: 'Report item', detail: 'Create a lost or found report.', to: '/lost-found', icon: 'lostFound' as IconName }
   ];
+  const allStartingPoints: Array<{ show: boolean; icon: EmptyStateIcon; title: string; description: string; action: string; to: string }> = [
+    { show: stats.totalHelpRequests === 0, icon: 'request', title: 'No help requests yet', description: 'Ask safely whenever a subject, project, or campus situation needs support.', action: 'Ask anonymously', to: '/silent-help' },
+    { show: (stats.totalStudentSkills ?? 0) === 0, icon: 'skill', title: 'No skills added yet', description: 'Add your first skill so classmates and mentors can understand what you can help with.', action: 'Add skill', to: '/skill-map' },
+    { show: stats.totalStressRecords === 0, icon: 'stress', title: 'No stress check-ins yet', description: 'Start with one subject to understand your exam pressure early.', action: 'Track stress', to: '/stress-tracker' },
+    { show: (stats.totalMoodRecords ?? 0) === 0, icon: 'mood', title: 'No mood reflections yet', description: 'Record a weekly mood check-in to notice your wellbeing pattern.', action: 'Log mood', to: '/mood-campus' },
+    { show: (stats.totalLostFoundItems ?? 0) === 0, icon: 'item', title: 'No item reports yet', description: 'Report lost or found campus items to help them return faster.', action: 'Report item', to: '/lost-found' }
+  ];
+  const startingPoints = allStartingPoints.filter((item) => item.show);
 
   return (
     <>
       <div className="db-metric-grid db-student-metrics">{metrics.map(metricCard)}</div>
+      {startingPoints.length ? (
+        <section className="db-space">
+          <SectionHeading title="Build your workspace" subtitle="A few useful starting points based on your current CampusCare activity." />
+          <div className="db-empty-grid">
+            {startingPoints.map((item) => (
+              <EmptyState compact icon={item.icon} title={item.title} description={item.description} actionLabel={item.action} actionTo={item.to} key={item.title} />
+            ))}
+          </div>
+        </section>
+      ) : null}
       <section className="db-space">
         <SectionHeading title="Quick actions" subtitle="Small actions that keep your CampusCare workspace useful." />
         <div className="db-action-grid">
@@ -425,15 +457,19 @@ function MentorDashboard({ stats }: { stats: DashboardStats }) {
       <div className="db-content-grid db-space">
         <div className="db-card db-chart-card">
           <SectionHeading title="Support queue" subtitle="A workload view calculated from current help-request status totals." />
-          <div className="db-queue-list">
-            {urgency.map((item) => (
-              <div className="db-queue-row" key={item.label}>
-                <span><i style={{ background: item.color }} />{item.label}</span>
-                <strong>{item.count}</strong>
+          {stats.openHelpRequests ? (
+            <>
+              <div className="db-queue-list">
+                {urgency.map((item) => (
+                  <div className="db-queue-row" key={item.label}>
+                    <span><i style={{ background: item.color }} />{item.label}</span>
+                    <strong>{item.count}</strong>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-          <Link className="db-inline-link" to="/silent-help">Review help requests <span>→</span></Link>
+              <Link className="db-inline-link" to="/silent-help">Review help requests <span>→</span></Link>
+            </>
+          ) : <EmptyState compact icon="request" title="No requests waiting" description="When students ask for help, open threads will appear here for review." variant="success" />}
         </div>
         <StressMeter average={stats.averageStressLevel} records={stats.totalStressRecords} />
       </div>
@@ -479,14 +515,14 @@ function AdminDashboard({ stats }: { stats: DashboardStats }) {
       <div className="db-admin-grid db-space">
         <div className="db-card db-chart-card db-module-chart">
           <SectionHeading title="Module activity" subtitle="Current record totals across CampusCare modules." />
-          <div className="db-bars">
+          {modules.some((module) => module.value > 0) ? <div className="db-bars">
             {modules.map((module) => (
               <div key={module.label}>
                 <div className="db-row-between"><span>{module.label}</span><strong>{module.value}</strong></div>
                 <div className="db-progress"><span style={{ width: `${Math.max(4, (module.value / maxModule) * 100)}%`, background: module.color }} /></div>
               </div>
             ))}
-          </div>
+          </div> : <EmptyState compact icon="chart" title="No activity recorded yet" description="CampusCare activity will appear here as students, mentors, and admins use the modules." />}
         </div>
         <div className="db-card db-chart-card">
           <SectionHeading title="Operational status" subtitle="Open and resolved work requiring administrative awareness." />
@@ -600,6 +636,7 @@ export default function DashboardPage() {
         .db-progress { height:6px; margin-top:.3rem; overflow:hidden; border-radius:999px; background:#e8eff5; }
         .db-progress span { display:block; height:100%; border-radius:999px; transform-origin:left; animation:dbProgress .7s ease both; }
         .db-empty { display:grid; place-items:center; min-height:150px; border:1px dashed #d7e3ed; border-radius:13px; color:#94a3b8; font-size:.78rem; background:#f8fbfd; }
+        .db-empty-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; }
         .db-insight-card { display:grid; grid-template-columns:auto minmax(0,1fr); align-items:start; gap:1rem; padding:1.25rem; }
         .db-insight-card .db-label { margin:0; }
         .db-insight-card h2 { margin:.35rem 0; font-family:"Sora",sans-serif; font-size:1rem; line-height:1.45; }
@@ -626,13 +663,13 @@ export default function DashboardPage() {
         .db-operation-grid strong { margin-top:.7rem; font-family:"Sora",sans-serif; font-size:1.45rem; }
         .db-operation-grid small { margin-top:.15rem; color:#94a3b8; font-size:.65rem; }
         @media(max-width:1180px) { .db-student-metrics,.db-admin-metrics { grid-template-columns:repeat(3,minmax(0,1fr)); } }
-        @media(max-width:920px) { .db-mentor-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); } .db-action-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .db-admin-grid { grid-template-columns:1fr; } }
+        @media(max-width:920px) { .db-mentor-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); } .db-action-grid,.db-empty-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .db-admin-grid { grid-template-columns:1fr; } }
         @media(max-width:720px) { .db-page { margin:-1rem; padding:1rem; } .db-hero { grid-template-columns:1fr; padding:1.35rem; } .db-hero-signal { display:none; } .db-student-metrics,.db-admin-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); } .db-content-grid { grid-template-columns:1fr; } .db-mood-layout { grid-template-columns:1fr; justify-items:center; width:100%; } .db-mood-list { width:100%; } }
-        @media(max-width:460px) { .db-student-metrics,.db-mentor-metrics,.db-admin-metrics,.db-action-grid { grid-template-columns:1fr; } .db-operation-grid { grid-template-columns:1fr; } .db-skill-overview { grid-template-columns:auto 1fr; } .db-skill-overview div:last-child { grid-column:2; } }
+        @media(max-width:460px) { .db-student-metrics,.db-mentor-metrics,.db-admin-metrics,.db-action-grid,.db-empty-grid { grid-template-columns:1fr; } .db-operation-grid { grid-template-columns:1fr; } .db-skill-overview { grid-template-columns:auto 1fr; } .db-skill-overview div:last-child { grid-column:2; } }
       `}</style>
 
       <div className="db-page">
-        {isLoading ? <div className="db-card db-empty">Loading your CampusCare dashboard...</div> : null}
+        {isLoading ? <PageLoadingState variant="dashboard" label="Loading your CampusCare dashboard" /> : null}
         {error ? <div className="alert-error">{error}</div> : null}
         {stats ? (
           <>

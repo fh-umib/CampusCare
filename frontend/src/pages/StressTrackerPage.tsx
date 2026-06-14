@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react';
+import { EmptyState as UIEmptyState } from '../components/ui/EmptyState';
+import { ButtonSpinner, PageLoadingState } from '../components/ui/LoadingStates';
 import { useAuth } from '../context/AuthContext';
 import { getApiErrorMessage } from '../services/apiClient';
 import { stressService } from '../services/stressService';
@@ -61,14 +63,8 @@ function SectionHeading({ eyebrow, title, description }: { eyebrow?: string; tit
   );
 }
 
-function EmptyState({ title, text }: { title: string; text: string }) {
-  return (
-    <div className="st-empty">
-      <Icon name="pulse" size={44} color="#94a3b8" background="#eef4f8" />
-      <strong>{title}</strong>
-      <span>{text}</span>
-    </div>
-  );
+function EmptyState({ title, text, actionHref, actionLabel, variant = 'soft' }: { title: string; text: string; actionHref?: string; actionLabel?: string; variant?: 'soft' | 'success' }) {
+  return <UIEmptyState icon="stress" title={title} description={text} actionHref={actionHref} actionLabel={actionLabel} variant={variant} />;
 }
 
 function Hero({ role, total, averageLevel, highCount, topSubject }: {
@@ -219,7 +215,7 @@ function StressForm({ onSaved }: { onSaved: () => Promise<void> }) {
         <textarea className="st-input st-textarea" placeholder="What is making this subject feel difficult right now?" value={form.note} onChange={(event) => setForm((current) => ({ ...current, note: event.target.value }))} />
       </label>
       <button className="st-primary-button" disabled={isSubmitting} type="submit">
-        {isSubmitting ? 'Saving check-in...' : 'Save stress record'}
+        {isSubmitting ? <><ButtonSpinner />Saving check-in...</> : 'Save stress record'}
         <Icon name="arrow" size={24} color="#fff" background="transparent" />
       </button>
     </form>
@@ -235,7 +231,7 @@ function SubjectChart({ summary }: { summary: StressSummary[] }) {
   return (
     <section className="st-card st-chart-card">
       <SectionHeading eyebrow="Subject pattern" title="Stress by subject" description="Average recorded pressure for each visible subject." />
-      {!rows.length ? <EmptyState title="No subject patterns yet" text="Subject averages will appear after check-ins are recorded." /> : (
+      {!rows.length ? <EmptyState title="No stress signals yet" text="Subject pressure patterns will appear after students record check-ins." /> : (
         <div className="st-subject-bars">
           {rows.map((item, index) => {
             const level = Math.max(0, Math.min(5, Number(item.averageStressLevel)));
@@ -268,7 +264,7 @@ function TrendChart({ records }: { records: StressRecord[] }) {
   return (
     <section className="st-card st-chart-card">
       <SectionHeading eyebrow="Recent pattern" title="Stress over time" description="Your latest visible check-ins, ordered by date." />
-      {!ordered.length ? <EmptyState title="No trend to show" text="A line will form as more check-ins are added." /> : (
+      {!ordered.length ? <EmptyState title="No stress trend yet" text="A clear pattern will form as more check-ins are recorded." /> : (
         <>
           <div className="st-trend-wrap">
             <svg aria-label="Stress level trend" role="img" viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -298,7 +294,7 @@ function Distribution({ records }: { records: StressRecord[] }) {
   return (
     <section className="st-card st-chart-card">
       <SectionHeading eyebrow="Level balance" title="Stress distribution" description="How visible records are distributed across the five levels." />
-      {!total ? <EmptyState title="No level distribution yet" text="Your stress levels will be summarized here." /> : (
+      {!total ? <EmptyState title="No ExamStress data yet" text="Stress-level distribution will appear when records are added." /> : (
         <>
           <div className="st-segments">
             {counts.map(({ level, count }) => count ? (
@@ -326,7 +322,7 @@ function PressureRanking({ summary }: { summary: StressSummary[] }) {
   return (
     <section className="st-card st-chart-card">
       <SectionHeading eyebrow="Attention order" title="Highest pressure subjects" description="Subjects ranked by their current average stress level." />
-      {!ranked.length ? <EmptyState title="No high-pressure subjects yet" text="Subject rankings will appear when data is available." /> : (
+      {!ranked.length ? <EmptyState title="No high-pressure subjects right now" text="Current records do not show urgent pressure signals." variant="success" /> : (
         <div className="st-ranking">
           {ranked.map((item, index) => {
             const level = Math.max(1, Math.round(Number(item.averageStressLevel))) as StressLevel;
@@ -380,7 +376,12 @@ function Records({ records, role }: { records: StressRecord[]; role: Role }) {
         title={role === 'student' ? 'Recent check-ins' : 'Recent stress records'}
         description={role === 'student' ? 'A calm record of your latest subject check-ins.' : 'Latest visible records, with high-pressure entries shown clearly.'}
       />
-      {!ordered.length ? <EmptyState title="No stress records yet" text="Start with one subject today." /> : (
+      {!ordered.length ? <EmptyState
+        title={role === 'student' ? 'No stress records yet' : role === 'mentor' ? 'No stress signals yet' : 'No ExamStress data yet'}
+        text={role === 'student' ? 'Start with one subject today. Small check-ins help you notice pressure early.' : role === 'mentor' ? 'Subject pressure patterns will appear after students record check-ins.' : 'Campus-wide academic pressure trends will appear when records are added.'}
+        actionHref={role === 'student' ? '#stress-form' : undefined}
+        actionLabel={role === 'student' ? 'Save first stress record' : undefined}
+      /> : (
         <div className="st-record-list">
           {ordered.slice(0, role === 'student' ? 8 : 12).map((record) => {
             const detail = levelDetails[record.stressLevel];
@@ -412,7 +413,7 @@ function AttentionBoard({ records }: { records: StressRecord[] }) {
   return (
     <section className="st-card st-chart-card">
       <SectionHeading eyebrow="Priority view" title="Stress attention board" description="Higher pressure records appear first for a focused review." />
-      {!ordered.length ? <EmptyState title="No records need review" text="Stress check-ins will appear here by priority." /> : (
+      {!ordered.length ? <EmptyState title="No stress signals yet" text="Stress check-ins will appear here by priority when students begin recording them." /> : (
         <div className="st-attention-list">
           {ordered.map((record) => {
             const detail = levelDetails[record.stressLevel];
@@ -643,9 +644,9 @@ export default function StressTrackerPage() {
       <div className="st-page">
         <Hero role={role} total={records.length} averageLevel={analytics.average} highCount={analytics.highCount} topSubject={analytics.topSubject} />
         {error ? <div className="st-page-error">{error}</div> : null}
-        {isLoading ? <div className="st-card st-loading">Loading ExamStress insights...</div> : null}
+        {isLoading ? <PageLoadingState variant="analytics" label="Loading ExamStress insights" /> : null}
 
-        {!isLoading && role === 'student' ? (
+        {!isLoading && !error && role === 'student' ? (
           <>
             <div className="st-student-top">
               <StressForm onSaved={loadData} />
@@ -666,7 +667,7 @@ export default function StressTrackerPage() {
           </>
         ) : null}
 
-        {!isLoading && role === 'mentor' ? (
+        {!isLoading && !error && role === 'mentor' ? (
           <>
             <div className="st-metrics st-metrics-mentor">
               <MetricCard icon="pulse" label="Average stress" value={`${analytics.average.toFixed(1)} / 5`} helper="Across visible check-ins" color="#0d9e8a" />
@@ -686,7 +687,7 @@ export default function StressTrackerPage() {
           </>
         ) : null}
 
-        {!isLoading && role === 'admin' ? (
+        {!isLoading && !error && role === 'admin' ? (
           <>
             <div className="st-metrics st-metrics-admin">
               <MetricCard icon="records" label="Total records" value={String(records.length)} helper="Visible module activity" color="#0b1d35" />

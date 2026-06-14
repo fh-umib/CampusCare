@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react';
+import { EmptyState as UIEmptyState } from '../components/ui/EmptyState';
+import { ButtonSpinner, PageLoadingState, SkeletonTable } from '../components/ui/LoadingStates';
 import { useAuth } from '../context/AuthContext';
 import { getApiErrorMessage } from '../services/apiClient';
 import { helpRequestService } from '../services/helpRequestService';
@@ -202,7 +204,7 @@ function DetailPanel({
   onStatus: (status: HelpRequestStatus) => void;
 }) {
   if (!request) {
-    return <div className="sh-card sh-detail-empty"><Icon name="help" size={52} /><h3>Select a request to review details</h3><p>Choose a thread from the queue to read the full request and replies.</p></div>;
+    return <div className="sh-card sh-detail-empty"><UIEmptyState icon="request" title="Select a request" description="Choose a request from the list to review details, replies, and status." /></div>;
   }
 
   const category = categoryMeta[request.category];
@@ -228,7 +230,7 @@ function DetailPanel({
             <p>{item.message}</p>
             <span>{item.replierName} · {formatDate(item.createdAt)}</span>
           </div>
-        )) : <div className="sh-inline-empty">No replies yet. A calm, useful response can move this thread forward.</div>}
+        )) : <UIEmptyState compact icon="request" title="No replies yet" description="A calm, useful response can move this thread forward." variant="soft" />}
       </div>
       <div className="sh-reply-form">
         <label htmlFor={`reply-${request.id}`}>Write a supportive reply</label>
@@ -398,14 +400,7 @@ function SupportJourney({ request }: { request: HelpRequest | null }) {
 }
 
 function HelpfulEmpty({ title, text, actionHref, actionLabel }: { title: string; text: string; actionHref?: string; actionLabel?: string }) {
-  return (
-    <div className="sh-empty">
-      <Icon name="help" size={46} />
-      <strong>{title}</strong>
-      <p>{text}</p>
-      {actionHref && actionLabel ? <a href={actionHref}>{actionLabel}</a> : null}
-    </div>
-  );
+  return <UIEmptyState icon={actionHref ? 'request' : 'search'} title={title} description={text} actionHref={actionHref} actionLabel={actionLabel} />;
 }
 
 export default function HelpRequestsPage() {
@@ -425,7 +420,6 @@ export default function HelpRequestsPage() {
 
   const role = user?.role === 'mentor' || user?.role === 'admin' ? user.role : 'student';
   const isStudent = role === 'student';
-  const canManageStatus = role === 'mentor' || role === 'admin';
 
   async function loadRequests() {
     setError('');
@@ -608,8 +602,14 @@ export default function HelpRequestsPage() {
 
         {message ? <div className="alert-success mt-4">{message}</div> : null}
         {error ? <div className="alert-error mt-4">{error}</div> : null}
+        {isLoading ? (
+          <div aria-busy="true" style={{ display: 'grid', gap: '1rem', marginTop: '1.25rem' }}>
+            <PageLoadingState variant="support" label="Loading Silent Help requests" />
+            {role === 'admin' ? <SkeletonTable rows={4} columns={6} /> : null}
+          </div>
+        ) : null}
 
-        {isStudent ? (
+        {!isLoading && !error && isStudent ? (
           <>
             <section className="sh-main-grid sh-student-grid">
               <article className="sh-card sh-card-padding" id="create-request">
@@ -619,7 +619,7 @@ export default function HelpRequestsPage() {
                   <label><span>Category</span><select value={form.category} onChange={(event) => setForm({ ...form, category: event.target.value as HelpRequestCategory })}>{categories.map((category) => <option key={category} value={category}>{categoryMeta[category].label}</option>)}</select></label>
                   <label><span>Description</span><textarea required placeholder="Explain the situation, what you tried, and what kind of support would help." value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} /></label>
                   <label className="sh-anonymous"><input type="checkbox" checked={form.isAnonymous} onChange={(event) => setForm({ ...form, isAnonymous: event.target.checked })} /><span><strong>Keep this request anonymous</strong><small>Your identity will appear as Anonymous Student.</small></span></label>
-                  <button className="sh-primary-button" disabled={isSubmitting} type="submit">{isSubmitting ? 'Creating request...' : 'Submit request'}</button>
+                  <button className="sh-primary-button" disabled={isSubmitting} type="submit">{isSubmitting ? <><ButtonSpinner />Creating request...</> : 'Submit request'}</button>
                 </form>
               </article>
               <div>
@@ -650,15 +650,16 @@ export default function HelpRequestsPage() {
               <div>
                 <div className="sh-section-head"><div><h2>My request history</h2><p>Follow your submitted requests and supportive replies.</p></div></div>
                 <Filters search={search} status={statusFilter} category={categoryFilter} priority={priorityFilter} onSearch={setSearch} onStatus={setStatusFilter} onCategory={setCategoryFilter} onPriority={setPriorityFilter} />
-                {isLoading ? <HelpfulEmpty title="Loading your requests" text="Your personal support history is being prepared." /> : null}
-                {!isLoading && !filteredRequests.length ? <HelpfulEmpty title="No requests yet" text="Create your first safe request whenever academic or wellbeing support would help." actionHref="#create-request" actionLabel="Create a request" /> : null}
+                {!filteredRequests.length ? studentRequests.length
+                  ? <HelpfulEmpty title="No matching requests" text="Try changing the search, status, category, or priority filter." />
+                  : <HelpfulEmpty title="No help requests yet" text="Create your first request when you need academic, project, teamwork, or exam support." actionHref="#create-request" actionLabel="Create request" /> : null}
                 <div className="sh-list">{filteredRequests.map((request) => <RequestCard key={request.id} request={request} selected={selectedRequest?.id === request.id} onSelect={() => setSelectedId(request.id)} />)}</div>
               </div>
               <DetailPanel request={selectedRequest} reply={selectedRequest ? replyText[selectedRequest.id] ?? '' : ''} canManageStatus={false} onReplyChange={(value) => selectedRequest && setReplyText((current) => ({ ...current, [selectedRequest.id]: value }))} onReply={() => selectedRequest && void handleReply(selectedRequest.id)} onStatus={(status) => selectedRequest && void handleStatus(selectedRequest.id, status)} />
             </section>
             <article className="sh-card sh-guidance"><div className="sh-section-head"><div><h2>When to use Silent Help</h2><p>Your request can be anonymous. Write only what you are comfortable sharing.</p></div><Icon name="help" /></div><ul><li>When a subject feels confusing.</li><li>When a project or code issue blocks you.</li><li>When teamwork becomes stressful.</li><li>When exam pressure feels high.</li></ul></article>
           </>
-        ) : role === 'mentor' ? (
+        ) : !isLoading && !error && role === 'mentor' ? (
           <>
             <section className="sh-stat-grid">
               {[
@@ -677,8 +678,9 @@ export default function HelpRequestsPage() {
               <div>
                 <Filters search={search} status={statusFilter} category={categoryFilter} priority={priorityFilter} onSearch={setSearch} onStatus={setStatusFilter} onCategory={setCategoryFilter} onPriority={setPriorityFilter} />
                 <div className="sh-section-head"><div><h2>Priority queue</h2><p>High-priority open requests appear first.</p></div><Badge color="#b45309" background="#fff7ed">{globalSummary.open} open</Badge></div>
-                {isLoading ? <HelpfulEmpty title="Loading the support queue" text="Student requests are being organized by urgency." /> : null}
-                {!isLoading && !filteredRequests.length ? <HelpfulEmpty title="No requests in this view" text="Try changing the filters or return when new support requests arrive." /> : null}
+                {!filteredRequests.length ? requests.length
+                  ? <HelpfulEmpty title="No matching requests" text="Try changing the search, status, category, or priority filter." />
+                  : <HelpfulEmpty title="No requests in the queue" text="Student support requests will appear here when they need mentor attention." /> : null}
                 <div className="sh-list">{filteredRequests.map((request) => <RequestCard key={request.id} request={request} selected={selectedRequest?.id === request.id} onSelect={() => setSelectedId(request.id)} />)}</div>
               </div>
               <DetailPanel request={selectedRequest} reply={selectedRequest ? replyText[selectedRequest.id] ?? '' : ''} canManageStatus onReplyChange={(value) => selectedRequest && setReplyText((current) => ({ ...current, [selectedRequest.id]: value }))} onReply={() => selectedRequest && void handleReply(selectedRequest.id)} onStatus={(status) => selectedRequest && void handleStatus(selectedRequest.id, status)} />
@@ -692,7 +694,7 @@ export default function HelpRequestsPage() {
               ].map((text) => <div className="sh-insight" key={text}><Icon name="help" size={30} /><p>{text}</p></div>)}</div><p className="sh-mentor-note">Reply with clarity, kindness, and one useful next step.</p></div>
             </section>
           </>
-        ) : (
+        ) : !isLoading && !error && role === 'admin' ? (
           <>
             <section className="sh-stat-grid sh-admin-stats">
               {adminStats.map(([label, value, icon]) => <article className="sh-card sh-stat sh-lift" key={label}><Icon name={icon} /><strong>{value}</strong><p>{label}</p></article>)}
@@ -709,12 +711,14 @@ export default function HelpRequestsPage() {
             <section className="sh-main-grid" id="request-queue">
               <div>
                 <Filters search={search} status={statusFilter} category={categoryFilter} priority={priorityFilter} onSearch={setSearch} onStatus={setStatusFilter} onCategory={setCategoryFilter} onPriority={setPriorityFilter} />
-                <div className="sh-card sh-table"><table><thead><tr><th>Request</th><th>Category</th><th>Status</th><th>Priority</th><th>Student</th><th>Date</th><th>Replies</th><th>Action</th></tr></thead><tbody>{filteredRequests.map((request) => <tr key={request.id}><td><strong>{request.title}</strong></td><td>{categoryMeta[request.category].label}</td><td><Badge color={statusMeta[request.status].color} background={statusMeta[request.status].background}>{statusMeta[request.status].label}</Badge></td><td><Badge color={priorityMeta[getPriority(request)].color} background={priorityMeta[getPriority(request)].background}>{priorityMeta[getPriority(request)].label}</Badge></td><td>{request.isAnonymous ? 'Anonymous Student' : request.studentName}</td><td>{formatDate(request.createdAt)}</td><td>{request.replies?.length ?? 0}</td><td><button type="button" onClick={() => setSelectedId(request.id)}>Review</button></td></tr>)}</tbody></table>{!isLoading && !filteredRequests.length ? <HelpfulEmpty title="No operational results" text="No requests match the current search and filter combination." /> : null}</div>
+                <div className="sh-card sh-table"><table><thead><tr><th>Request</th><th>Category</th><th>Status</th><th>Priority</th><th>Student</th><th>Date</th><th>Replies</th><th>Action</th></tr></thead><tbody>{filteredRequests.map((request) => <tr key={request.id}><td><strong>{request.title}</strong></td><td>{categoryMeta[request.category].label}</td><td><Badge color={statusMeta[request.status].color} background={statusMeta[request.status].background}>{statusMeta[request.status].label}</Badge></td><td><Badge color={priorityMeta[getPriority(request)].color} background={priorityMeta[getPriority(request)].background}>{priorityMeta[getPriority(request)].label}</Badge></td><td>{request.isAnonymous ? 'Anonymous Student' : request.studentName}</td><td>{formatDate(request.createdAt)}</td><td>{request.replies?.length ?? 0}</td><td><button type="button" onClick={() => setSelectedId(request.id)}>Review</button></td></tr>)}</tbody></table>{!filteredRequests.length ? requests.length
+                  ? <HelpfulEmpty title="No matching requests" text="Try changing the search, status, category, or priority filter." />
+                  : <HelpfulEmpty title="No Silent Help records yet" text="Support trends will appear after students begin using Silent Help." /> : null}</div>
               </div>
               <div><DetailPanel request={selectedRequest} reply={selectedRequest ? replyText[selectedRequest.id] ?? '' : ''} canManageStatus onReplyChange={(value) => selectedRequest && setReplyText((current) => ({ ...current, [selectedRequest.id]: value }))} onReply={() => selectedRequest && void handleReply(selectedRequest.id)} onStatus={(status) => selectedRequest && void handleStatus(selectedRequest.id, status)} /><div className="sh-card sh-guidance"><div className="sh-section-head"><div><h2>Support insights</h2><p>Useful signals from the current request set.</p></div><Icon name="chart" /></div><ul><li>{commonCategory} is the most active category.</li><li>{globalSummary.categoryCounts.academic_stress} academic stress requests are visible and should be reviewed carefully.</li><li>{globalSummary.open} open requests should be prioritized before closed threads.</li><li>Response coverage is currently {responseCoverage}%.</li></ul></div></div>
             </section>
           </>
-        )}
+        ) : null}
       </div>
     </>
   );

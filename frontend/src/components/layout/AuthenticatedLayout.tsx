@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { CampusCareLogoMark } from '../brand/CampusCareLogoMark';
+import { NotificationBell } from './NotificationBell';
 import { useAuth } from '../../context/AuthContext';
 
 type NavIconName = 'dashboard' | 'help' | 'stress' | 'mood' | 'skills' | 'lostFound' | 'profile' | 'logout';
@@ -152,6 +153,12 @@ export function AuthenticatedLayout() {
 
   return (
     <div className="min-h-screen bg-[#f4f8fc] text-slate-950 lg:flex lg:items-stretch">
+      <a
+        className="sr-only z-[10001] rounded-xl bg-[#0d9e8a] px-4 py-2 font-bold text-white focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
+        href="#main-content"
+      >
+        Skip to content
+      </a>
       <aside
         className="hidden min-h-screen w-[272px] shrink-0 flex-col border-r border-white/10 p-4 text-white shadow-[12px_0_36px_rgba(7,21,39,.12)] lg:flex"
         style={{
@@ -173,7 +180,7 @@ export function AuthenticatedLayout() {
           </div>
         </div>
 
-        <nav className="mt-4 min-h-0 flex-1 space-y-3.5">
+        <nav aria-label="Primary navigation" className="mt-4 min-h-0 flex-1 space-y-3.5">
           {navigationGroups.map((group) => (
             <div key={group.label}>
               <p className="mb-1.5 px-3 text-[0.61rem] font-extrabold uppercase tracking-[0.16em] text-white/30">
@@ -246,7 +253,7 @@ export function AuthenticatedLayout() {
       </aside>
 
       <div className="min-w-0 flex-1">
-        <header className="border-b border-[#e5edf5] bg-white/90 px-4 py-3 shadow-[0_4px_20px_rgba(15,23,42,.04)] backdrop-blur-xl md:px-8">
+        <header className="relative z-[100] overflow-visible border-b border-[#e5edf5] bg-white/90 px-4 py-3 shadow-[0_4px_20px_rgba(15,23,42,.04)] backdrop-blur-xl md:px-8">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-3">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-teal-100 bg-teal-50 text-sm font-extrabold text-teal-800 shadow-sm">
@@ -258,6 +265,7 @@ export function AuthenticatedLayout() {
               </div>
             </div>
             <div className="flex items-center gap-2 sm:gap-3">
+              <NotificationBell />
               <span className={`rounded-full px-3 py-1.5 text-[0.68rem] font-extrabold uppercase tracking-wide ring-1 ${roleBadgeClass(user?.role)}`}>
                 {user?.role} view
               </span>
@@ -270,7 +278,7 @@ export function AuthenticatedLayout() {
               </button>
             </div>
           </div>
-          <nav className="mt-3 flex gap-2 overflow-x-auto lg:hidden">
+          <nav aria-label="Mobile module navigation" className="mt-3 flex gap-2 overflow-x-auto lg:hidden">
             {navItems.map((item) => (
               <NavLink
                 key={item.to}
@@ -287,12 +295,12 @@ export function AuthenticatedLayout() {
             ))}
           </nav>
         </header>
-        <main className="mx-auto max-w-7xl px-4 py-6 pb-24 md:px-8 lg:pb-8">
+        <main className="mx-auto max-w-7xl px-4 py-6 pb-24 md:px-8 lg:pb-8" id="main-content">
           <Outlet />
         </main>
       </div>
 
-      <nav className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-5 border-t border-slate-200 bg-white/95 px-2 py-2 shadow-lg backdrop-blur lg:hidden">
+      <nav aria-label="Quick mobile navigation" className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-5 border-t border-slate-200 bg-white/95 px-2 py-2 shadow-lg backdrop-blur lg:hidden">
         {navItems.slice(0, 5).map((item) => (
           <NavLink
             key={item.to}

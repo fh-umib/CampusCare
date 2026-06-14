@@ -142,6 +142,8 @@ CampusCare/
         002_init_modules.sql
         003_seed_demo_data.sql
         004_user_profiles_and_engagement.sql
+        005_configure_approved_admin.sql
+        006_notifications.sql
       middleware/
         authenticate.ts
         authorizeRoles.ts
@@ -400,6 +402,14 @@ Copy-Item frontend/.env.example frontend/.env
 psql -U username -d campuscare -f backend/src/database/001_init_users.sql
 psql -U username -d campuscare -f backend/src/database/002_init_modules.sql
 psql -U username -d campuscare -f backend/src/database/004_user_profiles_and_engagement.sql
+psql -U username -d campuscare -f backend/src/database/005_configure_approved_admin.sql
+psql -U username -d campuscare -f backend/src/database/006_notifications.sql
+```
+
+Alternatively, after configuring `backend/.env`, apply the notifications migration with:
+
+```bash
+npm run migrate:notifications --workspace backend
 ```
 
 6. Optionally run demo seed data:
@@ -476,6 +486,8 @@ CREATE DATABASE campuscare;
 psql -U username -d campuscare -f backend/src/database/001_init_users.sql
 psql -U username -d campuscare -f backend/src/database/002_init_modules.sql
 psql -U username -d campuscare -f backend/src/database/004_user_profiles_and_engagement.sql
+psql -U username -d campuscare -f backend/src/database/005_configure_approved_admin.sql
+psql -U username -d campuscare -f backend/src/database/006_notifications.sql
 ```
 
 3. Optional demo data:

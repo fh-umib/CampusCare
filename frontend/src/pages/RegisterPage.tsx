@@ -5,6 +5,7 @@ import { authService } from '../services/authService';
 import { profileService } from '../services/profileService';
 import { CampusCareLogoMark } from '../components/brand/CampusCareLogoMark';
 import { AuthTopAction, AuthTopActionStyles } from '../components/auth/AuthTopAction';
+import { ButtonSpinner } from '../components/ui/LoadingStates';
 import type { ProfilePayload } from '../types/profile';
 import type { UserRole } from '../types/roles';
 
@@ -625,8 +626,8 @@ export default function RegisterPage() {
               </details>
 
               <div className="register-action-row">
-                <button className="register-action register-action-primary" type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? 'Creating account...' : 'Create account'}
+                <button aria-busy={isSubmitting} className="register-action register-action-primary" type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? <><ButtonSpinner />Creating account...</> : 'Create account'}
                   {!isSubmitting ? <RegisterIcon name="arrow" /> : null}
                 </button>
                 <Link className="register-action register-action-secondary" to={`/login?role=${form.role}`}>

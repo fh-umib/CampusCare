@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState, type CSSProperties, type FormEvent, type ReactNode } from 'react';
+import { EmptyState as UIEmptyState } from '../components/ui/EmptyState';
+import { ButtonSpinner, PageLoadingState } from '../components/ui/LoadingStates';
 import { useAuth } from '../context/AuthContext';
 import { getApiErrorMessage } from '../services/apiClient';
 import { lostFoundService } from '../services/lostFoundService';
@@ -42,8 +44,17 @@ function SectionHeading({ eyebrow, title, description }: { eyebrow?: string; tit
   return <div className="lf-heading">{eyebrow ? <span>{eyebrow}</span> : null}<h2>{title}</h2><p>{description}</p></div>;
 }
 
-function EmptyState({ title, text }: { title: string; text: string }) {
-  return <div className="lf-empty"><Icon name="report" size={44} color="#94a3b8" background="#eef4f8" /><strong>{title}</strong><span>{text}</span></div>;
+function EmptyState({ title, text, actionHref, actionLabel, icon = 'item' }: { title: string; text: string; actionHref?: string; actionLabel?: string; icon?: 'item' | 'search' | 'chart' }) {
+  const isPersonal = title === 'No personal reports yet';
+  const isFilterResult = title === 'No reports match your filters';
+  return <UIEmptyState
+    icon={isFilterResult ? 'search' : icon}
+    title={isPersonal ? 'No lost or found reports yet' : isFilterResult ? 'No matching items' : title}
+    description={isPersonal ? 'Report a lost or found item to help the campus community return it.' : isFilterResult ? 'Try changing the item type, status, location, or search text.' : text}
+    actionHref={isPersonal ? '#report-form' : actionHref}
+    actionLabel={isPersonal ? 'Create report' : actionLabel}
+    variant="soft"
+  />;
 }
 
 function Hero({ role, total, open, location }: { role: Role; total: number; open: number; location: string }) {
@@ -96,7 +107,7 @@ function ReportForm({ initialType, onSaved }: { initialType: LostFoundItemType; 
         <label><span>Item date</span><input type="date" value={form.item_date} onChange={(event) => setForm({ ...form, item_date: event.target.value })} /></label>
         <label className="lf-description"><span>Description</span><textarea placeholder="Color, brand, unique details, and where you last saw it." value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} /></label>
       </div>
-      <button className="lf-primary-button" disabled={isSubmitting} type="submit">{isSubmitting ? 'Creating report...' : `Report ${form.item_type} item`}<Icon name="arrow" size={23} color="#fff" background="transparent" /></button>
+      <button className="lf-primary-button" disabled={isSubmitting} type="submit">{isSubmitting ? <><ButtonSpinner />Creating report...</> : <>Report {form.item_type} item<Icon name="arrow" size={23} color="#fff" background="transparent" /></>}</button>
     </form>
   );
 }
@@ -105,7 +116,7 @@ function TypeChart({ items }: { items: LostFoundItem[] }) {
   const lost = items.filter((item) => item.itemType === 'lost').length;
   const found = items.length - lost;
   const total = items.length;
-  return <section className="lf-card lf-chart"><SectionHeading eyebrow="Report mix" title="Lost vs found" description="Current balance of campus item reports." />{total ? <div className="lf-type-chart"><div className="lf-donut" style={{ background: `conic-gradient(${typeMeta.lost.color} 0 ${(lost / total) * 100}%,${typeMeta.found.color} ${(lost / total) * 100}% 100%)` }}><span><strong>{total}</strong>reports</span></div><div><p><i style={{ background: typeMeta.lost.color }} /><span>Lost reports</span><strong>{lost}</strong></p><p><i style={{ background: typeMeta.found.color }} /><span>Found reports</span><strong>{found}</strong></p></div></div> : <EmptyState title="No report mix yet" text="Lost and found totals will appear here." />}</section>;
+  return <section className="lf-card lf-chart"><SectionHeading eyebrow="Report mix" title="Lost vs found" description="Current balance of campus item reports." />{total ? <div className="lf-type-chart"><div className="lf-donut" style={{ background: `conic-gradient(${typeMeta.lost.color} 0 ${(lost / total) * 100}%,${typeMeta.found.color} ${(lost / total) * 100}% 100%)` }}><span><strong>{total}</strong>reports</span></div><div><p><i style={{ background: typeMeta.lost.color }} /><span>Lost reports</span><strong>{lost}</strong></p><p><i style={{ background: typeMeta.found.color }} /><span>Found reports</span><strong>{found}</strong></p></div></div> : <EmptyState title="No item reports yet" text="Campus item tracking will appear after lost or found reports are created." icon="chart" />}</section>;
 }
 
 function StatusChart({ items }: { items: LostFoundItem[] }) {
@@ -137,7 +148,7 @@ function ItemCard({ item, selected, onSelect }: { item: LostFoundItem; selected:
 }
 
 function DetailPanel({ item, canManage, onStatus }: { item: LostFoundItem | null; canManage: boolean; onStatus: (id: string, status: LostFoundStatus) => Promise<void> }) {
-  if (!item) return <aside className="lf-card lf-detail"><EmptyState title="Select a report to view details" text="Choose an item card to see its full description and status." /></aside>;
+  if (!item) return <aside className="lf-card lf-detail"><EmptyState title="Select a report" text="Choose an item report to review location, date, status, and description." /></aside>;
   const type = typeMeta[item.itemType];
   const status = statusMeta[item.status];
   return <aside className="lf-card lf-detail"><div className="lf-detail-head"><Icon name={type.icon} size={48} color={type.color} background={type.soft} /><div><span style={{ color: type.color, background: type.soft }}>{type.label} item</span><span style={{ color: status.color, background: status.soft }}>{status.label}</span></div></div><h2>{item.title}</h2><p className="lf-reporter">Reported by {item.reporterName || 'CampusCare user'} · {formatDate(item.createdAt)}</p><div className="lf-detail-description">{item.description}</div><dl><div><dt>Location</dt><dd>{item.location || 'Not specified'}</dd></div><div><dt>Item date</dt><dd>{formatDate(item.itemDate || item.createdAt)}</dd></div><div><dt>Last updated</dt><dd>{formatDate(item.updatedAt)}</dd></div></dl>{canManage ? <div className="lf-status-actions"><span>Update report status</span>{statuses.map((value) => <button disabled={item.status === value} key={value} onClick={() => void onStatus(item.id, value)} type="button">{statusMeta[value].label}</button>)}</div> : <div className="lf-safe-note"><Icon name="resolved" size={34} color="#0d9e8a" background="#e8f8f5" /><span>Use safe communication and avoid sharing private contact details publicly.</span></div>}</aside>;
@@ -235,8 +246,8 @@ export default function LostFoundPage() {
         <Hero role={role} total={items.length} open={analytics.open} location={analytics.activeLocation} />
         {message ? <div className="lf-alert lf-alert-success">{message}</div> : null}
         {error ? <div className="lf-page-error">{error}</div> : null}
-        {isLoading ? <div className="lf-card lf-loading">Loading campus item reports...</div> : null}
-        {!isLoading ? <>
+        {isLoading ? <PageLoadingState variant="support" label="Loading campus item reports" /> : null}
+        {!isLoading && !error ? <>
           <div className="lf-metrics">
             <MetricCard icon="report" label={role === 'student' ? 'My reports' : 'Total reports'} value={String(role === 'student' ? myItems.length : items.length)} helper={role === 'student' ? 'Reports created by you' : 'Visible item activity'} color="#0b1d35" />
             <MetricCard icon="status" label={role === 'student' ? 'My open reports' : 'Open reports'} value={String(role === 'student' ? myOpen : analytics.open)} helper="Still awaiting resolution" color="#2563eb" delay={40} />
@@ -248,7 +259,7 @@ export default function LostFoundPage() {
           <div className="lf-form-layout"><ReportForm initialType="lost" onSaved={saved} /><Guidance role={role} activeLocation={analytics.activeLocation} /></div>
           {role === 'student' ? <section className="lf-my-reports"><SectionHeading eyebrow="Personal activity" title="My item reports" description="Your latest reports and their current recovery status." />{myItems.length ? <div className="lf-my-report-list">{myItems.slice(0, 4).map((item) => <button key={item.id} onClick={() => setSelectedId(item.id)} type="button"><Icon name={typeMeta[item.itemType].icon} size={34} color={typeMeta[item.itemType].color} background={typeMeta[item.itemType].soft} /><span><strong>{item.title}</strong><small>{item.location || 'No location'} · {formatDate(item.itemDate || item.createdAt)}</small></span><b style={{ color: statusMeta[item.status].color, background: statusMeta[item.status].soft }}>{statusMeta[item.status].label}</b></button>)}</div> : <EmptyState title="No personal reports yet" text="Report a lost or found item to help your campus community." />}</section> : null}
           <div className="lf-chart-grid"><TypeChart items={items} /><StatusChart items={items} /><LocationChart items={items} /><RecentTimeline items={items} /></div>
-          <section id="campus-reports" style={{ marginTop: '1rem' }}><SectionHeading eyebrow={role === 'admin' ? 'Operational browser' : 'Campus reports'} title={role === 'student' ? 'Browse lost and found reports' : 'Recent item report activity'} description="Search and filter real reports, then select one to review its full details." /><Filters search={search} setSearch={setSearch} type={typeFilter} setType={setTypeFilter} status={statusFilter} setStatus={setStatusFilter} location={locationFilter} setLocation={setLocationFilter} locations={analytics.locations} /><div className="lf-workspace"><div>{filtered.length ? <div className="lf-items">{filtered.map((item) => <ItemCard item={item} key={item.id} selected={selectedId === item.id} onSelect={() => setSelectedId(item.id)} />)}</div> : <EmptyState title="No reports match your filters" text="Try a broader search or report a lost or found item." />}</div><DetailPanel item={selected} canManage={canManageSelected} onStatus={updateStatus} /></div></section>
+          <section id="campus-reports" style={{ marginTop: '1rem' }}><SectionHeading eyebrow={role === 'admin' ? 'Operational browser' : 'Campus reports'} title={role === 'student' ? 'Browse lost and found reports' : 'Recent item report activity'} description="Search and filter real reports, then select one to review its full details." /><Filters search={search} setSearch={setSearch} type={typeFilter} setType={setTypeFilter} status={statusFilter} setStatus={setStatusFilter} location={locationFilter} setLocation={setLocationFilter} locations={analytics.locations} /><div className="lf-workspace"><div>{filtered.length ? <div className="lf-items">{filtered.map((item) => <ItemCard item={item} key={item.id} selected={selectedId === item.id} onSelect={() => setSelectedId(item.id)} />)}</div> : items.length ? <EmptyState title="No reports match your filters" text="Try a broader search or report a lost or found item." /> : <EmptyState title={role === 'mentor' ? 'No recent campus item reports' : 'No item reports yet'} text={role === 'mentor' ? 'Lost and found activity will appear here when students submit reports.' : 'Campus item tracking will appear after lost or found reports are created.'} />}</div><DetailPanel item={selected} canManage={canManageSelected} onStatus={updateStatus} /></div></section>
         </> : null}
       </div>
     </>

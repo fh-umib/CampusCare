@@ -14,6 +14,11 @@ export type LoginPayload = {
   password: string;
 };
 
+export type ForgotPasswordPayload = {
+  email: string;
+  role?: UserRole;
+};
+
 export type RegisterPayload = {
   fullName: string;
   email: string;
@@ -25,4 +30,3 @@ export type AuthResult = {
   token: string;
   user: AuthUser;
 };
-

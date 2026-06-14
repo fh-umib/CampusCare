@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { getApiErrorMessage } from '../services/apiClient';
 import { CampusCareLogoMark } from '../components/brand/CampusCareLogoMark';
 import { AuthTopAction, AuthTopActionStyles } from '../components/auth/AuthTopAction';
+import { ButtonSpinner } from '../components/ui/LoadingStates';
 
 const rolePanels = {
   student: {
@@ -126,7 +127,15 @@ export default function LoginPage() {
                 />
               </label>
               <label className="block">
-                <span className="field-label">Password</span>
+                <span className="flex items-center justify-between gap-3">
+                  <span className="field-label">Password</span>
+                  <Link
+                    className="text-xs font-semibold text-teal-700 transition hover:text-teal-900"
+                    to={`/forgot-password?role=${roleKey}`}
+                  >
+                    Forgot password?
+                  </Link>
+                </span>
                 <input
                   autoComplete="current-password"
                   className="input"
@@ -136,8 +145,8 @@ export default function LoginPage() {
                   onChange={(event) => setPassword(event.target.value)}
                 />
               </label>
-              <button className="btn-primary w-full" type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Signing in...' : 'Sign in'}
+              <button aria-busy={isSubmitting} className="btn-primary flex w-full items-center justify-center gap-2" type="submit" disabled={isSubmitting}>
+                {isSubmitting ? <><ButtonSpinner />Signing in...</> : 'Sign in'}
               </button>
             </form>
 

@@ -2,7 +2,11 @@ import { authRepository } from '../repositories/auth.repository.js';
 import type { PublicUser, User } from '../types/user.js';
 import { passwordUtils } from '../utils/password.js';
 import { tokenUtils } from '../utils/token.js';
-import { validateLoginPayload, validateRegisterPayload } from '../utils/validation.js';
+import {
+  validateForgotPasswordPayload,
+  validateLoginPayload,
+  validateRegisterPayload
+} from '../utils/validation.js';
 import { AppError } from '../utils/httpError.js';
 
 const APPROVED_ADMIN_EMAIL = 'fluturahysenni@gmail.com';
@@ -76,6 +80,14 @@ export const authService = {
     assertAdminIsAuthorized(user);
 
     return createAuthResponse(user);
+  },
+
+  forgotPassword: async (payload: unknown) => {
+    validateForgotPasswordPayload(payload);
+
+    return {
+      prepared: true
+    };
   },
 
   getCurrentUser: async (userId: string) => {

@@ -64,6 +64,14 @@ Used for lost/found item reporting.
 
 - `GET /dashboard/stats` returns role-aware dashboard statistics.
 
+## Notifications
+
+Used for personal and role-scoped activity updates.
+
+- `GET /notifications` returns notifications visible to the authenticated user.
+- `PATCH /notifications/:id/read` marks one visible notification as read.
+- `PATCH /notifications/read-all` marks all visible notifications as read.
+
 ## Profile and Onboarding
 
 Used for role-specific student, mentor, and admin profile context.

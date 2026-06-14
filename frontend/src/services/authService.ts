@@ -1,5 +1,11 @@
 import { apiClient, clearStoredToken, type ApiResponse } from './apiClient';
-import type { AuthResult, AuthUser, LoginPayload, RegisterPayload } from '../types/auth';
+import type {
+  AuthResult,
+  AuthUser,
+  ForgotPasswordPayload,
+  LoginPayload,
+  RegisterPayload
+} from '../types/auth';
 
 export const authService = {
   async login(payload: LoginPayload) {
@@ -12,6 +18,11 @@ export const authService = {
     return response.data.data;
   },
 
+  async forgotPassword(payload: ForgotPasswordPayload) {
+    const response = await apiClient.post<ApiResponse<{ prepared: boolean }>>('/auth/forgot-password', payload);
+    return response.data.message;
+  },
+
   async getCurrentUser() {
     const response = await apiClient.get<ApiResponse<{ user: AuthUser }>>('/auth/me');
     return response.data.data.user;
@@ -21,4 +32,3 @@ export const authService = {
     clearStoredToken();
   }
 };
-

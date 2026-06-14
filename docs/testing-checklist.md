@@ -11,6 +11,9 @@ Use this checklist before submitting, presenting, or continuing with a new devel
 - [ ] Run `backend/src/database/001_init_users.sql`.
 - [ ] Run `backend/src/database/002_init_modules.sql`.
 - [ ] Run `backend/src/database/004_user_profiles_and_engagement.sql`.
+- [ ] Run `backend/src/database/005_configure_approved_admin.sql`.
+- [ ] Run `backend/src/database/006_notifications.sql`.
+- [ ] Or run `npm run migrate:notifications --workspace backend` after configuring `backend/.env`.
 - [ ] Run `backend/src/database/003_seed_demo_data.sql` if demo data is needed.
 - [ ] Start the backend with `npm run dev:backend`.
 - [ ] Start the frontend with `npm run dev:frontend`.
@@ -29,6 +32,8 @@ Use this checklist before submitting, presenting, or continuing with a new devel
 - [ ] `GET /api/dashboard/stats` returns role-aware dashboard data.
 - [ ] `GET /api/profile` returns the current user's onboarding profile.
 - [ ] `POST /api/profile/onboarding` saves role-specific onboarding data.
+- [ ] `GET /api/notifications` returns only personal and current-role notifications.
+- [ ] Notification read and read-all endpoints update only visible notifications.
 
 ## C. Frontend Checks
 
@@ -47,6 +52,7 @@ Use this checklist before submitting, presenting, or continuing with a new devel
 - [ ] MoodCampus can create mood records and show summaries.
 - [ ] Lost & Found can create reports and show public reports.
 - [ ] Profile shows full name, email, role, account badge, created date, and skills.
+- [ ] Notification bell opens, shows unread count, navigates from linked updates, and marks items read.
 
 ## D. Role Checks
 

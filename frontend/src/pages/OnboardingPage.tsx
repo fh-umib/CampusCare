@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CampusCareLogoMark } from '../components/brand/CampusCareLogoMark';
+import { ButtonSpinner, PageLoadingState } from '../components/ui/LoadingStates';
 import { useAuth } from '../context/AuthContext';
 import { getApiErrorMessage } from '../services/apiClient';
 import { profileService } from '../services/profileService';
@@ -101,7 +102,7 @@ export default function OnboardingPage() {
             <span className="rounded-full border border-cyan-200/20 bg-cyan-100/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-cyan-100">
               {roleTitle}
             </span>
-            <h1 className="mt-5 text-4xl font-semibold leading-tight md:text-5xl">Complete your CampusCare profile.</h1>
+            <h1 className="mt-5 text-3xl font-semibold leading-tight md:text-4xl">Complete your CampusCare profile.</h1>
             <p className="mt-4 max-w-2xl text-sm leading-7 text-white/65">{roleDescription}</p>
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
@@ -115,11 +116,11 @@ export default function OnboardingPage() {
         </div>
       </section>
 
-      {isLoading ? <div className="empty-state">Loading profile details...</div> : null}
+      {isLoading ? <PageLoadingState variant="profile" label="Loading profile details" /> : null}
       {message ? <div className="alert-success">{message}</div> : null}
       {error ? <div className="alert-error">{error}</div> : null}
 
-      <form className="grid gap-6 lg:grid-cols-[0.78fr_1.22fr]" onSubmit={handleSubmit}>
+      {!isLoading ? <form className="grid gap-6 lg:grid-cols-[0.78fr_1.22fr]" onSubmit={handleSubmit}>
         <aside className="space-y-4">
           <div className="premium-card">
             <span className="badge-green">{role} view</span>
@@ -285,14 +286,14 @@ export default function OnboardingPage() {
 
           <div className="mt-6 flex flex-wrap gap-3">
             <button className="btn-primary" type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Saving...' : 'Save onboarding'}
+              {isSubmitting ? <><ButtonSpinner />Saving profile...</> : 'Save onboarding'}
             </button>
             <button className="btn-secondary" type="button" onClick={() => navigate('/dashboard')}>
               Skip for now
             </button>
           </div>
         </section>
-      </form>
+      </form> : null}
     </div>
   );
 }

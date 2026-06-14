@@ -13,6 +13,11 @@ export const authController = {
     successResponse(response, 'Login successful', result);
   },
 
+  forgotPassword: async (request: Request, response: Response) => {
+    await authService.forgotPassword(request.body);
+    successResponse(response, 'If this account exists, password recovery has been prepared.');
+  },
+
   me: async (request: Request, response: Response) => {
     const user = request.currentUser;
     successResponse(response, 'Current user retrieved', { user });

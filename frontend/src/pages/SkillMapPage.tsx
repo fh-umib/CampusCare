@@ -1,4 +1,6 @@
-import { useEffect, useMemo, useState, type CSSProperties, type FormEvent, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useState, type CSSProperties, type FormEvent, type ReactNode } from 'react';
+import { EmptyState as UIEmptyState } from '../components/ui/EmptyState';
+import { ButtonSpinner, PageLoadingState } from '../components/ui/LoadingStates';
 import { useAuth } from '../context/AuthContext';
 import { getApiErrorMessage } from '../services/apiClient';
 import { skillService } from '../services/skillService';
@@ -149,8 +151,8 @@ function SectionHeading({ eyebrow, title, description }: { eyebrow?: string; tit
   return <div className="sk-heading">{eyebrow ? <span>{eyebrow}</span> : null}<h2>{title}</h2><p>{description}</p></div>;
 }
 
-function EmptyState({ title, text }: { title: string; text: string }) {
-  return <div className="sk-empty"><Icon name="growth" size={44} color="#94a3b8" background="#eef4f8" /><strong>{title}</strong><span>{text}</span></div>;
+function EmptyState({ title, text, actionHref, actionLabel }: { title: string; text: string; actionHref?: string; actionLabel?: string }) {
+  return <UIEmptyState icon="skill" title={title} description={text} actionHref={actionHref} actionLabel={actionLabel} variant="soft" />;
 }
 
 function Hero({ role, total, shared, ready, commonCategory }: { role: Role; total: number; shared: number; ready: number; commonCategory: string }) {
@@ -216,21 +218,21 @@ function AddSkillPanel({ skills, onReload, onMessage }: { skills: Skill[]; onRel
   }
 
   return (
-    <section className="sk-card sk-add-panel">
+    <section className="sk-card sk-add-panel" id="add-skill">
       <SectionHeading eyebrow="Grow your profile" title="Add a skill to your map" description="Choose an existing skill, or add a missing one to the shared catalog." />
       {error ? <div className="sk-alert sk-alert-error">{error}</div> : null}
       <form className="sk-attach-form" onSubmit={attach}>
         <label><span>Skill</span><select value={attachForm.skillId} onChange={(event) => setAttachForm({ ...attachForm, skillId: event.target.value })}><option value="">Choose skill</option>{skills.map((skill) => <option key={skill.id} value={skill.id}>{skill.name}</option>)}</select></label>
         <label><span>Level</span><select value={attachForm.level} onChange={(event) => setAttachForm({ ...attachForm, level: event.target.value as SkillLevel })}>{levels.map((level) => <option key={level}>{level}</option>)}</select></label>
         <label><span>Availability</span><select value={attachForm.availability} onChange={(event) => setAttachForm({ ...attachForm, availability: event.target.value as SkillAvailability })}>{availabilityValues.map((value) => <option key={value}>{value}</option>)}</select></label>
-        <button disabled={Boolean(submitting) || !attachForm.skillId} type="submit">{submitting === 'attach' ? 'Adding...' : 'Add to my SkillMap'}<Icon name="arrow" size={22} color="#fff" background="transparent" /></button>
+        <button disabled={Boolean(submitting) || !attachForm.skillId} type="submit">{submitting === 'attach' ? <><ButtonSpinner />Adding skill...</> : <>Add to my SkillMap<Icon name="arrow" size={22} color="#fff" background="transparent" /></>}</button>
       </form>
       <details className="sk-catalog-form">
         <summary>Add a skill missing from the catalog</summary>
         <form onSubmit={createCatalogSkill}>
           <label><span>Skill name</span><input value={newSkill.name} onChange={(event) => setNewSkill({ ...newSkill, name: event.target.value })} /></label>
           <label><span>Category</span><input placeholder="e.g. Development" value={newSkill.category} onChange={(event) => setNewSkill({ ...newSkill, category: event.target.value })} /></label>
-          <button disabled={Boolean(submitting)} type="submit">{submitting === 'catalog' ? 'Saving...' : 'Add catalog skill'}</button>
+          <button disabled={Boolean(submitting)} type="submit">{submitting === 'catalog' ? <><ButtonSpinner />Saving skill...</> : 'Add catalog skill'}</button>
         </form>
       </details>
     </section>
@@ -302,27 +304,34 @@ function CategoryChart({ studentSkills }: { studentSkills: StudentSkillCard[] })
   studentSkills.flatMap((student) => student.skills).forEach((skill) => counts.set(skill.category || 'General', (counts.get(skill.category || 'General') ?? 0) + 1));
   const rows = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 7);
   const max = Math.max(1, ...rows.map(([, count]) => count));
-  return <section className="sk-card sk-chart"><SectionHeading eyebrow="Learning areas" title="Skills by category" description="Shared student skills grouped by their catalog category." />{rows.length ? <div className="sk-bars">{rows.map(([category, count], index) => <div key={category}><div><span>{category}</span><strong>{count}</strong></div><div><span style={{ width: `${(count / max) * 100}%`, animationDelay: `${index * 60}ms` }} /></div></div>)}</div> : <EmptyState title="No category data yet" text="Categories will appear as skills are shared." />}</section>;
+  return <section className="sk-card sk-chart"><SectionHeading eyebrow="Learning areas" title="Skills by category" description="Shared student skills grouped by their catalog category." />{rows.length ? <div className="sk-bars">{rows.map(([category, count], index) => <div key={category}><div><span>{category}</span><strong>{count}</strong></div><div><span style={{ width: `${(count / max) * 100}%`, animationDelay: `${index * 60}ms` }} /></div></div>)}</div> : <EmptyState title="No SkillMap activity yet" text="Skill trends will appear after students begin adding skills." />}</section>;
 }
 
 function LevelChart({ students }: { students: StudentSkillCard[] }) {
   const all = students.flatMap((student) => student.skills);
   const counts = levels.map((level) => ({ level, count: all.filter((skill) => skill.level === level).length }));
   const total = all.length;
-  return <section className="sk-card sk-chart"><SectionHeading eyebrow="Experience mix" title="Skill level distribution" description="How shared skills are described across current profiles." />{total ? <><div className="sk-level-segments">{counts.map(({ level, count }) => count ? <span key={level} style={{ width: `${(count / total) * 100}%` }} /> : null)}</div><div className="sk-level-list">{counts.map(({ level, count }, index) => <div key={level}><i /><span>{displayLabel(level)}</span><strong>{count}</strong><small>{Math.round((count / total) * 100)}%</small><b style={{ width: `${(count / total) * 100}%`, animationDelay: `${index * 70}ms` }} /></div>)}</div></> : <EmptyState title="No level data yet" text="Skill levels will appear after profiles are built." />}</section>;
+  return <section className="sk-card sk-chart"><SectionHeading eyebrow="Experience mix" title="Skill level distribution" description="How shared skills are described across current profiles." />{total ? <><div className="sk-level-segments">{counts.map(({ level, count }) => count ? <span key={level} style={{ width: `${(count / total) * 100}%` }} /> : null)}</div><div className="sk-level-list">{counts.map(({ level, count }, index) => <div key={level}><i /><span>{displayLabel(level)}</span><strong>{count}</strong><small>{Math.round((count / total) * 100)}%</small><b style={{ width: `${(count / total) * 100}%`, animationDelay: `${index * 70}ms` }} /></div>)}</div></> : <EmptyState title="No student skills shared yet" text="Shared skills will appear here so mentors can discover strengths and learning needs." />}</section>;
 }
 
 function StatusChart({ mySkills, results }: { mySkills: StudentSkill[]; results: Record<string, CheckResult> }) {
   const statuses = (['new', 'practicing', 'ready', 'verified', 'review'] as CheckStatus[]).map((status) => ({ status, count: mySkills.filter((skill) => getStatus(skill, results) === status).length }));
   const total = mySkills.length;
-  return <section className="sk-card sk-chart"><SectionHeading eyebrow="Growth checkpoints" title="Verification status" description="A friendly view of skills moving from practice toward confirmation." />{total ? <><div className="sk-status-segments">{statuses.map(({ status, count }) => count ? <span key={status} style={{ width: `${(count / total) * 100}%`, background: statusMeta[status].color }} /> : null)}</div><div className="sk-status-list">{statuses.map(({ status, count }) => <div key={status}><i style={{ background: statusMeta[status].color }} /><span>{statusMeta[status].label}</span><strong>{count}</strong></div>)}</div></> : <EmptyState title="No growth status yet" text="Add a skill to start your personal map." />}</section>;
+  return <section className="sk-card sk-chart"><SectionHeading eyebrow="Growth checkpoints" title="Verification status" description="A friendly view of skills moving from practice toward confirmation." />{total ? <><div className="sk-status-segments">{statuses.map(({ status, count }) => count ? <span key={status} style={{ width: `${(count / total) * 100}%`, background: statusMeta[status].color }} /> : null)}</div><div className="sk-status-list">{statuses.map(({ status, count }) => <div key={status}><i style={{ background: statusMeta[status].color }} /><span>{statusMeta[status].label}</span><strong>{count}</strong></div>)}</div></> : <EmptyState title="No verified skills yet" text="After practicing, complete a friendly skill check to confirm your progress." />}</section>;
 }
 
-function Discovery({ students, search, setSearch, onSearch }: { students: StudentSkillCard[]; search: string; setSearch: (value: string) => void; onSearch: (event: FormEvent) => void }) {
+function Discovery({ students, search, setSearch, onSearch, role }: { students: StudentSkillCard[]; search: string; setSearch: (value: string) => void; onSearch: (event: FormEvent) => void; role: Role }) {
+  const emptyTitle = search ? 'No matching profiles' : role === 'admin' ? 'No SkillMap activity yet' : 'No student skills shared yet';
+  const emptyText = search
+    ? 'Try another skill or clear the current search.'
+    : role === 'admin'
+      ? 'Skill trends will appear after students begin adding skills.'
+      : 'Shared skills will appear here so mentors can discover strengths and learning needs.';
+
   return (
     <section className="sk-card sk-discovery">
       <div className="sk-discovery-head"><SectionHeading eyebrow="Peer discovery" title="Student skill profiles" description="Find classmates and mentors by shared skills and collaboration availability." /><form onSubmit={onSearch}><Icon name="search" size={30} color={colors.muted} background="transparent" /><input placeholder="Search a skill" value={search} onChange={(event) => setSearch(event.target.value)} /><button type="submit">Search</button></form></div>
-      {!students.length ? <EmptyState title="No matching profiles" text="Try another skill or clear the current search." /> : <div className="sk-students">{students.map((student) => <article key={student.userId}><div className="sk-avatar">{student.fullName.split(' ').map((part) => part[0]).slice(0, 2).join('').toUpperCase()}</div><div><h3>{student.fullName}</h3><span>{displayLabel(student.role)} profile · {student.skills.length} skill{student.skills.length === 1 ? '' : 's'}</span></div><div className="sk-student-skills">{student.skills.map((skill) => <span key={skill.id}><Icon name={categoryIcon(skill.category, skill.name)} size={25} color={colors.teal} background="#e8f8f5" />{skill.name}<small>{displayLabel(skill.level)} · {displayLabel(skill.availability)}</small></span>)}</div></article>)}</div>}
+      {!students.length ? <EmptyState title={emptyTitle} text={emptyText} /> : <div className="sk-students">{students.map((student) => <article key={student.userId}><div className="sk-avatar">{student.fullName.split(' ').map((part) => part[0]).slice(0, 2).join('').toUpperCase()}</div><div><h3>{student.fullName}</h3><span>{displayLabel(student.role)} profile · {student.skills.length} skill{student.skills.length === 1 ? '' : 's'}</span></div><div className="sk-student-skills">{student.skills.map((skill) => <span key={skill.id}><Icon name={categoryIcon(skill.category, skill.name)} size={25} color={colors.teal} background="#e8f8f5" />{skill.name}<small>{displayLabel(skill.level)} · {displayLabel(skill.availability)}</small></span>)}</div></article>)}</div>}
     </section>
   );
 }
@@ -340,7 +349,7 @@ export default function SkillMapPage() {
   const [checkResults, setCheckResults] = useState<Record<string, CheckResult>>(loadCheckResults);
   const role: Role = user?.role === 'mentor' || user?.role === 'admin' ? user.role : 'student';
 
-  async function loadData(skillFilter = search) {
+  const loadData = useCallback(async (skillFilter = '') => {
     setError('');
     try {
       setIsLoading(true);
@@ -353,16 +362,16 @@ export default function SkillMapPage() {
     } finally {
       setIsLoading(false);
     }
-  }
+  }, []);
 
-  useEffect(() => { void loadData(''); }, []);
+  useEffect(() => { void loadData(''); }, [loadData]);
 
   async function handleRemove(skillId: string) {
     try {
       setError('');
       await skillService.removeMySkill(skillId);
       setMessage('Skill removed from your profile.');
-      await loadData();
+      await loadData(search);
     } catch (err) {
       setError(getApiErrorMessage(err));
     }
@@ -420,8 +429,8 @@ export default function SkillMapPage() {
         <Hero role={role} total={skills.length} shared={analytics.shared} ready={analytics.ready} commonCategory={analytics.commonCategory} />
         {message ? <div className="sk-alert sk-alert-success">{message}</div> : null}
         {error ? <div className="sk-page-error">{error}</div> : null}
-        {isLoading ? <div className="sk-card sk-loading">Loading SkillMap...</div> : null}
-        {!isLoading ? (
+        {isLoading ? <PageLoadingState variant="analytics" label="Loading SkillMap" /> : null}
+        {!isLoading && !error ? (
           <>
             <div className={`sk-metrics ${role}`}>
               {role === 'student' ? <>
@@ -445,9 +454,9 @@ export default function SkillMapPage() {
               </>}
             </div>
             <AddSkillPanel skills={skills} onReload={() => loadData()} onMessage={setMessage} />
-            <section style={{ marginTop: '1rem' }}><SectionHeading eyebrow={role === 'student' ? 'Personal SkillMap' : 'Current profile'} title={role === 'student' ? 'My skill growth' : 'My attached skills'} description="Practice status and friendly checks use each skill's real attachment date." />{mySkills.length ? <div className="sk-skills-grid">{mySkills.map((skill) => <SkillCard key={skill.skillId} skill={skill} result={checkResults[skill.skillId]} onCheck={setActiveCheck} onRemove={(skillId) => void handleRemove(skillId)} />)}</div> : <EmptyState title="No skills attached yet" text="Choose one skill above to begin building your map." />}</section>
+            <section style={{ marginTop: '1rem' }}><SectionHeading eyebrow={role === 'student' ? 'Personal SkillMap' : 'Current profile'} title={role === 'student' ? 'My skill growth' : 'My attached skills'} description="Practice status and friendly checks use each skill's real attachment date." />{mySkills.length ? <div className="sk-skills-grid">{mySkills.map((skill) => <SkillCard key={skill.skillId} skill={skill} result={checkResults[skill.skillId]} onCheck={setActiveCheck} onRemove={(skillId) => void handleRemove(skillId)} />)}</div> : <EmptyState title="No skills on your map yet" text="Add a skill you are learning or can help with. Your friendly skill check unlocks after practice." actionHref="#add-skill" actionLabel="Add first skill" />}</section>
             <div className="sk-chart-grid"><CategoryChart studentSkills={students} /><LevelChart students={students} /><StatusChart mySkills={mySkills} results={checkResults} /></div>
-            <Discovery students={students} search={search} setSearch={setSearch} onSearch={handleSearch} />
+            <Discovery students={students} search={search} setSearch={setSearch} onSearch={handleSearch} role={role} />
           </>
         ) : null}
       </div>

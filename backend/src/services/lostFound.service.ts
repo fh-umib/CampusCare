@@ -1,4 +1,5 @@
 import { lostFoundRepository } from '../repositories/lostFound.repository.js';
+import { notificationService } from './notification.service.js';
 import type { LostFoundItemType, LostFoundStatus } from '../types/lostFound.js';
 import type { PublicUser } from '../types/user.js';
 import { AppError } from '../utils/httpError.js';
@@ -43,11 +44,11 @@ export const lostFoundService = {
     return item;
   },
 
-  create: (payload: unknown, currentUser: PublicUser | undefined) => {
+  create: async (payload: unknown, currentUser: PublicUser | undefined) => {
     const user = requireCurrentUser(currentUser);
     const data = payload as Record<string, unknown>;
 
-    return lostFoundRepository.create({
+    const created = await lostFoundRepository.create({
       userId: user.id,
       title: requireString(data.title, 'title', 120),
       description: requireString(data.description, 'description'),
@@ -55,6 +56,23 @@ export const lostFoundService = {
       itemType: requireEnum(data.item_type ?? data.itemType, itemTypes, 'item_type'),
       itemDate: optionalDateString(data.item_date ?? data.itemDate)
     });
+    await Promise.all([
+      notificationService.create({
+        userId: user.id,
+        type: 'lost_found',
+        title: 'Item report created',
+        message: `Your ${created.itemType} item report “${created.title}” is now open.`,
+        link: '/lost-found'
+      }),
+      notificationService.create({
+        role: 'admin',
+        type: 'lost_found',
+        title: 'New Lost & Found report',
+        message: `A new ${created.itemType} item report was submitted.`,
+        link: '/lost-found'
+      })
+    ]);
+    return created;
   },
 
   updateStatus: async (id: string, payload: unknown, currentUser: PublicUser | undefined) => {
@@ -71,7 +89,15 @@ export const lostFoundService = {
     if (!updated) {
       throw new AppError(404, 'Lost or found item not found');
     }
-
+    if (item.userId && item.userId !== user.id) {
+      await notificationService.create({
+        userId: item.userId,
+        type: 'lost_found',
+        title: 'Item report status updated',
+        message: `“${item.title}” is now ${status}.`,
+        link: '/lost-found'
+      });
+    }
     return updated;
   }
 };

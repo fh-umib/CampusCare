@@ -1,5 +1,5 @@
 import type { UserRole } from '../types/roles.js';
-import type { LoginInput, RegisterInput } from '../types/auth.js';
+import type { ForgotPasswordInput, LoginInput, RegisterInput } from '../types/auth.js';
 import { AppError } from './httpError.js';
 
 const roles: UserRole[] = ['student', 'mentor', 'admin'];
@@ -69,5 +69,31 @@ export function validateLoginPayload(payload: unknown): LoginInput {
   return {
     email: data.email!.trim().toLowerCase(),
     password: data.password!
+  };
+}
+
+export function validateForgotPasswordPayload(payload: unknown): ForgotPasswordInput {
+  if (!payload || typeof payload !== 'object') {
+    throw new AppError(400, 'Invalid password recovery payload');
+  }
+
+  const data = payload as Partial<ForgotPasswordInput>;
+  const errors: string[] = [];
+
+  if (!data.email || typeof data.email !== 'string' || !emailPattern.test(data.email)) {
+    errors.push('A valid email is required');
+  }
+
+  if (data.role && !roles.includes(data.role)) {
+    errors.push('role must be one of: student, mentor, admin');
+  }
+
+  if (errors.length > 0) {
+    throw new AppError(400, 'Password recovery validation failed', errors);
+  }
+
+  return {
+    email: data.email!.trim().toLowerCase(),
+    role: data.role
   };
 }

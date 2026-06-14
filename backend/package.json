@@ -8,6 +8,7 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "seed:admin": "tsx src/database/seed_admin.ts",
+    "migrate:notifications": "tsx src/database/migrate_notifications.ts",
     "lint": "eslint ."
   },
   "dependencies": {

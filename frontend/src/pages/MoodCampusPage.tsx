@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState, type CSSProperties, type FormEvent, type ReactNode } from 'react';
+import { EmptyState as UIEmptyState } from '../components/ui/EmptyState';
+import { ButtonSpinner, PageLoadingState } from '../components/ui/LoadingStates';
 import { useAuth } from '../context/AuthContext';
 import { getApiErrorMessage } from '../services/apiClient';
 import { moodService } from '../services/moodService';
@@ -67,14 +69,8 @@ function SectionHeading({ eyebrow, title, description }: { eyebrow?: string; tit
   );
 }
 
-function EmptyState({ title, text }: { title: string; text: string }) {
-  return (
-    <div className="mc-empty">
-      <Icon name="reflection" size={44} color="#94a3b8" background="#eef4f8" />
-      <strong>{title}</strong>
-      <span>{text}</span>
-    </div>
-  );
+function EmptyState({ title, text, actionHref, actionLabel }: { title: string; text: string; actionHref?: string; actionLabel?: string }) {
+  return <UIEmptyState icon="mood" title={title} description={text} actionHref={actionHref} actionLabel={actionLabel} variant="soft" />;
 }
 
 function Hero({ role, total, commonMood, attentionCount, positiveCount }: {
@@ -197,7 +193,7 @@ function MoodForm({ onSaved, compact = false }: { onSaved: () => Promise<void>; 
         <textarea className="mc-input mc-textarea" placeholder="What shaped your week? Share only what feels comfortable." value={form.note} onChange={(event) => setForm((current) => ({ ...current, note: event.target.value }))} />
       </label>
       <button className="mc-primary-button" disabled={isSubmitting} type="submit">
-        {isSubmitting ? 'Saving reflection...' : 'Save mood check-in'}
+        {isSubmitting ? <><ButtonSpinner />Saving reflection...</> : 'Save mood check-in'}
         <Icon name="arrow" size={24} color="#fff" background="transparent" />
       </button>
     </form>
@@ -213,7 +209,7 @@ function DistributionChart({ summary }: { summary: MoodSummary[] }) {
   return (
     <section className="mc-card mc-chart-card">
       <SectionHeading eyebrow="Mood mix" title="Mood distribution" description="A clear count of every visible weekly mood signal." />
-      {!total ? <EmptyState title="No mood distribution yet" text="Mood counts will appear after the first check-in." /> : (
+      {!total ? <EmptyState title="No mood signals yet" text="General wellbeing patterns will appear after mood check-ins are recorded." /> : (
         <div className="mc-distribution">
           <div className="mc-donut" style={{
             background: `conic-gradient(${rows.map((item, index) => {
@@ -246,7 +242,7 @@ function BalanceChart({ records }: { records: MoodRecord[] }) {
   return (
     <section className="mc-card mc-chart-card">
       <SectionHeading eyebrow="Wellbeing balance" title="Steady vs pressured signals" description="A broad reflection view, not a diagnosis or individual score." />
-      {!total ? <EmptyState title="No balance to show" text="Start with one weekly check-in." /> : (
+      {!total ? <EmptyState title="No MoodCampus data yet" text="Campus mood trends will appear after users begin reflecting." /> : (
         <>
           <div className="mc-balance-summary">
             <div><span>Steady</span><strong>{positive}</strong><small>calm or motivated</small></div>
@@ -276,7 +272,7 @@ function Timeline({ records }: { records: MoodRecord[] }) {
         <SectionHeading eyebrow="Recent pattern" title="Weekly mood journey" description="Recent check-ins shown as a calm reflection path through the semester." />
         {ordered.length ? <span>{ordered.length} recent reflection{ordered.length === 1 ? '' : 's'}</span> : null}
       </div>
-      {!ordered.length ? <EmptyState title="No timeline yet" text="A pattern will form as weekly reflections are added." /> : (
+      {!ordered.length ? <EmptyState title="No mood journey yet" text="Your weekly mood journey will appear after a few check-ins." /> : (
         <div className="mc-journey" style={{ '--journey-count': ordered.length } as CSSProperties}>
           {ordered.map((record, index) => {
             const meta = moodMeta[record.mood];
@@ -306,7 +302,7 @@ function AttentionBoard({ records }: { records: MoodRecord[] }) {
   return (
     <section className="mc-card mc-chart-card">
       <SectionHeading eyebrow="Awareness board" title="Mood signals to notice" description="Pressure-related records appear first without assigning judgment." />
-      {!ordered.length ? <EmptyState title="No mood signals yet" text="Recent reflections will appear here." /> : (
+      {!ordered.length ? <EmptyState title="No mood signals yet" text="General wellbeing patterns will appear after mood check-ins are recorded." /> : (
         <div className="mc-attention-list">
           {ordered.map((record) => {
             const meta = moodMeta[record.mood];
@@ -351,7 +347,12 @@ function MoodHistory({ records, role }: { records: MoodRecord[]; role: Role }) {
   return (
     <section className="mc-card mc-history" id="mood-history">
       <SectionHeading eyebrow={role === 'student' ? 'Personal history' : 'Recent activity'} title={role === 'student' ? 'Mood history' : 'Recent mood activity'} description={role === 'student' ? 'A respectful timeline of your latest weekly reflections.' : 'Latest visible mood records for responsible awareness.'} />
-      {!ordered.length ? <EmptyState title="No mood records yet" text="Start with one weekly check-in." /> : (
+      {!ordered.length ? <EmptyState
+        title={role === 'student' ? 'No mood reflections yet' : role === 'mentor' ? 'No mood signals yet' : 'No MoodCampus data yet'}
+        text={role === 'student' ? 'Start with one weekly check-in. Your mood is information, not judgment.' : role === 'mentor' ? 'General wellbeing patterns will appear after mood check-ins are recorded.' : 'Campus mood trends will appear after users begin reflecting.'}
+        actionHref={role === 'student' ? '#mood-form' : undefined}
+        actionLabel={role === 'student' ? 'Record mood' : undefined}
+      /> : (
         <div className="mc-history-list">
           {ordered.slice(0, role === 'student' ? 8 : 12).map((record) => {
             const meta = moodMeta[record.mood];
@@ -566,9 +567,9 @@ export default function MoodCampusPage() {
       <div className="mc-page">
         <Hero role={role} total={records.length} commonMood={analytics.common} attentionCount={analytics.attention} positiveCount={analytics.positive} />
         {error ? <div className="mc-page-error">{error}</div> : null}
-        {isLoading ? <div className="mc-card mc-loading">Loading MoodCampus reflections...</div> : null}
+        {isLoading ? <PageLoadingState variant="analytics" label="Loading MoodCampus reflections" /> : null}
 
-        {!isLoading && role === 'student' ? (
+        {!isLoading && !error && role === 'student' ? (
           <>
             <div className="mc-student-top">
               <MoodForm onSaved={loadData} />
@@ -589,7 +590,7 @@ export default function MoodCampusPage() {
           </>
         ) : null}
 
-        {!isLoading && role === 'mentor' ? (
+        {!isLoading && !error && role === 'mentor' ? (
           <>
             <div className="mc-metrics mc-metrics-mentor">
               <MetricCard icon={analytics.common ? moodMeta[analytics.common].icon : 'reflection'} label="Most common mood" value={analytics.common ? moodMeta[analytics.common].label : 'No pattern'} helper="Across visible records" color={analytics.common ? moodMeta[analytics.common].color : '#0d9e8a'} />
@@ -604,7 +605,7 @@ export default function MoodCampusPage() {
           </>
         ) : null}
 
-        {!isLoading && role === 'admin' ? (
+        {!isLoading && !error && role === 'admin' ? (
           <>
             <div className="mc-metrics mc-metrics-admin">
               <MetricCard icon="history" label="Total records" value={String(records.length)} helper="Visible mood activity" color="#0b1d35" />
