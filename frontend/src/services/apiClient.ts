@@ -1,6 +1,10 @@
 import axios, { AxiosError } from 'axios';
 
 const TOKEN_KEY = 'campuscare_token';
+const API_URL =
+  import.meta.env.VITE_API_URL ??
+  import.meta.env.VITE_API_BASE_URL ??
+  'http://localhost:5000/api';
 
 export type ApiResponse<T> = {
   success: boolean;
@@ -10,7 +14,7 @@ export type ApiResponse<T> = {
 };
 
 export const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5000/api'
+  baseURL: API_URL
 });
 
 export function getStoredToken() {
@@ -43,4 +47,3 @@ apiClient.interceptors.request.use((config) => {
 
   return config;
 });
-

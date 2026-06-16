@@ -18,6 +18,7 @@ CampusCare is a full-stack, role-aware student support platform for university e
 - [Main Modules](#main-modules)
 - [How to Run the Project](#how-to-run-the-project)
 - [Environment Variables](#environment-variables)
+- [Deployment](#deployment)
 - [Current Notes and Future Direction](#current-notes-and-future-direction)
 - [Author](#author)
 
@@ -317,16 +318,41 @@ NODE_ENV=development
 DATABASE_URL=postgresql://username:password@localhost:5432/campuscare
 JWT_SECRET=replace_with_secure_jwt_secret
 JWT_EXPIRES_IN=7d
-CLIENT_URL=http://localhost:5173
+FRONTEND_URL=http://localhost:5173
 ```
 
 ### Frontend example
 
 ```env
-VITE_API_BASE_URL=http://localhost:5000/api
+VITE_API_URL=http://localhost:5000/api
 ```
 
 Use `backend/.env.example` and `frontend/.env.example` as the configuration references.
+
+---
+
+## Deployment
+
+### Frontend
+
+- Deploy the `frontend` folder to Vercel.
+- Set `VITE_API_URL` to the deployed backend API URL, including `/api`.
+- The included `frontend/vercel.json` keeps React Router pages available on direct navigation.
+
+### Backend
+
+- Deploy the `backend` folder to Render, Railway, or another Node.js hosting service.
+- Use `npm run build` as the build command and `npm run start` as the start command.
+- Configure `DATABASE_URL`, `JWT_SECRET`, `JWT_EXPIRES_IN`, `FRONTEND_URL`, and `NODE_ENV=production`.
+- Hosting providers may supply `PORT` automatically; the server already reads it from the environment.
+
+### Database
+
+- Create a managed PostgreSQL database and set its connection string as `DATABASE_URL`.
+- Run the schema migrations documented in `backend/src/database/README.md`.
+- Run the demo seed only when a non-production demonstration environment requires it.
+
+Never commit production environment files, database passwords, or JWT secrets.
 
 ---
 

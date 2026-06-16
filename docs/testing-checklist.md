@@ -6,7 +6,7 @@ Use this checklist before submitting, presenting, or continuing with a new devel
 
 - [ ] Run `npm install` from the project root.
 - [ ] Create `backend/.env` from `backend/.env.example`.
-- [ ] Confirm `DATABASE_URL`, `JWT_SECRET`, `JWT_EXPIRES_IN`, `CLIENT_URL`, `PORT`, and `NODE_ENV` are configured.
+- [ ] Confirm `DATABASE_URL`, `JWT_SECRET`, `JWT_EXPIRES_IN`, `FRONTEND_URL`, `PORT`, and `NODE_ENV` are configured.
 - [ ] Create the PostgreSQL database named `campuscare`.
 - [ ] Run `backend/src/database/001_init_users.sql`.
 - [ ] Run `backend/src/database/002_init_modules.sql`.
