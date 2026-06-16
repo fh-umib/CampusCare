@@ -49,7 +49,7 @@ export const authService = {
     const existingUser = await authRepository.findByEmail(input.email);
 
     if (existingUser) {
-      throw new AppError(409, 'Email is already registered');
+      throw new AppError(409, 'An account with this email already exists.');
     }
 
     const passwordHash = await passwordUtils.hash(input.password);

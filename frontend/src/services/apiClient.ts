@@ -32,6 +32,10 @@ export function clearStoredToken() {
 export function getApiErrorMessage(error: unknown) {
   if (axios.isAxiosError(error)) {
     const axiosError = error as AxiosError<{ message?: string; errors?: string[] }>;
+    if (!axiosError.response || (axiosError.response.status >= 500 && axiosError.response.status <= 599)) {
+      return 'Service is temporarily unavailable. Please try again.';
+    }
+
     return axiosError.response?.data?.message ?? axiosError.message;
   }
 
