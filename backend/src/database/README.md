@@ -102,3 +102,25 @@ GET https://campus-care-backend-i27p.onrender.com/api/health
 ```
 
 If health is connected but login returns `503`, the deployed database usually has not received the migrations yet or Render is pointing to a different `DATABASE_URL` than the one migrated locally.
+
+## Production demo-user cleanup
+
+To reset the deployed Neon database back to only the approved Admin, demo Student, and demo Mentor accounts, run this from the Render shell after the latest backend deployment:
+
+```bash
+npm run cleanup:demo-users
+```
+
+If Render is configured from the repository root instead of the `backend` folder, use:
+
+```bash
+npm run cleanup:demo-users --workspace backend
+```
+
+This command keeps only:
+
+- `fluturahysenni@gmail.com` as `admin`
+- `student@campuscare.local` as `student`
+- `mentor@campuscare.local` as `mentor`
+
+It hashes the required demo passwords with bcrypt and removes related rows for deleted temporary users. It does not drop tables or print database credentials.

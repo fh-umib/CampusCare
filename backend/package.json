@@ -9,6 +9,7 @@
     "start": "node dist/server.js",
     "migrate": "tsx src/database/migrate.ts",
     "seed": "tsx src/database/seed.ts",
+    "cleanup:demo-users": "tsx src/database/cleanupDemoUsers.ts",
     "seed:admin": "tsx src/database/seed_admin.ts",
     "migrate:notifications": "tsx src/database/migrate_notifications.ts",
     "lint": "eslint ."
