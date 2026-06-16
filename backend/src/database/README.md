@@ -24,7 +24,13 @@ Set `DATABASE_URL` and a secure `JWT_SECRET` in `backend/.env`. Never commit thi
 
 ## 3. Run schema migrations
 
-Run the required schema files in this order:
+From the backend folder, run:
+
+```bash
+npm run migrate
+```
+
+The migration command runs the required schema files in this order:
 
 1. `001_init_users.sql`
 2. `002_init_modules.sql`
@@ -33,7 +39,7 @@ Run the required schema files in this order:
 
 The files `003_seed_demo_data.sql` and `005_configure_approved_admin.sql` are older data setup files, not schema migrations. The recommended local setup uses the TypeScript seed command below instead.
 
-SQL files can be executed with `psql` or the pgAdmin Query Tool.
+The same SQL files can also be executed manually with `psql` or the pgAdmin Query Tool if needed.
 
 ## 4. Seed local demo data
 
@@ -70,3 +76,29 @@ npm run seed
 ```
 
 The current project does not require a password-reset table. Its forgot-password endpoint only returns a privacy-safe acknowledgement.
+
+## Render + Neon setup
+
+For the deployed Render backend, set the Neon connection string as `DATABASE_URL` in Render environment variables. Do not commit it.
+
+After deployment, run these commands in the Render shell or as a one-time job from the backend service:
+
+```bash
+npm run migrate
+npm run seed
+```
+
+If the Render service is configured from the repository root instead of the `backend` folder, use:
+
+```bash
+npm run migrate --workspace backend
+npm run seed --workspace backend
+```
+
+Then verify:
+
+```text
+GET https://campus-care-backend-i27p.onrender.com/api/health
+```
+
+If health is connected but login returns `503`, the deployed database usually has not received the migrations yet or Render is pointing to a different `DATABASE_URL` than the one migrated locally.
