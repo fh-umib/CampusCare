@@ -7,6 +7,7 @@ import { getApiErrorMessage } from '../services/apiClient';
 import { dashboardService } from '../services/dashboardService';
 import type { DashboardStats } from '../types/dashboard';
 import { formatDate } from '../utils/formatDate';
+import { AnalyticsPanel } from '../components/analytics/AnalyticsPanel';
 
 type IconName =
   | 'help'
@@ -677,6 +678,7 @@ export default function DashboardPage() {
             {role === 'student' ? <StudentDashboard stats={stats} /> : null}
             {role === 'mentor' ? <MentorDashboard stats={stats} /> : null}
             {role === 'admin' ? <AdminDashboard stats={stats} /> : null}
+            <AnalyticsPanel role={role} />
           </>
         ) : null}
       </div>

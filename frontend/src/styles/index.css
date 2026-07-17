@@ -12,6 +12,17 @@ body {
   background: #f4f8fc;
 }
 
+.an-panel { padding: 1.25rem; }
+.an-head { display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; margin-bottom:1rem; }
+.an-head h2,.an-grid h3 { margin:0; color:#0b1d35; font-family:Sora,sans-serif; }
+.an-head h2 { font-size:1rem; }.an-head p,.an-note { margin:.3rem 0 0; color:#64748b; font-size:.72rem; }
+.an-actions { display:flex; flex-wrap:wrap; gap:.5rem; }.an-actions button { border:1px solid #bce9e2; border-radius:10px; background:#f0fdfa; padding:.55rem .75rem; color:#0f766e; font-size:.72rem; font-weight:800; cursor:pointer; }.an-actions button:disabled{opacity:.55;cursor:wait}
+.an-metrics { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:.65rem; }.an-metrics article{border:1px solid #e2ebf2;border-radius:12px;background:#f8fbfd;padding:.75rem}.an-metrics span{display:block;color:#64748b;font-size:.63rem;text-transform:uppercase;font-weight:800}.an-metrics strong{display:block;margin-top:.35rem;font-family:Sora,sans-serif;font-size:1.2rem}
+.an-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1rem; }.an-grid>div{min-width:0;border:1px solid #e2ebf2;border-radius:13px;padding:1rem}.an-grid h3{font-size:.82rem;margin-bottom:.8rem}
+.an-bars{display:grid;gap:.55rem}.an-bars>div{display:grid;grid-template-columns:90px minmax(40px,1fr) 28px;align-items:center;gap:.5rem;color:#64748b;font-size:.67rem;text-transform:capitalize}.an-bars>div>div{height:7px;border-radius:99px;background:#e8eff5;overflow:hidden}.an-bars i{display:block;height:100%;border-radius:99px;background:#0d9e8a}.an-bars strong{color:#0b1d35;text-align:right}
+.an-heatmap{display:grid;grid-template-columns:repeat(14,1fr);gap:4px;min-height:80px}.an-heatmap span{min-height:16px;border-radius:3px;background:#0d9e8a}.an-empty{grid-column:1/-1;display:grid;place-items:center;min-height:80px;color:#94a3b8;font-size:.72rem}.an-note{margin-top:.9rem}
+@media(max-width:900px){.an-metrics{grid-template-columns:repeat(3,1fr)}}@media(max-width:650px){.an-head,.an-grid{display:grid;grid-template-columns:1fr}.an-metrics{grid-template-columns:repeat(2,1fr)}.an-actions button{flex:1}.an-heatmap{grid-template-columns:repeat(7,1fr)}}
+
 html {
   scroll-behavior: smooth;
   overflow-x: hidden;

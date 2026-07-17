@@ -46,8 +46,15 @@ export async function queryDatabase<T extends QueryResultRow>(sql: string, param
     databaseStatus = 'connected';
     return result;
   } catch (error) {
-    databaseStatus = 'disconnected';
-    logDatabaseError(error);
-    throw new AppError(503, 'Database is currently unavailable');
+    const code = error && typeof error === 'object' && 'code' in error ? String(error.code) : '';
+    const unavailable = code.startsWith('08') || ['ECONNREFUSED', 'ECONNRESET', 'ETIMEDOUT', 'ENOTFOUND'].includes(code);
+    if (unavailable) {
+      databaseStatus = 'disconnected';
+      logDatabaseError(error);
+      throw new AppError(503, 'Database is currently unavailable', [], 'DATABASE_UNAVAILABLE');
+    }
+    const message = error instanceof Error ? error.message : 'Unknown query error';
+    logger.error('database_query_error', env.nodeEnv === 'development' ? { code, message } : { code });
+    throw new AppError(500, 'Unable to complete database request', [], 'DATABASE_QUERY_FAILED', message);
   }
 }

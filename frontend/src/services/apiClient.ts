@@ -1,6 +1,7 @@
 import axios, { AxiosError } from 'axios';
 
 const TOKEN_KEY = 'campuscare_token';
+export const AUTH_INVALID_EVENT = 'campuscare:auth-invalid';
 const API_URL =
   import.meta.env.VITE_API_URL ??
   import.meta.env.VITE_API_BASE_URL ??
@@ -51,3 +52,14 @@ apiClient.interceptors.request.use((config) => {
 
   return config;
 });
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error: unknown) => {
+    if (axios.isAxiosError(error) && error.response?.status === 401 && getStoredToken()) {
+      clearStoredToken();
+      window.dispatchEvent(new Event(AUTH_INVALID_EVENT));
+    }
+    return Promise.reject(error);
+  }
+);

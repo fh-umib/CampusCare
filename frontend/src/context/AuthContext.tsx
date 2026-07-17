@@ -8,7 +8,7 @@ import {
   type ReactNode
 } from 'react';
 import { authService } from '../services/authService';
-import { clearStoredToken, getStoredToken, storeToken } from '../services/apiClient';
+import { AUTH_INVALID_EVENT, clearStoredToken, getStoredToken, storeToken } from '../services/apiClient';
 import type { AuthUser, LoginPayload, RegisterPayload } from '../types/auth';
 
 type AuthContextValue = {
@@ -65,6 +65,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     void refreshCurrentUser();
   }, [refreshCurrentUser]);
+
+  useEffect(() => {
+    const clearInvalidSession = () => {
+      setUser(null);
+      setToken(null);
+      setIsLoading(false);
+    };
+    window.addEventListener(AUTH_INVALID_EVENT, clearInvalidSession);
+    return () => window.removeEventListener(AUTH_INVALID_EVENT, clearInvalidSession);
+  }, []);
 
   const login = useCallback(
     async (payload: LoginPayload) => {

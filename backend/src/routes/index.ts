@@ -10,6 +10,8 @@ import { skillRoutes } from './skill.routes.js';
 import { stressRoutes } from './stress.routes.js';
 import { getDatabaseStatus } from '../config/database.js';
 import { successResponse, errorResponse } from '../utils/apiResponse.js';
+import { analyticsRoutes } from '../modules/analytics/analytics.routes.js';
+import { reportRoutes } from '../modules/reports/report.routes.js';
 
 export const apiRoutes = Router();
 
@@ -34,3 +36,5 @@ apiRoutes.use('/mood', moodRoutes);
 apiRoutes.use('/notifications', notificationRoutes);
 apiRoutes.use('/lost-found', lostFoundRoutes);
 apiRoutes.use('/profile', profileRoutes);
+apiRoutes.use('/analytics', analyticsRoutes);
+apiRoutes.use('/reports', reportRoutes);

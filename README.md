@@ -362,6 +362,10 @@ Never commit production environment files, database passwords, or JWT secrets.
 
 ## Current Notes and Future Direction
 
+### Analytics and reporting
+
+Authenticated role dashboards now include PostgreSQL-backed analytics, UTC weekly/monthly comparisons, privacy-safe activity visualizations, deterministic reports, and branded server-generated PDF exports. Student analytics are owner-scoped; mentor and admin analytics contain aggregates without student message content or anonymous identities. See [`docs/ANALYTICS_AND_REPORTING.md`](docs/ANALYTICS_AND_REPORTING.md) for endpoints, metric definitions, privacy rules, and testing.
+
 - The project currently supports its core full-stack workflows.
 - Admin accounts are created manually.
 - Password recovery can later be connected to a production email service.
