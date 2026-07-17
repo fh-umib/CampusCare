@@ -1,10 +1,10 @@
 import type { PublicUser } from '../types/user.js';
 import type { UserProfileInput } from '../types/profile.js';
 import { profileRepository } from '../repositories/profile.repository.js';
-import { requireCurrentUser, optionalString } from '../utils/moduleValidation.js';
+import { requireCurrentUser, optionalString, requireObject } from '../utils/moduleValidation.js';
 
 function readProfileInput(payload: unknown, completeOnboarding: boolean): UserProfileInput {
-  const data = payload && typeof payload === 'object' ? (payload as Record<string, unknown>) : {};
+  const data = requireObject(payload);
 
   return {
     studyYear: optionalString(data.studyYear, 'studyYear', 50),

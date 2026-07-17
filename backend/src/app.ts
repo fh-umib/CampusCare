@@ -1,11 +1,12 @@
 import cors, { type CorsOptions } from 'cors';
 import express from 'express';
-import { getDatabaseStatus } from './config/database.js';
 import { env } from './config/env.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { notFoundHandler } from './middleware/notFoundHandler.js';
 import { apiRoutes } from './routes/index.js';
 import { AppError } from './utils/httpError.js';
+import { requestContext } from './middleware/requestContext.js';
+import { successResponse } from './utils/apiResponse.js';
 
 export const app = express();
 
@@ -31,15 +32,10 @@ const corsOptions: CorsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.use(express.json());
+app.use(requestContext);
+app.use(express.json({ limit: '100kb' }));
 
-app.get('/health', (_request, response) => {
-  response.json({
-    success: true,
-    message: 'CampusCare API is running',
-    database: getDatabaseStatus()
-  });
-});
+app.get('/health', (_request, response) => successResponse(response, 'CampusCare API is running', { status: 'ok' }));
 
 app.use('/api', apiRoutes);
 app.use(notFoundHandler);

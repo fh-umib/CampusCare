@@ -6,7 +6,9 @@ import {
   optionalEnum,
   optionalString,
   requireCurrentUser,
-  requireString
+  requireObject,
+  requireString,
+  requireUuid
 } from '../utils/moduleValidation.js';
 
 const skillLevels = ['beginner', 'intermediate', 'advanced'] as const satisfies readonly SkillLevel[];
@@ -21,7 +23,7 @@ export const skillService = {
 
   create: (payload: unknown, currentUser: PublicUser | undefined) => {
     requireCurrentUser(currentUser);
-    const data = payload as Record<string, unknown>;
+    const data = requireObject(payload);
 
     return skillRepository.create({
       name: requireString(data.name, 'name', 80),
@@ -36,8 +38,8 @@ export const skillService = {
 
   attachMySkill: async (payload: unknown, currentUser: PublicUser | undefined) => {
     const user = requireCurrentUser(currentUser);
-    const data = payload as Record<string, unknown>;
-    const skillId = requireString(data.skillId, 'skillId');
+    const data = requireObject(payload);
+    const skillId = requireUuid(data.skillId, 'skillId');
     const skill = await skillRepository.findById(skillId);
 
     if (!skill) {
@@ -59,6 +61,7 @@ export const skillService = {
 
   removeMySkill: async (skillId: string, currentUser: PublicUser | undefined) => {
     const user = requireCurrentUser(currentUser);
+    requireUuid(skillId, 'skillId');
     const removed = await skillRepository.removeFromUser(user.id, skillId);
 
     if (!removed) {

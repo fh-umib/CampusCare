@@ -1,6 +1,7 @@
 import { Pool, type QueryResultRow } from 'pg';
 import { env } from './env.js';
 import { AppError } from '../utils/httpError.js';
+import { logger } from '../utils/logger.js';
 
 export const pool = new Pool({
   connectionString: env.databaseUrl
@@ -12,12 +13,12 @@ let databaseStatus: DatabaseStatus = 'disconnected';
 
 pool.on('error', (error) => {
   databaseStatus = 'disconnected';
-  console.error('PostgreSQL pool error:', error.message);
+  logger.error('database_pool_error', env.nodeEnv === 'development' ? { message: error.message } : {});
 });
 
 function logDatabaseError(error: unknown) {
   const message = error instanceof Error ? error.message : 'Unknown database error';
-  console.error(`Unable to connect to PostgreSQL: ${message}`);
+  logger.error('database_connection_error', env.nodeEnv === 'development' ? { message } : {});
 }
 
 export function getDatabaseStatus() {
@@ -30,7 +31,7 @@ export async function testDatabaseConnection() {
     await client.query('SELECT 1');
     client.release();
     databaseStatus = 'connected';
-    console.log('PostgreSQL connection established');
+    logger.info('database_connected');
     return true;
   } catch (error) {
     databaseStatus = 'disconnected';

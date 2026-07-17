@@ -3,7 +3,7 @@ import { notificationService } from './notification.service.js';
 import type { HelpRequestCategory, HelpRequestStatus } from '../types/helpRequest.js';
 import type { PublicUser } from '../types/user.js';
 import { AppError } from '../utils/httpError.js';
-import { optionalEnum, requireCurrentUser, requireEnum, requireString } from '../utils/moduleValidation.js';
+import { optionalBoolean, optionalEnum, requireCurrentUser, requireEnum, requireObject, requireString, requireUuid } from '../utils/moduleValidation.js';
 
 const helpCategories = [
   'subject',
@@ -26,6 +26,7 @@ export const helpRequestService = {
   },
 
   getById: async (id: string) => {
+    requireUuid(id);
     const helpRequest = await helpRequestRepository.findById(id);
 
     if (!helpRequest) {
@@ -37,14 +38,14 @@ export const helpRequestService = {
 
   create: async (payload: unknown, currentUser: PublicUser | undefined) => {
     const user = requireCurrentUser(currentUser);
-    const data = payload as Record<string, unknown>;
+    const data = requireObject(payload);
 
     const created = await helpRequestRepository.create({
       userId: user.id,
       title: requireString(data.title, 'title', 150),
       category: requireEnum(data.category, helpCategories, 'category'),
       description: requireString(data.description, 'description'),
-      isAnonymous: data.isAnonymous === undefined ? true : Boolean(data.isAnonymous)
+      isAnonymous: optionalBoolean(data.isAnonymous, 'isAnonymous', true)
     });
     await Promise.all([
       notificationService.create({
@@ -71,7 +72,7 @@ export const helpRequestService = {
     const reply = await helpRequestRepository.createReply({
       helpRequestId: id,
       userId: user.id,
-      message: requireString((payload as Record<string, unknown>).message, 'message')
+      message: requireString(requireObject(payload).message, 'message', 5000)
     });
     if (helpRequest.userId && helpRequest.userId !== user.id) {
       await notificationService.create({
@@ -87,7 +88,7 @@ export const helpRequestService = {
 
   updateStatus: async (id: string, payload: unknown) => {
     const helpRequest = await helpRequestService.getById(id);
-    const status = requireEnum((payload as Record<string, unknown>).status, helpStatuses, 'status');
+    const status = requireEnum(requireObject(payload).status, helpStatuses, 'status');
     const updated = await helpRequestRepository.updateStatus(id, status);
 
     if (!updated) {

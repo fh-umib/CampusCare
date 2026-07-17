@@ -16,11 +16,29 @@ async function runMigrations() {
   const client = await pool.connect();
 
   try {
+    await client.query(`CREATE TABLE IF NOT EXISTS schema_migrations (
+      filename TEXT PRIMARY KEY,
+      applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )`);
+
     for (const fileName of migrationFiles) {
+      const applied = await client.query('SELECT 1 FROM schema_migrations WHERE filename = $1', [fileName]);
+      if (applied.rowCount) {
+        console.log(`Skipping applied migration: ${fileName}`);
+        continue;
+      }
       const migrationUrl = new URL(`./${fileName}`, import.meta.url);
       const sql = await readFile(migrationUrl, 'utf8');
       console.log(`Running migration: ${fileName}`);
-      await client.query(sql);
+      await client.query('BEGIN');
+      try {
+        await client.query(sql);
+        await client.query('INSERT INTO schema_migrations (filename) VALUES ($1)', [fileName]);
+        await client.query('COMMIT');
+      } catch (error) {
+        await client.query('ROLLBACK');
+        throw error;
+      }
       console.log(`Migration completed: ${fileName}`);
     }
 

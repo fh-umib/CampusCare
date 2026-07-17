@@ -8,7 +8,9 @@ import {
   optionalString,
   requireCurrentUser,
   requireEnum,
-  requireString
+  requireObject,
+  requireString,
+  requireUuid
 } from '../utils/moduleValidation.js';
 
 const itemTypes = ['lost', 'found'] as const satisfies readonly LostFoundItemType[];
@@ -35,6 +37,7 @@ export const lostFoundService = {
   },
 
   getById: async (id: string) => {
+    requireUuid(id);
     const item = await lostFoundRepository.findById(id);
 
     if (!item) {
@@ -46,7 +49,7 @@ export const lostFoundService = {
 
   create: async (payload: unknown, currentUser: PublicUser | undefined) => {
     const user = requireCurrentUser(currentUser);
-    const data = payload as Record<string, unknown>;
+    const data = requireObject(payload);
 
     const created = await lostFoundRepository.create({
       userId: user.id,
@@ -83,7 +86,7 @@ export const lostFoundService = {
       throw new AppError(403, 'You do not have permission to perform this action.');
     }
 
-    const status = requireEnum((payload as Record<string, unknown>).status, itemStatuses, 'status');
+    const status = requireEnum(requireObject(payload).status, itemStatuses, 'status');
     const updated = await lostFoundRepository.updateStatus(id, status);
 
     if (!updated) {

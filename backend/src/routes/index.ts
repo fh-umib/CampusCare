@@ -9,15 +9,20 @@ import { profileRoutes } from './profile.routes.js';
 import { skillRoutes } from './skill.routes.js';
 import { stressRoutes } from './stress.routes.js';
 import { getDatabaseStatus } from '../config/database.js';
+import { successResponse, errorResponse } from '../utils/apiResponse.js';
 
 export const apiRoutes = Router();
 
 apiRoutes.get('/health', (_request, response) => {
-  response.json({
-    success: true,
-    message: 'CampusCare API is running',
-    database: getDatabaseStatus()
-  });
+  successResponse(response, 'CampusCare API is running', { status: 'ok' });
+});
+
+apiRoutes.get('/ready', (_request, response) => {
+  if (getDatabaseStatus() !== 'connected') {
+    errorResponse(response, 'CampusCare API is not ready', [], 503, 'SERVICE_NOT_READY');
+    return;
+  }
+  successResponse(response, 'CampusCare API is ready', { status: 'ready' });
 });
 
 apiRoutes.use('/auth', authRoutes);

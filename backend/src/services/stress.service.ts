@@ -5,7 +5,8 @@ import {
   canViewGlobalRecords,
   optionalString,
   requireCurrentUser,
-  requireIntegerRange
+  requireIntegerRange,
+  requireObject
 } from '../utils/moduleValidation.js';
 
 function scopeFor(user: PublicUser) {
@@ -20,14 +21,14 @@ export const stressService = {
 
   create: async (payload: unknown, currentUser: PublicUser | undefined) => {
     const user = requireCurrentUser(currentUser);
-    const data = payload as Record<string, unknown>;
+    const data = requireObject(payload);
 
     const stressLevel = requireIntegerRange(data.stress_level ?? data.stressLevel, 'stress_level', 1, 5);
     const created = await stressRepository.create({
       userId: user.id,
       subject: optionalString(data.subject, 'subject', 100),
       stressLevel,
-      note: optionalString(data.note, 'note')
+      note: optionalString(data.note, 'note', 2000)
     });
     const notifications = [
       notificationService.create({
