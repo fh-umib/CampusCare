@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import { AuthenticatedLayout } from '../components/layout/AuthenticatedLayout';
 import DashboardPage from '../pages/DashboardPage';
 import ForgotPasswordPage from '../pages/ForgotPasswordPage';
@@ -15,6 +15,7 @@ import RoleEntryPage from '../pages/RoleEntryPage';
 import SkillMapPage from '../pages/SkillMapPage';
 import StressTrackerPage from '../pages/StressTrackerPage';
 import { ProtectedRoute } from './ProtectedRoute';
+import AIStudyAssistantPage from '../pages/AIStudyAssistantPage';
 
 export function AppRoutes() {
   return (
@@ -35,6 +36,10 @@ export function AppRoutes() {
           <Route path="/lost-found" element={<LostFoundPage />} />
           <Route path="/onboarding" element={<OnboardingPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route element={<ProtectedRoute roles={['student']} />}>
+            <Route path="/ai-study-assistant" element={<AIStudyAssistantPage />} />
+            <Route path="/dashboard/ai-study-assistant" element={<Navigate to="/ai-study-assistant" replace />} />
+          </Route>
         </Route>
       </Route>
       <Route path="*" element={<NotFoundPage />} />

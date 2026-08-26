@@ -366,6 +366,10 @@ Never commit production environment files, database passwords, or JWT secrets.
 
 Authenticated role dashboards now include PostgreSQL-backed analytics, UTC weekly/monthly comparisons, privacy-safe activity visualizations, deterministic reports, and branded server-generated PDF exports. Student analytics are owner-scoped; mentor and admin analytics contain aggregates without student message content or anonymous identities. See [`docs/ANALYTICS_AND_REPORTING.md`](docs/ANALYTICS_AND_REPORTING.md) for endpoints, metric definitions, privacy rules, and testing.
 
+### AI Study Assistant
+
+Students have a private, rate-limited AI Study Assistant for explanations, plans, summaries, practice, code help, and revision. OpenAI access stays server-side behind a provider abstraction; mentor/admin access is denied and operational analytics contain no message text. See [`docs/AI_STUDY_ASSISTANT.md`](docs/AI_STUDY_ASSISTANT.md).
+
 - The project currently supports its core full-stack workflows.
 - Admin accounts are created manually.
 - Password recovery can later be connected to a production email service.

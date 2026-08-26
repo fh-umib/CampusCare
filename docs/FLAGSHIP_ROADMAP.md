@@ -24,6 +24,8 @@ Each phase must preserve current route contracts until a versioned migration is 
 
 ## Phase 2.3 — AI assistance
 
+Status: foundation implemented. Private student conversations, Responses API provider abstraction, safety redirects, rate limits, aggregate usage, and protected UI are present; provider evaluation and production consent/legal review remain release gates.
+
 - Goal: AI Study Assistant and weekly summaries with safe usage controls.
 - Database: consent, prompt/output metadata, quotas, feedback, retention/deletion markers; avoid raw secrets.
 - Backend: provider adapter, data minimization, prompt-injection defenses, moderation, budgets, timeouts, fallbacks.

@@ -5,7 +5,8 @@ const migrationFiles = [
   '001_init_users.sql',
   '002_init_modules.sql',
   '004_user_profiles_and_engagement.sql',
-  '006_notifications.sql'
+  '006_notifications.sql',
+  '007_ai_study_assistant.sql'
 ];
 
 async function runMigrations() {

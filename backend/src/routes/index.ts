@@ -12,6 +12,7 @@ import { getDatabaseStatus } from '../config/database.js';
 import { successResponse, errorResponse } from '../utils/apiResponse.js';
 import { analyticsRoutes } from '../modules/analytics/analytics.routes.js';
 import { reportRoutes } from '../modules/reports/report.routes.js';
+import { aiRoutes } from '../modules/ai/ai.routes.js';
 
 export const apiRoutes = Router();
 
@@ -38,3 +39,4 @@ apiRoutes.use('/lost-found', lostFoundRoutes);
 apiRoutes.use('/profile', profileRoutes);
 apiRoutes.use('/analytics', analyticsRoutes);
 apiRoutes.use('/reports', reportRoutes);
+apiRoutes.use('/ai', aiRoutes);

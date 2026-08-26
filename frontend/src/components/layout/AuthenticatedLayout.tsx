@@ -4,7 +4,7 @@ import { CampusCareLogoMark } from '../brand/CampusCareLogoMark';
 import { NotificationBell } from './NotificationBell';
 import { useAuth } from '../../context/AuthContext';
 
-type NavIconName = 'dashboard' | 'help' | 'stress' | 'mood' | 'skills' | 'lostFound' | 'profile' | 'logout';
+type NavIconName = 'dashboard' | 'help' | 'stress' | 'mood' | 'skills' | 'lostFound' | 'profile' | 'assistant' | 'logout';
 
 type NavItem = {
   label: string;
@@ -23,6 +23,7 @@ const navigationGroups: Array<{ label: string; items: NavItem[] }> = [
       { label: 'Silent Help', to: '/silent-help', icon: 'help' },
       { label: 'ExamStress', to: '/stress-tracker', icon: 'stress' },
       { label: 'MoodCampus', to: '/mood-campus', icon: 'mood' }
+      ,{ label: 'AI Study Assistant', to: '/ai-study-assistant', icon: 'assistant' }
     ]
   },
   {
@@ -88,6 +89,13 @@ const iconPaths: Record<NavIconName, ReactNode> = {
     <>
       <circle cx="12" cy="8" r="3.5" />
       <path d="M5 21c.5-4.5 2.8-7 7-7s6.5 2.5 7 7" />
+    </>
+  ),
+  assistant: (
+    <>
+      <path d="M12 3v3M5.6 5.6l2.1 2.1M18.4 5.6l-2.1 2.1" />
+      <rect x="4" y="9" width="16" height="11" rx="3" />
+      <path d="M8 14h.1M16 14h.1M9 17h6" />
     </>
   ),
   logout: (
@@ -193,7 +201,7 @@ export function AuthenticatedLayout() {
                 {group.label}
               </p>
               <div className="space-y-1">
-                {group.items.map((item) => (
+                {group.items.filter((item) => item.icon !== 'assistant' || user?.role === 'student').map((item) => (
                   <NavLink
                     key={item.to}
                     to={item.to}
@@ -288,7 +296,7 @@ export function AuthenticatedLayout() {
             aria-label="Mobile module navigation"
             className="mobile-module-nav mt-3 flex snap-x gap-2 overflow-x-auto px-0.5 pb-1 lg:hidden"
           >
-            {navItems.map((item) => (
+            {navItems.filter((item) => item.icon !== 'assistant' || user?.role === 'student').map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}

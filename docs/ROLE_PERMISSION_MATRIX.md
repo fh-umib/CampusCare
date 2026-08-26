@@ -24,6 +24,7 @@ Status is based on backend code inspection on 2026-07-17. “Global” means all
 | Lost & found | Change status | Own report | Own report | Global | Service ownership/admin override enforced. |
 | Notifications | List/read | Own + student-role | Own + mentor-role | Own + admin-role | Visibility enforced in SQL. Role broadcasts use per-user read records. |
 | Platform/admin settings | Manage | No endpoint | No endpoint | No endpoint | Not implemented; frontend workspace does not create backend authority. |
+| AI Study Assistant | Conversations/messages | Own only | Denied | Denied | Backend authentication, exact student role, UUID ownership checks, and soft archive are enforced. Admin analytics receive aggregate usage only. |
 
 ## Priority policy decisions
 

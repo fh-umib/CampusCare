@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { resolveDateRange } from './analytics.validation.js';
-import { assertAnalyticsRole } from './analytics.service.js';
+import { assertAnalyticsRole, calculateAiSuccessRate } from './analytics.service.js';
 import { buildReport } from '../reports/report.service.js';
 import { renderReportPdf } from '../reports/pdf.service.js';
 import type { AnalyticsOverview } from './analytics.types.js';
@@ -31,4 +31,9 @@ test('empty datasets produce deterministic privacy-safe reports and PDFs', async
   const pdf = await renderReportPdf(report);
   assert.equal(pdf.subarray(0, 4).toString(), '%PDF');
   assert.ok(pdf.length > 500);
+});
+
+test('admin AI analytics reports zero success safely when the provider is unavailable', () => {
+  assert.equal(calculateAiSuccessRate(0, 0), 0);
+  assert.equal(calculateAiSuccessRate(0, 4), 0);
 });

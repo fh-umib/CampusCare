@@ -20,6 +20,12 @@ function readPort() {
   return value;
 }
 
+function readPositiveInteger(name: string, fallback: number) {
+  const value = Number(process.env[name] ?? fallback);
+  if (!Number.isInteger(value) || value < 1) throw new Error(`${name} must be a positive integer.`);
+  return value;
+}
+
 const nodeEnv = readNodeEnvironment();
 
 function requiredInProduction(name: 'DATABASE_URL' | 'JWT_SECRET' | 'FRONTEND_URL', fallback = '') {
@@ -46,6 +52,10 @@ export const env = Object.freeze({
     process.env.CLIENT_URL?.trim() || (nodeEnv === 'production' ? '' : 'http://localhost:5173')
   ),
   openAiApiKey: process.env.OPENAI_API_KEY?.trim(),
+  openAiModel: process.env.OPENAI_MODEL?.trim() || 'gpt-5.4-mini',
+  aiDailyMessageLimit: readPositiveInteger('AI_DAILY_MESSAGE_LIMIT', 20),
+  aiMaxInputLength: readPositiveInteger('AI_MAX_INPUT_LENGTH', 6000),
+  aiMaxOutputTokens: readPositiveInteger('AI_MAX_OUTPUT_TOKENS', 1200),
   redisUrl: process.env.REDIS_URL?.trim(),
   sentryDsn: process.env.SENTRY_DSN?.trim()
 });
