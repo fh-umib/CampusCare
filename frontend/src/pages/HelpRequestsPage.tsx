@@ -6,6 +6,8 @@ import { getApiErrorMessage } from '../services/apiClient';
 import { helpRequestService } from '../services/helpRequestService';
 import type { HelpRequest, HelpRequestCategory, HelpRequestStatus } from '../types/helpRequest';
 import { formatDate } from '../utils/formatDate';
+import { SupportChat } from '../components/support/SupportChat';
+import { useSearchParams } from 'react-router-dom';
 
 type Priority = 'high' | 'medium' | 'low';
 type IconName = 'help' | 'shield' | 'reply' | 'chart' | 'priority' | 'anonymous' | 'search' | 'category' | 'status' | 'arrow';
@@ -405,8 +407,10 @@ function HelpfulEmpty({ title, text, actionHref, actionLabel }: { title: string;
 
 export default function HelpRequestsPage() {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const requestedId = searchParams.get('request') ?? '';
   const [requests, setRequests] = useState<HelpRequest[]>([]);
-  const [selectedId, setSelectedId] = useState('');
+  const [selectedId, setSelectedId] = useState(requestedId);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<HelpRequestStatus | 'all'>('all');
   const [categoryFilter, setCategoryFilter] = useState<HelpRequestCategory | 'all'>('all');
@@ -417,6 +421,7 @@ export default function HelpRequestsPage() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [threadLinkError, setThreadLinkError] = useState('');
 
   const role = user?.role === 'mentor' || user?.role === 'admin' ? user.role : 'student';
   const isStudent = role === 'student';
@@ -438,6 +443,14 @@ export default function HelpRequestsPage() {
   useEffect(() => {
     void loadRequests();
   }, []);
+
+  useEffect(() => {
+    if (!requestedId) return;
+    setSelectedId(requestedId);
+    setThreadLinkError('');
+    if (requests.some((request) => request.id === requestedId)) return;
+    helpRequestService.get(requestedId).then((request) => setRequests((current) => current.some((item) => item.id === request.id) ? current : [request, ...current])).catch(() => setThreadLinkError('This support thread could not be opened. It may not exist or you may not have access.'));
+  }, [requestedId, requests]);
 
   async function handleCreate(event: FormEvent) {
     event.preventDefault();
@@ -506,8 +519,8 @@ export default function HelpRequestsPage() {
   }, [categoryFilter, priorityFilter, search, statusFilter, visibleRequests]);
 
   const selectedRequest = useMemo(
-    () => filteredRequests.find((request) => request.id === selectedId) ?? filteredRequests[0] ?? null,
-    [filteredRequests, selectedId]
+    () => requestedId && selectedId === requestedId ? filteredRequests.find((request) => request.id === selectedId) ?? null : filteredRequests.find((request) => request.id === selectedId) ?? filteredRequests[0] ?? null,
+    [filteredRequests, requestedId, selectedId]
   );
 
   const commonCategory = useMemo(() => {
@@ -602,6 +615,7 @@ export default function HelpRequestsPage() {
 
         {message ? <div className="alert-success mt-4">{message}</div> : null}
         {error ? <div className="alert-error mt-4">{error}</div> : null}
+        {threadLinkError ? <div className="alert-error mt-4">{threadLinkError}</div> : null}
         {isLoading ? (
           <div aria-busy="true" style={{ display: 'grid', gap: '1rem', marginTop: '1.25rem' }}>
             <PageLoadingState variant="support" label="Loading Silent Help requests" />
@@ -655,7 +669,7 @@ export default function HelpRequestsPage() {
                   : <HelpfulEmpty title="No help requests yet" text="Create your first request when you need academic, project, teamwork, or exam support." actionHref="#create-request" actionLabel="Create request" /> : null}
                 <div className="sh-list">{filteredRequests.map((request) => <RequestCard key={request.id} request={request} selected={selectedRequest?.id === request.id} onSelect={() => setSelectedId(request.id)} />)}</div>
               </div>
-              <DetailPanel request={selectedRequest} reply={selectedRequest ? replyText[selectedRequest.id] ?? '' : ''} canManageStatus={false} onReplyChange={(value) => selectedRequest && setReplyText((current) => ({ ...current, [selectedRequest.id]: value }))} onReply={() => selectedRequest && void handleReply(selectedRequest.id)} onStatus={(status) => selectedRequest && void handleStatus(selectedRequest.id, status)} />
+              <div><DetailPanel request={selectedRequest} reply={selectedRequest ? replyText[selectedRequest.id] ?? '' : ''} canManageStatus={false} onReplyChange={(value) => selectedRequest && setReplyText((current) => ({ ...current, [selectedRequest.id]: value }))} onReply={() => selectedRequest && void handleReply(selectedRequest.id)} onStatus={(status) => selectedRequest && void handleStatus(selectedRequest.id, status)} />{selectedRequest?<SupportChat helpRequestId={selectedRequest.id} role="student"/>:null}</div>
             </section>
             <article className="sh-card sh-guidance"><div className="sh-section-head"><div><h2>When to use Silent Help</h2><p>Your request can be anonymous. Write only what you are comfortable sharing.</p></div><Icon name="help" /></div><ul><li>When a subject feels confusing.</li><li>When a project or code issue blocks you.</li><li>When teamwork becomes stressful.</li><li>When exam pressure feels high.</li></ul></article>
           </>
@@ -683,7 +697,7 @@ export default function HelpRequestsPage() {
                   : <HelpfulEmpty title="No requests in the queue" text="Student support requests will appear here when they need mentor attention." /> : null}
                 <div className="sh-list">{filteredRequests.map((request) => <RequestCard key={request.id} request={request} selected={selectedRequest?.id === request.id} onSelect={() => setSelectedId(request.id)} />)}</div>
               </div>
-              <DetailPanel request={selectedRequest} reply={selectedRequest ? replyText[selectedRequest.id] ?? '' : ''} canManageStatus onReplyChange={(value) => selectedRequest && setReplyText((current) => ({ ...current, [selectedRequest.id]: value }))} onReply={() => selectedRequest && void handleReply(selectedRequest.id)} onStatus={(status) => selectedRequest && void handleStatus(selectedRequest.id, status)} />
+              <div><DetailPanel request={selectedRequest} reply={selectedRequest ? replyText[selectedRequest.id] ?? '' : ''} canManageStatus onReplyChange={(value) => selectedRequest && setReplyText((current) => ({ ...current, [selectedRequest.id]: value }))} onReply={() => selectedRequest && void handleReply(selectedRequest.id)} onStatus={(status) => selectedRequest && void handleStatus(selectedRequest.id, status)} />{selectedRequest?<SupportChat helpRequestId={selectedRequest.id} role="mentor"/>:null}</div>
             </section>
             <section className="sh-analytics-grid">
               <StatusVisual requests={requests} title="Request progress" />

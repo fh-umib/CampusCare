@@ -3,6 +3,7 @@ import { AppError } from '../../utils/httpError.js';
 import { requireCurrentUser } from '../../utils/moduleValidation.js';
 import { analyticsRepository } from './analytics.repository.js';
 import { aiRepository } from '../ai/ai.repository.js';
+import { supportRepository } from '../support/support.repository.js';
 import type { AnalyticsOverview, AnalyticsRole, CountPoint, DateRange, HeatmapPoint, TimePoint } from './analytics.types.js';
 
 export function assertAnalyticsRole(user: PublicUser, role: AnalyticsRole) {
@@ -54,6 +55,7 @@ export const analyticsService = {
     const aiUsage = requestedRole === 'admin' ? await aiRepository.aggregateUsage(range.start, range.end) : null;
     const aiModes = requestedRole === 'admin' ? await aiRepository.modeUsage(range.start, range.end) : [];
     const aiDaily = requestedRole === 'admin' ? await aiRepository.dailyUsage(range.start, range.end) : [];
+    const supportMetrics = requestedRole === 'admin' ? await supportRepository.metrics(range.start, range.end) : null;
     const current = number(data.metrics.current_activity);
     const previous = number(data.metrics.previous_activity);
     const metrics: Record<string, number | string | null> = {
@@ -68,6 +70,8 @@ export const analyticsService = {
       aiSuccessfulRequests: number(aiUsage?.successful_requests), aiFailedRequests: number(aiUsage?.failed_requests),
       aiAverageResponseMs: number(aiUsage?.average_response_ms)
       ,aiSuccessRate: calculateAiSuccessRate(aiUsage?.successful_requests, aiUsage?.total_requests)
+      ,openSupportConversations: number(supportMetrics?.open_support_conversations), activeSupportChats: number(supportMetrics?.active_support_chats),
+      supportMessagesSent: number(supportMetrics?.messages_sent), unresolvedSupportConversations: number(supportMetrics?.unresolved_conversations), activeSupportMentors: number(supportMetrics?.active_support_mentors)
     });
     return {
       role: requestedRole, period: period(range), metrics,

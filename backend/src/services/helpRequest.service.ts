@@ -4,6 +4,7 @@ import type { HelpRequestCategory, HelpRequestStatus } from '../types/helpReques
 import type { PublicUser } from '../types/user.js';
 import { AppError } from '../utils/httpError.js';
 import { optionalBoolean, optionalEnum, requireCurrentUser, requireEnum, requireObject, requireString, requireUuid } from '../utils/moduleValidation.js';
+import { supportService } from '../modules/support/support.service.js';
 
 const helpCategories = [
   'subject',
@@ -17,23 +18,24 @@ const helpCategories = [
 
 const helpStatuses = ['open', 'answered', 'closed'] as const satisfies readonly HelpRequestStatus[];
 
+async function authorizedRequest(id:string,user:PublicUser){requireUuid(id);const request=await helpRequestRepository.findById(id);if(!request)throw new AppError(404,'Help request not found');if(user.role==='student'&&request.userId!==user.id)throw new AppError(404,'Help request not found');return request}
+
 export const helpRequestService = {
-  list: (query: Record<string, unknown>) => {
-    return helpRequestRepository.findAll({
+  list: async (query: Record<string, unknown>, currentUser: PublicUser | undefined) => {
+    const user=requireCurrentUser(currentUser);
+    const requests=await helpRequestRepository.findAll({
       status: optionalEnum(query.status, helpStatuses, 'status'),
       category: optionalEnum(query.category, helpCategories, 'category')
     });
+    if(user.role==='student')return requests.filter(request=>request.userId===user.id);
+    return requests.map(request=>request.isAnonymous?{...request,userId:null,studentName:'Anonymous Student'}:request);
   },
 
-  getById: async (id: string) => {
-    requireUuid(id);
-    const helpRequest = await helpRequestRepository.findById(id);
-
-    if (!helpRequest) {
-      throw new AppError(404, 'Help request not found');
-    }
-
-    return helpRequest;
+  getById: async (id: string, currentUser: PublicUser | undefined) => {
+    const user=requireCurrentUser(currentUser);
+    const helpRequest = await authorizedRequest(id,user);
+    if(user.role==='admin')return{...helpRequest,userId:helpRequest.isAnonymous?null:helpRequest.userId,studentName:helpRequest.isAnonymous?'Anonymous Student':helpRequest.studentName,replies:[]};
+    return user.role==='mentor'&&helpRequest.isAnonymous?{...helpRequest,userId:null,studentName:'Anonymous Student'}:helpRequest;
   },
 
   create: async (payload: unknown, currentUser: PublicUser | undefined) => {
@@ -53,14 +55,14 @@ export const helpRequestService = {
         type: 'help_request',
         title: 'New support request',
         message: `${created.title} is waiting in the Silent Help queue.`,
-        link: '/silent-help'
+        link: `/silent-help?request=${created.id}`
       }),
       notificationService.create({
         role: 'admin',
         type: 'help_request',
         title: 'New support activity',
         message: `A new ${created.category.replace(/_/g, ' ')} request was added to Silent Help.`,
-        link: '/silent-help'
+        link: `/silent-help?request=${created.id}`
       })
     ]);
     return created;
@@ -68,26 +70,15 @@ export const helpRequestService = {
 
   reply: async (id: string, payload: unknown, currentUser: PublicUser | undefined) => {
     const user = requireCurrentUser(currentUser);
-    const helpRequest = await helpRequestService.getById(id);
-    const reply = await helpRequestRepository.createReply({
-      helpRequestId: id,
-      userId: user.id,
-      message: requireString(requireObject(payload).message, 'message', 5000)
-    });
-    if (helpRequest.userId && helpRequest.userId !== user.id) {
-      await notificationService.create({
-        userId: helpRequest.userId,
-        type: 'reply',
-        title: 'New reply to your request',
-        message: `Someone replied to “${helpRequest.title}”.`,
-        link: '/silent-help'
-      });
-    }
-    return reply;
+    if(user.role==='admin')throw new AppError(403,'Admin accounts cannot participate in private support conversations.');
+    const helpRequest = await authorizedRequest(id,user);
+    void helpRequest;
+    return supportService.sendByHelpRequest(id,{message:requireString(requireObject(payload).message,'message',2000)},user);
   },
 
-  updateStatus: async (id: string, payload: unknown) => {
-    const helpRequest = await helpRequestService.getById(id);
+  updateStatus: async (id: string, payload: unknown, currentUser?:PublicUser) => {
+    const user=requireCurrentUser(currentUser);
+    const helpRequest = await authorizedRequest(id,user);
     const status = requireEnum(requireObject(payload).status, helpStatuses, 'status');
     const updated = await helpRequestRepository.updateStatus(id, status);
 
@@ -101,7 +92,7 @@ export const helpRequestService = {
         type: 'help_request',
         title: 'Help request status updated',
         message: `“${helpRequest.title}” is now ${status}.`,
-        link: '/silent-help'
+        link: `/silent-help?request=${helpRequest.id}`
       });
     }
     return updated;

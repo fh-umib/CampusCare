@@ -4,12 +4,12 @@ import { successResponse } from '../utils/apiResponse.js';
 
 export const helpRequestController = {
   list: async (request: Request, response: Response) => {
-    const data = await helpRequestService.list(request.query);
+    const data = await helpRequestService.list(request.query, request.currentUser);
     successResponse(response, 'Help requests retrieved', data);
   },
 
   getById: async (request: Request, response: Response) => {
-    const data = await helpRequestService.getById(request.params.id);
+    const data = await helpRequestService.getById(request.params.id, request.currentUser);
     successResponse(response, 'Help request retrieved', data);
   },
 
@@ -24,7 +24,7 @@ export const helpRequestController = {
   },
 
   updateStatus: async (request: Request, response: Response) => {
-    const data = await helpRequestService.updateStatus(request.params.id, request.body);
+    const data = await helpRequestService.updateStatus(request.params.id, request.body, request.currentUser);
     successResponse(response, 'Help request status updated', data);
   }
 };

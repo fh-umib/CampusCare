@@ -10,6 +10,7 @@ import {
 import { authService } from '../services/authService';
 import { AUTH_INVALID_EVENT, clearStoredToken, getStoredToken, storeToken } from '../services/apiClient';
 import type { AuthUser, LoginPayload, RegisterPayload } from '../types/auth';
+import { realtimeService } from '../services/realtime';
 
 type AuthContextValue = {
   user: AuthUser | null;
@@ -65,6 +66,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     void refreshCurrentUser();
   }, [refreshCurrentUser]);
+
+  useEffect(() => {
+    if (token && user) realtimeService.connect(token);
+    else realtimeService.disconnect();
+    return () => realtimeService.disconnect();
+  }, [token, user]);
 
   useEffect(() => {
     const clearInvalidSession = () => {

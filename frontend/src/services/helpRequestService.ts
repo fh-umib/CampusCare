@@ -12,6 +12,11 @@ export const helpRequestService = {
     return response.data.data;
   },
 
+  async get(id: string) {
+    const response = await apiClient.get<ApiResponse<HelpRequest>>(`/help-requests/${id}`);
+    return response.data.data;
+  },
+
   async reply(id: string, message: string) {
     const response = await apiClient.post<ApiResponse<unknown>>(`/help-requests/${id}/replies`, { message });
     return response.data.data;

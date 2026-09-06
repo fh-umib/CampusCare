@@ -5,14 +5,14 @@ import { requireRole } from '../middleware/authorizeRoles.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 
 export const helpRequestRoutes = Router();
+helpRequestRoutes.use(authenticate);
 
 helpRequestRoutes.get('/', asyncHandler(helpRequestController.list));
 helpRequestRoutes.get('/:id', asyncHandler(helpRequestController.getById));
-helpRequestRoutes.post('/', authenticate, asyncHandler(helpRequestController.create));
-helpRequestRoutes.post('/:id/replies', authenticate, asyncHandler(helpRequestController.reply));
+helpRequestRoutes.post('/', asyncHandler(helpRequestController.create));
+helpRequestRoutes.post('/:id/replies', asyncHandler(helpRequestController.reply));
 helpRequestRoutes.patch(
   '/:id/status',
-  authenticate,
   requireRole('mentor', 'admin'),
   asyncHandler(helpRequestController.updateStatus)
 );

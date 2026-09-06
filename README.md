@@ -329,6 +329,7 @@ FRONTEND_URL=http://localhost:5173
 
 ```env
 VITE_API_URL=http://localhost:5000/api
+VITE_SOCKET_URL=http://localhost:5000
 ```
 
 Use `backend/.env.example` and `frontend/.env.example` as the configuration references.
@@ -369,6 +370,10 @@ Authenticated role dashboards now include PostgreSQL-backed analytics, UTC weekl
 ### AI Study Assistant
 
 Students have a private, rate-limited AI Study Assistant for explanations, plans, summaries, practice, code help, and revision. OpenAI access stays server-side behind a provider abstraction; mentor/admin access is denied and operational analytics contain no message text. See [`docs/AI_STUDY_ASSISTANT.md`](docs/AI_STUDY_ASSISTANT.md).
+
+### Realtime notifications and support chat
+
+Authenticated Socket.IO connections now complement the existing REST APIs with live notification-bell updates and persisted Student–Mentor support chat tied to Silent Help requests. Anonymous identity masking and room authorization are enforced by the backend; Admin receives operational metadata only. See [`docs/REALTIME_AND_CHAT.md`](docs/REALTIME_AND_CHAT.md).
 
 - The project currently supports its core full-stack workflows.
 - Admin accounts are created manually.

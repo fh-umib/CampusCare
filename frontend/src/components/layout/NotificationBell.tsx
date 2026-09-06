@@ -3,6 +3,8 @@ import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { notificationService } from '../../services/notificationService';
 import type { Notification, NotificationType } from '../../types/notification';
+import { realtimeService } from '../../services/realtime';
+import { useAuth } from '../../context/AuthContext';
 
 const iconPaths: Record<NotificationType | 'bell' | 'arrow' | 'check' | 'retry', ReactNode> = {
   bell: <><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9Z" /><path d="M10 21h4" /></>,
@@ -47,6 +49,7 @@ function timeLabel(value: string) {
 }
 
 export function NotificationBell() {
+  const { user } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -71,7 +74,17 @@ export function NotificationBell() {
   }, []);
 
   useEffect(() => {
+    setNotifications([]);
+    setIsOpen(false);
     loadNotifications(true);
+  }, [loadNotifications, user?.id]);
+
+  useEffect(() => {
+    const removeConnect=realtimeService.on('connect',()=>loadNotifications(false));
+    const removeNew=realtimeService.on<Notification>('notification:new',(notification)=>setNotifications(current=>current.some(item=>item.id===notification.id)?current:[notification,...current].slice(0,50)));
+    const removeRead=realtimeService.on<{id:string}>('notification:read',({id})=>setNotifications(current=>current.map(item=>item.id===id?{...item,isRead:true}:item)));
+    const removeAll=realtimeService.on('notification:read-all',()=>setNotifications(current=>current.map(item=>({...item,isRead:true}))));
+    return()=>{removeConnect();removeNew();removeRead();removeAll()};
   }, [loadNotifications]);
 
   useEffect(() => {

@@ -1,0 +1,2 @@
+export type SupportConversation={id:string;helpRequestId:string;title:string;category:string;isAnonymous:boolean;status:'open'|'closed';mentorUserId:string|null;participantLabel:string;unreadCount:number;createdAt:string;updatedAt:string;closedAt:string|null};
+export type SupportMessage={id:string;conversationId:string;sender:{role:'student'|'mentor';displayName:string};message:string;createdAt:string};
