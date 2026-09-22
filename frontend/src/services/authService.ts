@@ -1,6 +1,6 @@
 import { apiClient, clearStoredToken, type ApiResponse } from './apiClient';
 import type {
-  AuthResult,
+  AuthResult, LoginResult,
   AuthUser,
   ForgotPasswordPayload,
   LoginPayload,
@@ -9,7 +9,12 @@ import type {
 
 export const authService = {
   async login(payload: LoginPayload) {
-    const response = await apiClient.post<ApiResponse<AuthResult>>('/auth/login', payload);
+    const response = await apiClient.post<ApiResponse<LoginResult>>('/auth/login', payload);
+    return response.data.data;
+  },
+
+  async verifyTwoFactor(challengeToken: string, code: string) {
+    const response = await apiClient.post<ApiResponse<AuthResult>>('/auth/2fa/verify', { challengeToken, code });
     return response.data.data;
   },
 

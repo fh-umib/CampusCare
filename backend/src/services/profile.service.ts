@@ -2,6 +2,7 @@ import type { PublicUser } from '../types/user.js';
 import type { UserProfileInput } from '../types/profile.js';
 import { profileRepository } from '../repositories/profile.repository.js';
 import { requireCurrentUser, optionalString, requireObject } from '../utils/moduleValidation.js';
+import { auditService } from '../modules/security/audit.service.js';
 
 function readProfileInput(payload: unknown, completeOnboarding: boolean): UserProfileInput {
   const data = requireObject(payload);
@@ -32,7 +33,7 @@ export const profileService = {
   updateCurrentProfile: async (payload: unknown, currentUser: PublicUser | undefined) => {
     const user = requireCurrentUser(currentUser);
     const input = readProfileInput(payload, Boolean((payload as { onboardingCompleted?: unknown })?.onboardingCompleted));
-    return profileRepository.upsert(user.id, input);
+    const profile=await profileRepository.upsert(user.id, input);await auditService.record({actor:user,action:'profile_updated',entityType:'profile',entityId:user.id});return profile;
   },
 
   completeOnboarding: async (payload: unknown, currentUser: PublicUser | undefined) => {

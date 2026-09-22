@@ -76,6 +76,10 @@ The current version is functional and ready for further testing, documentation, 
 
 Admin accounts are created manually. Public admin registration is restricted.
 
+## Security
+
+CampusCare enforces backend role and ownership checks, supports optional authenticator-based two-factor authentication for Admin accounts, and records privacy-safe audit and personal activity events. Audit logs never contain passwords, tokens, authenticator secrets, private support messages, or AI prompts and responses. See [Security and Audit](docs/SECURITY_AND_AUDIT.md) for the permission model, setup flow, logging policy, tests, and known limitations.
+
 ---
 
 ## Core Functionalities

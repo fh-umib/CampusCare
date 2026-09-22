@@ -10,6 +10,7 @@ type NavItem = {
   label: string;
   to: string;
   icon: NavIconName;
+  adminOnly?: boolean;
 };
 
 const navigationGroups: Array<{ label: string; items: NavItem[] }> = [
@@ -35,7 +36,7 @@ const navigationGroups: Array<{ label: string; items: NavItem[] }> = [
   },
   {
     label: 'Account',
-    items: [{ label: 'Profile', to: '/profile', icon: 'profile' }]
+    items: [{ label: 'Profile', to: '/profile', icon: 'profile' }, { label: 'Audit Logs', to: '/audit-logs', icon: 'profile', adminOnly: true }]
   }
 ];
 
@@ -201,7 +202,7 @@ export function AuthenticatedLayout() {
                 {group.label}
               </p>
               <div className="space-y-1">
-                {group.items.filter((item) => item.icon !== 'assistant' || user?.role === 'student').map((item) => (
+                {group.items.filter((item) => (!item.adminOnly || user?.role === 'admin') && (item.icon !== 'assistant' || user?.role === 'student')).map((item) => (
                   <NavLink
                     key={item.to}
                     to={item.to}
@@ -296,7 +297,7 @@ export function AuthenticatedLayout() {
             aria-label="Mobile module navigation"
             className="mobile-module-nav mt-3 flex snap-x gap-2 overflow-x-auto px-0.5 pb-1 lg:hidden"
           >
-            {navItems.filter((item) => item.icon !== 'assistant' || user?.role === 'student').map((item) => (
+            {navItems.filter((item) => (!item.adminOnly || user?.role === 'admin') && (item.icon !== 'assistant' || user?.role === 'student')).map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
@@ -323,7 +324,7 @@ export function AuthenticatedLayout() {
         aria-label="Quick mobile navigation"
         className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-6 gap-1 border-t border-slate-200 bg-white/95 px-2.5 py-2 shadow-[0_-8px_24px_rgba(15,23,42,.08)] backdrop-blur lg:hidden"
       >
-        {mobileBottomItems.map((item) => (
+        {mobileBottomItems.filter((item) => !item.adminOnly).map((item) => (
           <NavLink
             key={item.to}
             to={item.to}

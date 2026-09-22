@@ -16,6 +16,7 @@ import SkillMapPage from '../pages/SkillMapPage';
 import StressTrackerPage from '../pages/StressTrackerPage';
 import { ProtectedRoute } from './ProtectedRoute';
 import AIStudyAssistantPage from '../pages/AIStudyAssistantPage';
+import AuditLogsPage from '../pages/AuditLogsPage';
 
 export function AppRoutes() {
   return (
@@ -40,6 +41,7 @@ export function AppRoutes() {
             <Route path="/ai-study-assistant" element={<AIStudyAssistantPage />} />
             <Route path="/dashboard/ai-study-assistant" element={<Navigate to="/ai-study-assistant" replace />} />
           </Route>
+          <Route element={<ProtectedRoute roles={['admin']} />}><Route path="/audit-logs" element={<AuditLogsPage />} /></Route>
         </Route>
       </Route>
       <Route path="*" element={<NotFoundPage />} />

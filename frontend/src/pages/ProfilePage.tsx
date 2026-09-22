@@ -11,6 +11,7 @@ import type { DashboardStats } from '../types/dashboard';
 import type { UserProfile } from '../types/profile';
 import type { StudentSkill } from '../types/skill';
 import { formatDate } from '../utils/formatDate';
+import { ProfileSecurityActivity } from '../components/security/ProfileSecurityActivity';
 
 type Role = 'student' | 'mentor' | 'admin';
 type IconName = 'profile' | 'email' | 'role' | 'calendar' | 'complete' | 'help' | 'skill' | 'stress' | 'mood' | 'lostFound' | 'activity' | 'settings' | 'guidance' | 'shield' | 'arrow';
@@ -273,6 +274,7 @@ export default function ProfilePage() {
             <div className="pf-middle-grid"><ProgressJourney role={role} userCreatedAt={user?.createdAt} stats={stats} skills={skills} profileComplete={Boolean(profile?.onboardingCompleted)} /><GuidanceCard role={role} /></div>
             <section className="pf-card pf-onboarding"><div className="pf-onboarding-head"><SectionHeading eyebrow="Onboarding details" title="Role preferences and context" description={profile?.onboardingCompleted ? 'These details shape the prompts and context shown across your workspace.' : 'Complete onboarding to personalize your CampusCare experience.'} /><Link to="/onboarding">Update onboarding</Link></div>{fields.some((field) => field.value) ? <div className="pf-details-grid">{fields.map((field) => <article className={`pf-detail-card ${field.value ? '' : 'is-missing'}`} key={field.label}><Icon name={field.icon} size={34} color={field.value ? colors.teal : '#94a3b8'} background={field.value ? '#e8f8f5' : '#eef4f8'} /><span><small>{field.label}</small><strong>{displayLabel(field.value)}</strong></span></article>)}</div> : <EmptyState title={role === 'student' ? 'Complete your student context' : role === 'mentor' ? 'Complete your mentor support profile' : 'Complete your admin responsibility details'} text="Complete onboarding to personalize your CampusCare workspace." action={{ label: 'Update onboarding', to: '/onboarding' }} />}</section>
             <section className="pf-card pf-skills"><div className="pf-skills-head"><SectionHeading eyebrow="SkillMap identity" title={role === 'student' ? 'My shared skills' : 'Skills on this account'} description="Skills currently attached to your CampusCare profile." /><Link to="/skill-map">Manage skills</Link></div>{skills.length ? <div className="pf-skill-list">{skills.map((skill) => <span key={skill.skillId}><Icon name="skill" size={25} color={colors.teal} background="#e8f8f5" />{skill.name}<small>{displayLabel(skill.level)}</small></span>)}</div> : <EmptyState title="No skills added yet" text="Add your first skill to make your CampusCare identity more useful." action={{ label: 'Open SkillMap', to: '/skill-map' }} />}</section>
+            <ProfileSecurityActivity role={role} />
             <div className="pf-section"><QuickActions actions={actions} /></div>
           </>
         )}

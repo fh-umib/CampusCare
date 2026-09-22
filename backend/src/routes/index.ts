@@ -14,6 +14,7 @@ import { analyticsRoutes } from '../modules/analytics/analytics.routes.js';
 import { reportRoutes } from '../modules/reports/report.routes.js';
 import { aiRoutes } from '../modules/ai/ai.routes.js';
 import { supportRoutes } from '../modules/support/support.routes.js';
+import { securityRoutes } from '../modules/security/security.routes.js';
 
 export const apiRoutes = Router();
 
@@ -42,3 +43,4 @@ apiRoutes.use('/analytics', analyticsRoutes);
 apiRoutes.use('/reports', reportRoutes);
 apiRoutes.use('/ai', aiRoutes);
 apiRoutes.use('/support', supportRoutes);
+apiRoutes.use('/security',securityRoutes);

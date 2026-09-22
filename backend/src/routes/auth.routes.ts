@@ -7,5 +7,6 @@ export const authRoutes = Router();
 
 authRoutes.post('/register', asyncHandler(authController.register));
 authRoutes.post('/login', asyncHandler(authController.login));
+authRoutes.post('/2fa/verify',asyncHandler(authController.verifyTwoFactor));
 authRoutes.post('/forgot-password', asyncHandler(authController.forgotPassword));
 authRoutes.get('/me', authenticate, asyncHandler(authController.me));

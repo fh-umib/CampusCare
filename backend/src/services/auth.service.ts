@@ -8,6 +8,8 @@ import {
   validateRegisterPayload
 } from '../utils/validation.js';
 import { AppError } from '../utils/httpError.js';
+import { twoFactorService } from '../modules/security/twoFactor.service.js';
+import { auditService } from '../modules/security/audit.service.js';
 
 const APPROVED_ADMIN_EMAIL = 'fluturahysenni@gmail.com';
 
@@ -74,13 +76,23 @@ export const authService = {
     const passwordMatches = await passwordUtils.compare(input.password, user.passwordHash);
 
     if (!passwordMatches) {
+      await auditService.record({ actor: toPublicUser(user), action: 'login_failed', entityType: 'session' });
       throw new AppError(401, 'Invalid email or password');
     }
 
     assertAdminIsAuthorized(user);
 
+    if(user.role==='admin'){
+      const security=await authRepository.getAdminSecurity(user.id);
+      if(security?.admin_2fa_enabled)return{requiresTwoFactor:true,challengeToken:tokenUtils.signTwoFactorChallenge({userId:user.id,role:user.role})};
+    }
+
+    await auditService.record({actor:toPublicUser(user),action:'login_success',entityType:'session'});
+
     return createAuthResponse(user);
   },
+
+  verifyTwoFactor:async(payload:unknown)=>{if(!payload||typeof payload!=='object')throw new AppError(400,'Verification details are required.');const data=payload as Record<string,unknown>;if(typeof data.challengeToken!=='string'||typeof data.code!=='string')throw new AppError(400,'Challenge token and verification code are required.');const challenge=tokenUtils.verify(data.challengeToken);if(challenge.purpose!=='admin-2fa'||challenge.role!=='admin')throw new AppError(401,'Invalid or expired verification challenge.');const user=await authRepository.findById(challenge.userId);if(!user||user.role!=='admin'||!(await twoFactorService.verifyLogin(user.id,data.code)))throw new AppError(401,'The verification code is invalid or expired.',[],'TWO_FACTOR_CODE_INVALID');const publicUser=toPublicUser(user);await auditService.record({actor:publicUser,action:'admin_2fa_verified',entityType:'session'});await auditService.record({actor:publicUser,action:'login_success',entityType:'session'});return createAuthResponse(user)},
 
   forgotPassword: async (payload: unknown) => {
     validateForgotPasswordPayload(payload);

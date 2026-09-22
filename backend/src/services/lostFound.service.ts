@@ -3,6 +3,7 @@ import { notificationService } from './notification.service.js';
 import type { LostFoundItemType, LostFoundStatus } from '../types/lostFound.js';
 import type { PublicUser } from '../types/user.js';
 import { AppError } from '../utils/httpError.js';
+import { auditService } from '../modules/security/audit.service.js';
 import {
   optionalEnum,
   optionalString,
@@ -75,6 +76,7 @@ export const lostFoundService = {
         link: '/lost-found'
       })
     ]);
+    await auditService.record({ actor: user, action: 'lost_found_created', entityType: 'lost_found_item', entityId: created.id, metadata: { itemType: created.itemType } });
     return created;
   },
 
@@ -101,6 +103,7 @@ export const lostFoundService = {
         link: '/lost-found'
       });
     }
+    await auditService.record({ actor: user, action: 'lost_found_status_changed', entityType: 'lost_found_item', entityId: id, metadata: { status } });
     return updated;
   }
 };

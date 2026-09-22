@@ -2,6 +2,7 @@ import { skillRepository } from '../repositories/skill.repository.js';
 import type { SkillAvailability, SkillLevel } from '../types/skill.js';
 import type { PublicUser } from '../types/user.js';
 import { AppError } from '../utils/httpError.js';
+import { auditService } from '../modules/security/audit.service.js';
 import {
   optionalEnum,
   optionalString,
@@ -46,12 +47,14 @@ export const skillService = {
       throw new AppError(404, 'Skill not found');
     }
 
-    return skillRepository.attachToUser({
+    const attached = await skillRepository.attachToUser({
       userId: user.id,
       skillId,
       level: optionalEnum(data.level, skillLevels, 'level') ?? 'beginner',
       availability: optionalEnum(data.availability, availabilityValues, 'availability') ?? 'available'
     });
+    await auditService.record({ actor: user, action: 'skill_added', entityType: 'skill', entityId: skillId, metadata: { level: attached.level } });
+    return attached;
   },
 
   getMySkills: (currentUser: PublicUser | undefined) => {

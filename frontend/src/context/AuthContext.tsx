@@ -9,7 +9,7 @@ import {
 } from 'react';
 import { authService } from '../services/authService';
 import { AUTH_INVALID_EVENT, clearStoredToken, getStoredToken, storeToken } from '../services/apiClient';
-import type { AuthUser, LoginPayload, RegisterPayload } from '../types/auth';
+import type { AuthUser, LoginPayload, LoginResult, RegisterPayload } from '../types/auth';
 import { realtimeService } from '../services/realtime';
 
 type AuthContextValue = {
@@ -17,7 +17,8 @@ type AuthContextValue = {
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (payload: LoginPayload) => Promise<void>;
+  login: (payload: LoginPayload) => Promise<LoginResult>;
+  verifyTwoFactor: (challengeToken: string, code: string) => Promise<void>;
   register: (payload: RegisterPayload) => Promise<void>;
   logout: () => void;
   refreshCurrentUser: () => Promise<void>;
@@ -86,10 +87,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback(
     async (payload: LoginPayload) => {
       const result = await authService.login(payload);
-      setSession(result.user, result.token);
+      if ('token' in result) setSession(result.user, result.token);
+      return result;
     },
     [setSession]
   );
+
+  const verifyTwoFactor = useCallback(async (challengeToken: string, code: string) => {
+    const result = await authService.verifyTwoFactor(challengeToken, code);
+    setSession(result.user, result.token);
+  }, [setSession]);
 
   const register = useCallback(
     async (payload: RegisterPayload) => {
@@ -106,11 +113,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAuthenticated: Boolean(token && user),
       isLoading,
       login,
+      verifyTwoFactor,
       register,
       logout,
       refreshCurrentUser
     }),
-    [isLoading, login, logout, refreshCurrentUser, register, token, user]
+    [isLoading, login, logout, refreshCurrentUser, register, token, user, verifyTwoFactor]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

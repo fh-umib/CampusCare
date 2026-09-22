@@ -27,7 +27,7 @@ export function createSupportRealtimeHandlers(socket:RealtimeSocket,user:PublicU
   typingStop:(payload:unknown,ack?:unknown)=>runRealtimeEvent('support:typing:stop',ack,async()=>{const id=readRealtimeConversationId(payload);const access=await supportService.authorize(id,user);socket.to(conversationRoom(access.conversation.id)).emit('support:typing:stop',{conversationId:access.conversation.id,displayName:user.role==='student'?'Student':'Mentor'})})
 }}
 
-export async function authenticateRealtimeToken(token:unknown,getUser=authService.getCurrentUser){if(typeof token!=='string'||!token.trim())throw Object.assign(new Error('Authentication is required.'),{data:{code:'REALTIME_AUTH_REQUIRED'}});const payload=tokenUtils.verify(token);return getUser(payload.userId)}
+export async function authenticateRealtimeToken(token:unknown,getUser=authService.getCurrentUser){if(typeof token!=='string'||!token.trim())throw Object.assign(new Error('Authentication is required.'),{data:{code:'REALTIME_AUTH_REQUIRED'}});const payload=tokenUtils.verify(token);if(payload.purpose==='admin-2fa')throw Object.assign(new Error('Two-factor verification is required.'),{data:{code:'REALTIME_AUTH_INVALID'}});return getUser(payload.userId)}
 
 export function attachRealtimeServer(httpServer:HttpServer){
   const origins=[env.frontendUrl,...(env.nodeEnv==='development'?['http://localhost:5173']:[])].flatMap(value=>value.split(',')).map(value=>value.trim().replace(/\/$/,'')).filter(Boolean);

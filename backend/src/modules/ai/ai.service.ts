@@ -7,6 +7,7 @@ import { aiRepository } from './ai.repository.js';
 import { safetyResponse } from './ai.safety.js';
 import type { AiProvider } from './ai.types.js';
 import { readConversationInput, readConversationUpdate, readMessage, readMode } from './ai.validation.js';
+import { auditService } from '../security/audit.service.js';
 
 const bursts = new Map<string, number>();
 function student(user?: PublicUser) { const current = requireCurrentUser(user); if (current.role !== 'student') throw aiError(403, 'AI_FORBIDDEN', 'The AI Study Assistant is currently available to students only.'); return current; }
@@ -34,11 +35,12 @@ export const aiService = {
     if (!isRetry) await aiRepository.addStudentMessage(id, safe ? '[Sensitive message withheld after safety redirect]' : message, safe ? 'redirected' : 'allowed');
     await aiRepository.setModeAndTitle(id, mode, conversation.title === 'New study session' ? deriveTitle(message, mode) : undefined);
     const started = Date.now();
+    await auditService.record({ actor: u, action: 'ai_request_attempted', entityType: 'ai_conversation', entityId: id, metadata: { mode } });
     try {
       const result = safe ? { response: safe, inputTokens: 0, outputTokens: 0 } : await (provider ?? createAiProvider()).generate({ mode, message, history, requestId });
       const duration = Date.now() - started; await aiRepository.addAssistantMessage(id, result.response, { ...result, duration, safety: safe ? 'redirected' : 'allowed' });
       await Promise.all([aiRepository.recordUsage(u.id, true, result.inputTokens, result.outputTokens, duration), aiRepository.touch(id)]);
       return { message: result.response, remainingToday: env.aiDailyMessageLimit - Number(usage.request_count) };
-    } catch (error) { await aiRepository.recordUsage(u.id, false, 0, 0, Date.now() - started); throw error; }
+    } catch (error) { await aiRepository.recordUsage(u.id, false, 0, 0, Date.now() - started); if ((error as { code?: string }).code === 'AI_PROVIDER_QUOTA_UNAVAILABLE') await auditService.record({ actor: u, action: 'ai_provider_unavailable', entityType: 'ai_conversation', entityId: id }); throw error; }
   }
 };

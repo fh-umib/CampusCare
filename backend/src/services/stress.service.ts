@@ -8,9 +8,10 @@ import {
   requireIntegerRange,
   requireObject
 } from '../utils/moduleValidation.js';
+import { auditService } from '../modules/security/audit.service.js';
 
 function scopeFor(user: PublicUser) {
-  return canViewGlobalRecords(user.role) ? {} : { userId: user.id };
+  return { userId: user.id };
 }
 
 export const stressService = {
@@ -58,11 +59,12 @@ export const stressService = {
       );
     }
     await Promise.all(notifications);
+    await auditService.record({ actor: user, action: 'stress_check_in_recorded', entityType: 'stress_record', entityId: created.id, metadata: { level: stressLevel } });
     return created;
   },
 
   summary: (currentUser: PublicUser | undefined) => {
     const user = requireCurrentUser(currentUser);
-    return stressRepository.summary(scopeFor(user));
+    return stressRepository.summary(canViewGlobalRecords(user.role) ? {} : scopeFor(user));
   }
 };

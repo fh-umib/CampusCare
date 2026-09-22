@@ -12,6 +12,7 @@ export const authController = {
     const result = await authService.login(request.body);
     successResponse(response, 'Login successful', result);
   },
+  verifyTwoFactor:async(request:Request,response:Response)=>successResponse(response,'Identity verified',await authService.verifyTwoFactor(request.body)),
 
   forgotPassword: async (request: Request, response: Response) => {
     await authService.forgotPassword(request.body);

@@ -28,7 +28,7 @@ const rolePanels = {
 };
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, verifyTwoFactor } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -37,6 +37,8 @@ export default function LoginPage() {
   const rolePanel = rolePanels[roleKey];
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [challengeToken, setChallengeToken] = useState('');
+  const [verificationCode, setVerificationCode] = useState('');
   const [error, setError] = useState('');
   const successMessage =
     typeof (location.state as { message?: unknown } | null)?.message === 'string'
@@ -55,8 +57,18 @@ export default function LoginPage() {
 
     try {
       setIsSubmitting(true);
-      await login({ email, password });
-      navigate('/dashboard');
+      if (challengeToken) {
+        if (!/^\d{6}$/.test(verificationCode)) {
+          setError('Enter the 6-digit code from your authenticator app.');
+          return;
+        }
+        await verifyTwoFactor(challengeToken, verificationCode);
+        navigate('/dashboard');
+      } else {
+        const result = await login({ email, password });
+        if ('requiresTwoFactor' in result) setChallengeToken(result.challengeToken);
+        else navigate('/dashboard');
+      }
     } catch (err) {
       setError(getApiErrorMessage(err));
     } finally {
@@ -106,16 +118,16 @@ export default function LoginPage() {
 
           <div className="premium-card flex flex-col justify-center p-5 md:p-6">
             <span className="badge-green">{rolePanel.eyebrow}</span>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-[#071527]">Sign in to CampusCare</h2>
+            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-[#071527]">{challengeToken ? 'Verify your identity' : 'Sign in to CampusCare'}</h2>
             <p className="mt-1 text-sm leading-5 text-slate-600">
-              Welcome back. Continue to your role-aware dashboard and active support workspace.
+              {challengeToken ? 'Enter the 6-digit code from your authenticator app to continue.' : 'Welcome back. Continue to your role-aware dashboard and active support workspace.'}
             </p>
 
             {successMessage ? <div className="alert-success mt-3">{successMessage}</div> : null}
             {error ? <div className="alert-error mt-3">{error}</div> : null}
 
             <form className="mt-4 space-y-3" onSubmit={handleSubmit}>
-              <label className="block">
+              {!challengeToken ? <label className="block">
                 <span className="field-label">Email</span>
                 <input
                   autoComplete="email"
@@ -125,8 +137,8 @@ export default function LoginPage() {
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                 />
-              </label>
-              <label className="block">
+              </label> : null}
+              {!challengeToken ? <label className="block">
                 <span className="flex items-center justify-between gap-3">
                   <span className="field-label">Password</span>
                   <Link
@@ -144,10 +156,11 @@ export default function LoginPage() {
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                 />
-              </label>
+              </label> : <label className="block"><span className="field-label">Verification code</span><input autoComplete="one-time-code" autoFocus className="input text-center text-xl tracking-[.35em]" inputMode="numeric" maxLength={6} pattern="[0-9]{6}" required value={verificationCode} onChange={(event) => setVerificationCode(event.target.value.replace(/\D/g, '').slice(0, 6))} /></label>}
               <button aria-busy={isSubmitting} className="btn-primary flex w-full items-center justify-center gap-2" type="submit" disabled={isSubmitting}>
-                {isSubmitting ? <><ButtonSpinner />Signing in...</> : 'Sign in'}
+                {isSubmitting ? <><ButtonSpinner />{challengeToken ? 'Verifying...' : 'Signing in...'}</> : challengeToken ? 'Verify and continue' : 'Sign in'}
               </button>
+              {challengeToken ? <button className="btn-secondary w-full" type="button" onClick={() => { setChallengeToken(''); setVerificationCode(''); setError(''); }}>Back to sign in</button> : null}
             </form>
 
             {roleKey === 'admin' ? (

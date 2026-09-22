@@ -30,3 +30,8 @@ export type AuthResult = {
   token: string;
   user: AuthUser;
 };
+
+export type LoginResult = AuthResult | {
+  requiresTwoFactor: true;
+  challengeToken: string;
+};

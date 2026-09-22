@@ -10,6 +10,7 @@ export type AuthUser = {
 export type JwtPayload = {
   userId: string;
   role: UserRole;
+  purpose?: 'session' | 'admin-2fa';
 };
 
 export type RegisterInput = {

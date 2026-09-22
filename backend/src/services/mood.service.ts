@@ -3,11 +3,12 @@ import { notificationService } from './notification.service.js';
 import type { MoodState } from '../types/mood.js';
 import type { PublicUser } from '../types/user.js';
 import { canViewGlobalRecords, optionalString, requireCurrentUser, requireEnum, requireObject } from '../utils/moduleValidation.js';
+import { auditService } from '../modules/security/audit.service.js';
 
 const moodValues = ['motivated', 'tired', 'stressed', 'calm', 'overwhelmed'] as const satisfies readonly MoodState[];
 
 function scopeFor(user: PublicUser) {
-  return canViewGlobalRecords(user.role) ? {} : { userId: user.id };
+  return { userId: user.id };
 }
 
 export const moodService = {
@@ -33,11 +34,12 @@ export const moodService = {
       message: `Your ${mood} MoodCampus check-in was recorded.`,
       link: '/mood-campus'
     });
+    await auditService.record({ actor: user, action: 'mood_recorded', entityType: 'mood_record', entityId: created.id, metadata: { mood } });
     return created;
   },
 
   summary: (currentUser: PublicUser | undefined) => {
     const user = requireCurrentUser(currentUser);
-    return moodRepository.summary(scopeFor(user));
+    return moodRepository.summary(canViewGlobalRecords(user.role) ? {} : scopeFor(user));
   }
 };

@@ -13,6 +13,10 @@ export const tokenUtils = {
       expiresIn: env.jwtExpiresIn as SignOptions['expiresIn']
     });
   },
+  signTwoFactorChallenge: (payload: JwtPayload) => {
+    if (!env.jwtSecret) throw new AppError(500, 'JWT secret is not configured');
+    return jwt.sign({ ...payload, purpose: 'admin-2fa' }, env.jwtSecret, { expiresIn: '5m' });
+  },
 
   verify: (token: string) => {
     if (!env.jwtSecret) {

@@ -13,6 +13,7 @@ export async function authenticate(request: Request, _response: Response, next: 
 
     const token = authHeader.replace('Bearer ', '').trim();
     const payload = tokenUtils.verify(token);
+    if(payload.purpose==='admin-2fa')throw new AppError(401,'Authentication required');
     request.currentUser = await authService.getCurrentUser(payload.userId);
 
     next();

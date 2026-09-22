@@ -5,6 +5,7 @@ import type { PublicUser } from '../types/user.js';
 import { AppError } from '../utils/httpError.js';
 import { optionalBoolean, optionalEnum, requireCurrentUser, requireEnum, requireObject, requireString, requireUuid } from '../utils/moduleValidation.js';
 import { supportService } from '../modules/support/support.service.js';
+import { auditService } from '../modules/security/audit.service.js';
 
 const helpCategories = [
   'subject',
@@ -65,6 +66,7 @@ export const helpRequestService = {
         link: `/silent-help?request=${created.id}`
       })
     ]);
+    await auditService.record({actor:user,action:'support_request_created',entityType:'help_request',entityId:created.id,metadata:{anonymous:created.isAnonymous,category:created.category}});
     return created;
   },
 
@@ -95,6 +97,7 @@ export const helpRequestService = {
         link: `/silent-help?request=${helpRequest.id}`
       });
     }
+    await auditService.record({actor:user,action:status==='closed'?'support_request_resolved':'support_request_status_changed',entityType:'help_request',entityId:id,metadata:{status}});
     return updated;
   }
 };
