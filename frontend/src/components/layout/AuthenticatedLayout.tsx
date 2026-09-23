@@ -3,6 +3,7 @@ import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { CampusCareLogoMark } from '../brand/CampusCareLogoMark';
 import { NotificationBell } from './NotificationBell';
 import { useAuth } from '../../context/AuthContext';
+import { ThemeToggle } from '../theme/ThemeToggle';
 
 type NavIconName = 'dashboard' | 'help' | 'stress' | 'mood' | 'skills' | 'lostFound' | 'profile' | 'assistant' | 'logout';
 
@@ -280,6 +281,7 @@ export function AuthenticatedLayout() {
               </div>
             </div>
             <div className="flex items-center gap-2 sm:gap-3">
+              <ThemeToggle />
               <NotificationBell />
               <span className={`rounded-full px-3 py-1.5 text-[0.68rem] font-extrabold uppercase tracking-wide ring-1 ${roleBadgeClass(user?.role)}`}>
                 {user?.role} view

@@ -2,6 +2,7 @@ import type { CSSProperties, ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { CampusCareLogoMark } from '../components/brand/CampusCareLogoMark';
 import { useAuth } from '../context/AuthContext';
+import { ThemeToggle } from '../components/theme/ThemeToggle';
 
 type IconName =
   | 'help'
@@ -411,6 +412,7 @@ export default function LandingPage() {
             </span>
           </Link>
           <nav className="lp-nav" aria-label="Landing page navigation">
+            <ThemeToggle />
             <a className="lp-nav-link" href="#modules">Modules</a>
             <a className="lp-nav-link" href="#roles">Roles</a>
             {isAuthenticated ? (
