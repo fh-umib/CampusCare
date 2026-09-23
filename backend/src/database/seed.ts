@@ -144,7 +144,8 @@ async function seedDemoData() {
            category = EXCLUDED.category,
            description = EXCLUDED.description,
            is_anonymous = EXCLUDED.is_anonymous,
-           status = EXCLUDED.status`,
+           status = EXCLUDED.status,
+           created_at = EXCLUDED.created_at`,
       [studentId]
     );
 
@@ -161,7 +162,8 @@ async function seedDemoData() {
        SET user_id = EXCLUDED.user_id,
            subject = EXCLUDED.subject,
            stress_level = EXCLUDED.stress_level,
-           note = EXCLUDED.note`,
+           note = EXCLUDED.note,
+           recorded_at = EXCLUDED.recorded_at`,
       [studentId]
     );
 
@@ -175,7 +177,8 @@ async function seedDemoData() {
        ON CONFLICT (id) DO UPDATE
        SET user_id = EXCLUDED.user_id,
            mood = EXCLUDED.mood,
-           note = EXCLUDED.note`,
+           note = EXCLUDED.note,
+           recorded_at = EXCLUDED.recorded_at`,
       [studentId]
     );
 
@@ -185,8 +188,8 @@ async function seedDemoData() {
        )
        VALUES (
          '75000000-0000-0000-0000-000000000001', $1,
-         'USB Flash Drive', 'Black USB flash drive found after a laboratory session.',
-         'Computer Lab 2', 'found', 'open', CURRENT_DATE - 1,
+         'Black USB Drive', 'Lost near the computer lab after the afternoon class.',
+         'Computer Lab 2', 'lost', 'open', CURRENT_DATE - 1,
          NOW() - INTERVAL '1 day'
        )
        ON CONFLICT (id) DO UPDATE
@@ -196,7 +199,8 @@ async function seedDemoData() {
            location = EXCLUDED.location,
            item_type = EXCLUDED.item_type,
            status = EXCLUDED.status,
-           item_date = EXCLUDED.item_date`,
+           item_date = EXCLUDED.item_date,
+           created_at = EXCLUDED.created_at`,
       [studentId]
     );
 
@@ -216,7 +220,7 @@ async function seedDemoData() {
           'Wellbeing overview available', 'Review the latest stress and mood support signals.',
           '/stress-tracker', FALSE, NOW() - INTERVAL '20 minutes'),
          ('76000000-0000-0000-0000-000000000005', 'admin', 'system',
-          'Platform activity overview', 'CampusCare demo module activity is ready for review.',
+          'Platform activity overview', 'Recent CampusCare module activity is ready for review.',
           '/dashboard', FALSE, NOW() - INTERVAL '15 minutes'),
          ('76000000-0000-0000-0000-000000000006', 'admin', 'lost_found',
           'Campus report needs review', 'A Lost & Found report is currently open.',
@@ -226,7 +230,9 @@ async function seedDemoData() {
            type = EXCLUDED.type,
            title = EXCLUDED.title,
            message = EXCLUDED.message,
-           link = EXCLUDED.link`,
+           link = EXCLUDED.link,
+           is_read = EXCLUDED.is_read,
+           created_at = EXCLUDED.created_at`,
       []
     );
 

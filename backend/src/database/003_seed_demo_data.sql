@@ -202,7 +202,14 @@ VALUES
     'closed',
     NOW() - INTERVAL '2 days'
   )
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (id) DO UPDATE
+SET user_id = EXCLUDED.user_id,
+    title = EXCLUDED.title,
+    category = EXCLUDED.category,
+    description = EXCLUDED.description,
+    is_anonymous = EXCLUDED.is_anonymous,
+    status = EXCLUDED.status,
+    created_at = EXCLUDED.created_at;
 
 INSERT INTO help_replies (id, help_request_id, user_id, message, created_at)
 VALUES
@@ -220,7 +227,11 @@ VALUES
     'Try organizing your revision into smaller blocks and ask for support early if the stress level stays high.',
     NOW() - INTERVAL '2 days'
   )
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (id) DO UPDATE
+SET help_request_id = EXCLUDED.help_request_id,
+    user_id = EXCLUDED.user_id,
+    message = EXCLUDED.message,
+    created_at = EXCLUDED.created_at;
 
 INSERT INTO stress_records (id, user_id, subject, stress_level, note, recorded_at)
 VALUES
@@ -256,7 +267,12 @@ VALUES
     'Feeling more confident after reviewing dashboards.',
     NOW() - INTERVAL '1 day'
   )
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (id) DO UPDATE
+SET user_id = EXCLUDED.user_id,
+    subject = EXCLUDED.subject,
+    stress_level = EXCLUDED.stress_level,
+    note = EXCLUDED.note,
+    recorded_at = EXCLUDED.recorded_at;
 
 INSERT INTO mood_records (id, user_id, mood, note, recorded_at)
 VALUES
@@ -295,17 +311,21 @@ VALUES
     'Need help prioritizing tasks.',
     NOW() - INTERVAL '2 days'
   )
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (id) DO UPDATE
+SET user_id = EXCLUDED.user_id,
+    mood = EXCLUDED.mood,
+    note = EXCLUDED.note,
+    recorded_at = EXCLUDED.recorded_at;
 
 INSERT INTO lost_found_items (id, user_id, title, description, location, item_type, status, item_date, created_at)
 VALUES
   (
     '99999999-0000-0000-0000-000000000001',
     (SELECT id FROM users WHERE email = 'flutura.student@campuscare.test'),
-    'USB Flash Drive',
-    'Black 32GB USB flash drive found near the computer lab.',
+    'Black USB Drive',
+    'Lost near the computer lab after the afternoon class.',
     'Computer Lab 2',
-    'found',
+    'lost',
     'open',
     CURRENT_DATE - 5,
     NOW() - INTERVAL '5 days'
@@ -354,4 +374,12 @@ VALUES
     CURRENT_DATE - 1,
     NOW() - INTERVAL '1 day'
   )
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (id) DO UPDATE
+SET user_id = EXCLUDED.user_id,
+    title = EXCLUDED.title,
+    description = EXCLUDED.description,
+    location = EXCLUDED.location,
+    item_type = EXCLUDED.item_type,
+    status = EXCLUDED.status,
+    item_date = EXCLUDED.item_date,
+    created_at = EXCLUDED.created_at;
