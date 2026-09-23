@@ -112,6 +112,9 @@ body {
 :root[data-theme="dark"] .ai-demo-notice p { color:#afd0d5; }
 :root[data-theme="dark"] .ai-demo-notice small { color:#88aab4; }
 :root[data-theme="dark"] .ai-provider-label { border-color:#356b6c; color:#9be8df; background:#15333a; }
+:root[data-theme="dark"] .lf-owner-resolve { border-color:var(--cc-border); }
+:root[data-theme="dark"] .lf-owner-resolve > span,:root[data-theme="dark"] .lf-owner-resolve small { color:var(--cc-muted); }
+:root[data-theme="dark"] .lf-alert-success { border-color:#286553!important; color:#9be8c6!important; background:#12352e!important; }
 
 .an-panel { padding: 1.25rem; }
 .an-head { display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; margin-bottom:1rem; }
