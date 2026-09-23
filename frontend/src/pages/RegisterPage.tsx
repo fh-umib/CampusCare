@@ -1,5 +1,5 @@
 import { useState, type FormEvent, type ReactNode } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { clearStoredToken, getApiErrorMessage } from '../services/apiClient';
 import { authService } from '../services/authService';
 import { profileService } from '../services/profileService';
@@ -104,13 +104,13 @@ function initialProfile(): ProfilePayload {
 export default function RegisterPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const isAdminRegistration = searchParams.get('role') === 'admin';
-  const requestedRole = searchParams.get('role') === 'mentor' ? 'mentor' : 'student';
+  const roleParam = searchParams.get('role');
+  const isAdminRegistration = roleParam === 'admin';
+  const requestedRole: Exclude<UserRole, 'admin'> | null = roleParam === 'student' || roleParam === 'mentor' ? roleParam : null;
   const [form, setForm] = useState({
     fullName: '',
     email: '',
-    password: '',
-    role: requestedRole as Exclude<UserRole, 'admin'>
+    password: ''
   });
   const [profileForm, setProfileForm] = useState<ProfilePayload>(() => initialProfile());
   const [error, setError] = useState('');
@@ -177,6 +177,9 @@ export default function RegisterPage() {
     );
   }
 
+  if (!requestedRole) return <Navigate to="/start" replace />;
+  const fixedRole = requestedRole;
+
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     setError('');
@@ -189,12 +192,12 @@ export default function RegisterPage() {
 
     try {
       setIsSubmitting(true);
-      const result = await authService.register(form);
+      const result = await authService.register({ ...form, role: fixedRole });
       await profileService.completeOnboardingWithToken(profileForm, result.token);
       clearStoredToken();
       setSuccessMessage('Account created successfully. Please log in to continue.');
       setTimeout(() => {
-        navigate(`/login?role=${form.role}`, {
+        navigate(`/login?role=${fixedRole}`, {
           replace: true,
           state: { message: 'Account created successfully. Please log in to continue.' }
         });
@@ -206,9 +209,9 @@ export default function RegisterPage() {
     }
   }
 
-  const selectedRole = roleOptions.find((option) => option.role === form.role) ?? roleOptions[0];
+  const selectedRole = roleOptions.find((option) => option.role === fixedRole) ?? roleOptions[0];
   const roleContext =
-    form.role === 'mentor'
+    fixedRole === 'mentor'
       ? 'Set up a guidance workspace to review requests, support students, and follow academic wellbeing signals.'
       : 'Set up a student workspace for help requests, skills, stress tracking, mood reflection, and campus reports.';
 
@@ -289,6 +292,8 @@ export default function RegisterPage() {
           line-height: 1.45;
         }
         .register-section {
+          width: 100%;
+          margin: 0;
           overflow: hidden;
           border: 1px solid #dfeaf3;
           border-radius: 16px;
@@ -296,6 +301,7 @@ export default function RegisterPage() {
           box-shadow: 0 8px 24px rgba(15,23,42,.035);
         }
         .register-section-body { padding: .9rem; }
+        .register-details > summary { min-height: 76px; padding: .9rem; }
         .register-section-header {
           display: flex;
           align-items: center;
@@ -378,12 +384,12 @@ export default function RegisterPage() {
           </Link>
           <div className="flex flex-wrap gap-2">
             <AuthTopAction accent icon="role" to="/start">Change role</AuthTopAction>
-            <AuthTopAction icon="login" to={`/login?role=${form.role}`}>Already registered</AuthTopAction>
+            <AuthTopAction icon="login" to={`/login?role=${fixedRole}`}>Already registered</AuthTopAction>
           </div>
         </div>
 
-        <div className="mt-4 grid gap-4 lg:grid-cols-[0.76fr_1.24fr] lg:items-start">
-          <aside className="dark-gradient overflow-hidden rounded-[1.45rem] p-4 text-white shadow-xl md:p-5">
+        <div className="mt-4 grid gap-4 lg:grid-cols-[0.76fr_1.24fr] lg:items-stretch">
+          <aside className="dark-gradient flex overflow-hidden rounded-[1.45rem] p-4 text-white shadow-xl md:p-5 lg:h-full lg:flex-col">
             <div className="flex items-center gap-3">
               <CampusCareLogoMark size={48} variant="dark" />
               <div>
@@ -393,48 +399,26 @@ export default function RegisterPage() {
             </div>
             <h1 className="mt-5 text-2xl font-semibold leading-tight lg:text-[2.15rem]">Create your CampusCare account with purpose.</h1>
             <p className="mt-3 text-sm leading-6 text-white/65">
-              Choose your role, create your account, and personalize your workspace for support, skills, wellbeing, and campus reports.
+              Your selected workspace is fixed while you create your account and add optional profile details.
             </p>
 
-            <div className="mt-4 grid gap-2">
-              {roleOptions.map((option) => {
-                const selected = form.role === option.role;
-                return (
-                <button
-                  key={option.role}
-                  className={`register-role-card ${selected ? 'register-role-card-selected' : ''}`}
-                  type="button"
-                  onClick={() => setForm({ ...form, role: option.role })}
-                >
-                  <span className="register-role-icon"><RegisterIcon name={option.role} /></span>
+            <div className="mt-4 grid gap-2 lg:flex lg:flex-1 lg:flex-col">
+                <div className="register-role-card register-role-card-selected" aria-label={`${selectedRole.title} account selected`}>
+                  <span className="register-role-icon"><RegisterIcon name={selectedRole.role} /></span>
                   <span className="register-role-copy">
                     <span className="register-role-heading">
-                      <strong>{option.title}</strong>
-                      {selected ? <span className="register-role-state">Selected</span> : null}
+                      <strong>{selectedRole.title} account</strong>
+                      <span className="register-role-state">Selected</span>
                     </span>
-                    <span className="register-role-badge">{option.badge}</span>
-                    <span className="register-role-description">{option.description}</span>
+                    <span className="register-role-badge">{selectedRole.badge}</span>
+                    <span className="register-role-description">{selectedRole.description}</span>
                   </span>
-                </button>
-                );
-              })}
-              <Link className="register-role-card" to="/login?role=admin">
-                <span className="register-role-icon"><RegisterIcon name="admin" /></span>
-                <span className="register-role-copy">
-                  <span className="register-role-heading">
-                    <strong>Admin</strong>
-                    <span className="register-role-state"><RegisterIcon name="lock" size={11} /> Protected</span>
-                  </span>
-                  <span className="register-role-badge">Authorized platform access</span>
-                  <span className="register-role-description">
-                    Admin accounts use approved credentials and continue through the secure login flow.
-                  </span>
-                </span>
-              </Link>
+                </div>
+              <p className="text-xs leading-5 text-white/50 lg:mt-auto lg:pt-4">Need a different workspace? Use “Change role” above. Admin registration remains protected.</p>
             </div>
           </aside>
 
-          <div className="premium-card p-4 shadow-xl md:p-5">
+          <div className="premium-card p-4 shadow-xl md:p-5 lg:h-full">
             <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
               <div>
                 <span className="badge-green">{selectedRole.badge}</span>
@@ -443,7 +427,7 @@ export default function RegisterPage() {
                   {roleContext}
                 </p>
               </div>
-              <div className="rounded-full border border-teal-100 bg-teal-50 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-teal-700">Step 2 of 4</div>
+              <div className="shrink-0 self-start whitespace-nowrap rounded-full border border-teal-100 bg-teal-50 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-teal-700 sm:self-auto">Step 2 of 4</div>
             </div>
 
             {successMessage ? <div className="alert-success mt-3">{successMessage}</div> : null}
@@ -469,17 +453,6 @@ export default function RegisterPage() {
                       value={form.fullName}
                       onChange={(event) => setForm({ ...form, fullName: event.target.value })}
                     />
-                  </label>
-                  <label className="block">
-                    <span className="field-label">Role</span>
-                    <select
-                      className="input"
-                      value={form.role}
-                      onChange={(event) => setForm({ ...form, role: event.target.value as Exclude<UserRole, 'admin'> })}
-                    >
-                      <option value="student">Student</option>
-                      <option value="mentor">Mentor</option>
-                    </select>
                   </label>
                   <label className="block">
                     <span className="field-label">Email</span>
@@ -509,9 +482,9 @@ export default function RegisterPage() {
               </div>
 
               <details className="register-section register-details group">
-                <summary className="register-section-header cursor-pointer list-none p-[.9rem]">
+                <summary className="register-section-header cursor-pointer list-none">
                   <div>
-                    <h3 className="register-section-title">{form.role === 'student' ? 'Student role details' : 'Mentor role details'}</h3>
+                    <h3 className="register-section-title">{fixedRole === 'student' ? 'Student role details' : 'Mentor role details'}</h3>
                     <p className="register-section-helper">Optional profile context that personalizes your workspace.</p>
                   </div>
                   <span className="register-section-pill register-details-action">
@@ -519,7 +492,7 @@ export default function RegisterPage() {
                   </span>
                 </summary>
 
-                {form.role === 'student' ? (
+                {fixedRole === 'student' ? (
                   <div className="register-section-body border-t border-[#dfeaf3]">
                   <div className="register-section-header">
                     <div>
@@ -630,7 +603,7 @@ export default function RegisterPage() {
                   {isSubmitting ? <><ButtonSpinner />Creating account...</> : 'Create account'}
                   {!isSubmitting ? <RegisterIcon name="arrow" /> : null}
                 </button>
-                <Link className="register-action register-action-secondary" to={`/login?role=${form.role}`}>
+                <Link className="register-action register-action-secondary" to={`/login?role=${fixedRole}`}>
                   <RegisterIcon name="login" />
                   Already registered
                 </Link>
