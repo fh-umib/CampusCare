@@ -140,7 +140,7 @@ function MetricCard({ icon, label, value, helper, color, delay = 0 }: {
   );
 }
 
-function StressForm({ onSaved }: { onSaved: () => Promise<void> }) {
+function StressForm({ onSaved }: { onSaved: (record: StressRecord) => void }) {
   const [form, setForm] = useState({ subject: '', stress_level: 3 as StressLevel, note: '' });
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -154,16 +154,16 @@ function StressForm({ onSaved }: { onSaved: () => Promise<void> }) {
 
     try {
       setIsSubmitting(true);
-      await stressService.create({
+      const created = await stressService.create({
         subject: form.subject.trim() || undefined,
         stress_level: form.stress_level,
         note: form.note.trim() || undefined
       });
+      onSaved(created);
       setForm({ subject: '', stress_level: 3, note: '' });
       setMessage('Stress check-in saved. Thank you for taking a moment to notice how you feel.');
-      await onSaved();
-    } catch (err) {
-      setError(getApiErrorMessage(err));
+    } catch {
+      setError('Unable to save your stress check-in right now. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -467,7 +467,10 @@ export default function StressTrackerPage() {
       setRecords(recordsData);
       setSummary(summaryData);
     } catch (err) {
-      setError(getApiErrorMessage(err));
+      const detail = getApiErrorMessage(err);
+      setError(detail === 'Service is temporarily unavailable. Please try again.'
+        ? 'Unable to load ExamStress right now. Please try again.'
+        : detail);
     } finally {
       setIsLoading(false);
     }
@@ -476,6 +479,12 @@ export default function StressTrackerPage() {
   useEffect(() => {
     void loadData();
   }, []);
+
+  function handleSaved(record: StressRecord) {
+    setError('');
+    setRecords((current) => current.some((item) => item.id === record.id) ? current : [record, ...current]);
+    void stressService.summary().then(setSummary).catch(() => undefined);
+  }
 
   const analytics = useMemo(() => {
     const avg = average(records);
@@ -646,10 +655,10 @@ export default function StressTrackerPage() {
         {error ? <div className="st-page-error">{error}</div> : null}
         {isLoading ? <PageLoadingState variant="analytics" label="Loading ExamStress insights" /> : null}
 
-        {!isLoading && !error && role === 'student' ? (
+        {!isLoading && role === 'student' ? (
           <>
             <div className="st-student-top">
-              <StressForm onSaved={loadData} />
+              <StressForm onSaved={handleSaved} />
               <div>
                 <div className="st-metrics st-metrics-student" style={{ marginTop: 0 }}>
                   <MetricCard icon="pulse" label="Average stress" value={`${analytics.average.toFixed(1)} / 5`} helper={analytics.direction} color="#0d9e8a" />
@@ -667,7 +676,7 @@ export default function StressTrackerPage() {
           </>
         ) : null}
 
-        {!isLoading && !error && role === 'mentor' ? (
+        {!isLoading && role === 'mentor' ? (
           <>
             <div className="st-metrics st-metrics-mentor">
               <MetricCard icon="pulse" label="Average stress" value={`${analytics.average.toFixed(1)} / 5`} helper="Across visible check-ins" color="#0d9e8a" />
@@ -687,7 +696,7 @@ export default function StressTrackerPage() {
           </>
         ) : null}
 
-        {!isLoading && !error && role === 'admin' ? (
+        {!isLoading && role === 'admin' ? (
           <>
             <div className="st-metrics st-metrics-admin">
               <MetricCard icon="records" label="Total records" value={String(records.length)} helper="Visible module activity" color="#0b1d35" />

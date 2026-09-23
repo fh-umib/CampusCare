@@ -9,6 +9,7 @@ import {
   requireObject
 } from '../utils/moduleValidation.js';
 import { auditService } from '../modules/security/audit.service.js';
+import { logger } from '../utils/logger.js';
 
 function scopeFor(user: PublicUser) {
   return { userId: user.id };
@@ -58,7 +59,10 @@ export const stressService = {
         })
       );
     }
-    await Promise.all(notifications);
+    const notificationResults = await Promise.allSettled(notifications);
+    if (notificationResults.some((result) => result.status === 'rejected')) {
+      logger.warn('stress_notification_delivery_failed', { stressRecordId: created.id });
+    }
     await auditService.record({ actor: user, action: 'stress_check_in_recorded', entityType: 'stress_record', entityId: created.id, metadata: { level: stressLevel } });
     return created;
   },
