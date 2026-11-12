@@ -35,6 +35,9 @@ export function clearStoredToken() {
 export function getApiErrorMessage(error: unknown) {
   if (axios.isAxiosError(error)) {
     const axiosError = error as AxiosError<ApiErrorBody>;
+    if (axiosError.response?.data?.code === 'EVENTS_SCHEMA_REQUIRED') {
+      return axiosError.response.data.message ?? 'Hackathons & Events needs a database update. Please contact an administrator.';
+    }
     if (axiosError.response?.data?.code === 'AI_PROVIDER_QUOTA_UNAVAILABLE') {
       return axiosError.response.data.message ?? 'AI Study Assistant is currently unavailable because the AI service is not enabled for this deployment. Your CampusCare account and saved study sessions are still available.';
     }

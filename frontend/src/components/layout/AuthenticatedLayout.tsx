@@ -5,7 +5,7 @@ import { NotificationBell } from './NotificationBell';
 import { useAuth } from '../../context/AuthContext';
 import { ThemeToggle } from '../theme/ThemeToggle';
 
-type NavIconName = 'dashboard' | 'help' | 'stress' | 'mood' | 'skills' | 'lostFound' | 'profile' | 'assistant' | 'logout';
+type NavIconName = 'dashboard' | 'help' | 'stress' | 'mood' | 'skills' | 'lostFound' | 'profile' | 'assistant' | 'logout' | 'events';
 
 type NavItem = {
   label: string;
@@ -32,6 +32,7 @@ const navigationGroups: Array<{ label: string; items: NavItem[] }> = [
     label: 'Campus',
     items: [
       { label: 'SkillMap', to: '/skill-map', icon: 'skills' },
+      { label: 'Hackathons & Events', to: '/opportunities', icon: 'events' },
       { label: 'Lost & Found', to: '/lost-found', icon: 'lostFound' }
     ]
   },
@@ -47,6 +48,7 @@ const mobileBottomItems = navItems.filter((item) =>
 );
 
 const iconPaths: Record<NavIconName, ReactNode> = {
+  events: (<><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 11h18M8 15h3M8 18h6"/></>),
   dashboard: (
     <>
       <rect x="3" y="3" width="7" height="7" rx="1.5" />

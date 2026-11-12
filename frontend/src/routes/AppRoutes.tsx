@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
+import OpportunitiesPage from '../pages/OpportunitiesPage';
 import { AuthenticatedLayout } from '../components/layout/AuthenticatedLayout';
 import DashboardPage from '../pages/DashboardPage';
 import ForgotPasswordPage from '../pages/ForgotPasswordPage';
@@ -29,6 +30,9 @@ export function AppRoutes() {
       <Route element={<ProtectedRoute />}>
         <Route element={<AuthenticatedLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/opportunities" element={<OpportunitiesPage />} />
+          <Route path="/opportunities/:id" element={<OpportunitiesPage />} />
+          <Route path="/opportunities/:id/teams/:teamId" element={<OpportunitiesPage />} />
           <Route path="/silent-help" element={<HelpRequestsPage />} />
           <Route path="/skill-map" element={<SkillMapPage />} />
           <Route path="/skillmap" element={<SkillMapPage />} />
