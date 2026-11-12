@@ -8,7 +8,9 @@ const migrationFiles = [
   '006_notifications.sql',
   '007_ai_study_assistant.sql',
   '008_realtime_support_chat.sql',
-  '009_security_and_audit.sql'
+  '009_security_and_audit.sql',
+  '010_hackathons_events.sql',
+  '011_team_discord_invites.sql'
 ];
 
 async function runMigrations() {

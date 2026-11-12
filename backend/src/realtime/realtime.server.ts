@@ -1,4 +1,5 @@
 import type { Server as HttpServer } from 'node:http';
+import { eventsService } from '../modules/events/events.service.js';
 import { Server } from 'socket.io';
 import { env } from '../config/env.js';
 import { authService } from '../services/auth.service.js';
@@ -29,12 +30,20 @@ export function createSupportRealtimeHandlers(socket:RealtimeSocket,user:PublicU
 
 export async function authenticateRealtimeToken(token:unknown,getUser=authService.getCurrentUser){if(typeof token!=='string'||!token.trim())throw Object.assign(new Error('Authentication is required.'),{data:{code:'REALTIME_AUTH_REQUIRED'}});const payload=tokenUtils.verify(token);if(payload.purpose==='admin-2fa')throw Object.assign(new Error('Two-factor verification is required.'),{data:{code:'REALTIME_AUTH_INVALID'}});return getUser(payload.userId)}
 
+export function createEventRealtimeHandlers(socket:RealtimeSocket,user:PublicUser){return {
+  join:(payload:unknown,ack?:unknown)=>runRealtimeEvent('event-team:join',ack,async()=>{const id=requireUuid((payload as {teamId?:unknown})?.teamId,'teamId');await eventsService.authorize(id,user);await socket.join(`event-team:${id}`);return {teamId:id};}),
+  leave:(payload:unknown,ack?:unknown)=>runRealtimeEvent('event-team:leave',ack,async()=>{const id=requireUuid((payload as {teamId?:unknown})?.teamId,'teamId');await socket.leave(`event-team:${id}`);}),
+  send:(payload:unknown,ack?:unknown)=>runRealtimeEvent('event-team:send',ack,async()=>{const id=requireUuid((payload as {teamId?:unknown})?.teamId,'teamId');return eventsService.send(id,payload as Record<string,unknown>,user);})
+};}
+
 export function attachRealtimeServer(httpServer:HttpServer){
   const origins=[env.frontendUrl,...(env.nodeEnv==='development'?['http://localhost:5173']:[])].flatMap(value=>value.split(',')).map(value=>value.trim().replace(/\/$/,'')).filter(Boolean);
   const io=new Server(httpServer,{cors:{origin:origins,credentials:true},maxHttpBufferSize:20_000});
   registerRealtimeServer(io);
   io.use(async(socket,next)=>{try{socket.data.user=await authenticateRealtimeToken(socket.handshake.auth?.token);next()}catch(error){const authError=error instanceof Error?error:new Error('Invalid or expired authentication.');if(!('data'in authError))Object.assign(authError,{data:{code:'REALTIME_AUTH_INVALID'}});next(authError)}});
   io.on('connection',socket=>{const user=socket.data.user;void socket.join(userRoom(user.id));if(user.role==='mentor'||user.role==='admin')void socket.join(roleRoom(user.role));const handlers=createSupportRealtimeHandlers(socket,user);
+    const eventHandlers=createEventRealtimeHandlers(socket,user);
+    socket.on('event-team:join',eventHandlers.join);socket.on('event-team:leave',eventHandlers.leave);socket.on('event-team:send',eventHandlers.send);
     socket.on('support:join',handlers.join);socket.on('support:leave',handlers.leave);socket.on('support:message',handlers.message);socket.on('support:read',handlers.read);socket.on('support:typing',handlers.typing);socket.on('support:typing:stop',handlers.typingStop);
     logger.info('realtime_connected',{userId:user.id,role:user.role});
   });

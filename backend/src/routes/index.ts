@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { eventsRoutes } from '../modules/events/events.routes.js';
 import { authRoutes } from './auth.routes.js';
 import { dashboardRoutes } from './dashboard.routes.js';
 import { helpRequestRoutes } from './helpRequest.routes.js';
@@ -17,6 +18,7 @@ import { supportRoutes } from '../modules/support/support.routes.js';
 import { securityRoutes } from '../modules/security/security.routes.js';
 
 export const apiRoutes = Router();
+apiRoutes.use('/opportunities', eventsRoutes);
 
 apiRoutes.get('/health', (_request, response) => {
   successResponse(response, 'CampusCare API is running', { status: 'ok' });

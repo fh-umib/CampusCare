@@ -47,6 +47,11 @@ export async function queryDatabase<T extends QueryResultRow>(sql: string, param
     return result;
   } catch (error) {
     const code = error && typeof error === 'object' && 'code' in error ? String(error.code) : '';
+    const eventsQuery = /\b(campus_events|event_teams|event_team_members|event_team_messages|event_interests)\b/.test(sql);
+    if (eventsQuery && ['42P01', '42703'].includes(code)) {
+      logger.error('events_schema_required', { code });
+      throw new AppError(503, 'Hackathons & Events needs a database update. Ask an administrator to apply the pending events migrations.', [], 'EVENTS_SCHEMA_REQUIRED');
+    }
     const unavailable = code.startsWith('08') || ['ECONNREFUSED', 'ECONNRESET', 'ETIMEDOUT', 'ENOTFOUND'].includes(code);
     if (unavailable) {
       databaseStatus = 'disconnected';
