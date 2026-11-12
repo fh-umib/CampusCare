@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { adminUsersRoutes } from '../modules/adminUsers/adminUsers.routes.js';
 import { eventsRoutes } from '../modules/events/events.routes.js';
 import { authRoutes } from './auth.routes.js';
 import { dashboardRoutes } from './dashboard.routes.js';
@@ -18,6 +19,7 @@ import { supportRoutes } from '../modules/support/support.routes.js';
 import { securityRoutes } from '../modules/security/security.routes.js';
 
 export const apiRoutes = Router();
+apiRoutes.use('/admin/users', adminUsersRoutes);
 apiRoutes.use('/opportunities', eventsRoutes);
 
 apiRoutes.get('/health', (_request, response) => {

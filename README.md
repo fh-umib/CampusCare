@@ -60,6 +60,7 @@ CampusCare has evolved into a working full-stack application with:
 - JWT authentication and role-based access
 - Responsive desktop and mobile interface
 - Role-aware notifications
+- Admin-only registered users directory with safe account details, real role totals, search, filters and pagination.
 - Private AI Study Assistant with graceful provider-unavailability handling
 - Hackathons & Events: event discovery, SkillMap team matching, membership requests, private realtime team chat, optional private Discord links, and Admin event management. Includes an idempotent opportunity showcase with real/user-verified events, clearly identified university demos, featured selection and archiving. See [module documentation](docs/HACKATHONS_AND_EVENTS.md).
 - Realtime notifications and persisted Student–Mentor support chat

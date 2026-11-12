@@ -1,12 +1,14 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import type { ReactNode } from 'react';
 import { useAuth } from '../context/AuthContext';
 import type { UserRole } from '../types/roles';
 
 type ProtectedRouteProps = {
   roles?: UserRole[];
+  forbiddenElement?: ReactNode;
 };
 
-export function ProtectedRoute({ roles }: ProtectedRouteProps) {
+export function ProtectedRoute({ roles, forbiddenElement }: ProtectedRouteProps) {
   const { isAuthenticated, isLoading, user } = useAuth();
   const location = useLocation();
 
@@ -19,6 +21,7 @@ export function ProtectedRoute({ roles }: ProtectedRouteProps) {
   }
 
   if (roles && user && !roles.includes(user.role)) {
+    if(forbiddenElement)return forbiddenElement;
     return <Navigate to="/dashboard" replace />;
   }
 

@@ -18,6 +18,8 @@ import StressTrackerPage from '../pages/StressTrackerPage';
 import { ProtectedRoute } from './ProtectedRoute';
 import AIStudyAssistantPage from '../pages/AIStudyAssistantPage';
 import AuditLogsPage from '../pages/AuditLogsPage';
+import AdminUsersPage from '../pages/AdminUsersPage';
+import ForbiddenPage from '../pages/ForbiddenPage';
 
 export function AppRoutes() {
   return (
@@ -41,6 +43,7 @@ export function AppRoutes() {
           <Route path="/lost-found" element={<LostFoundPage />} />
           <Route path="/onboarding" element={<OnboardingPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route element={<ProtectedRoute roles={['admin']} forbiddenElement={<ForbiddenPage />} />}><Route path="/admin/users" element={<AdminUsersPage />} /></Route>
           <Route element={<ProtectedRoute roles={['student']} />}>
             <Route path="/ai-study-assistant" element={<AIStudyAssistantPage />} />
             <Route path="/dashboard/ai-study-assistant" element={<Navigate to="/ai-study-assistant" replace />} />

@@ -5,7 +5,7 @@ import { NotificationBell } from './NotificationBell';
 import { useAuth } from '../../context/AuthContext';
 import { ThemeToggle } from '../theme/ThemeToggle';
 
-type NavIconName = 'dashboard' | 'help' | 'stress' | 'mood' | 'skills' | 'lostFound' | 'profile' | 'assistant' | 'logout' | 'events';
+type NavIconName = 'dashboard' | 'help' | 'stress' | 'mood' | 'skills' | 'lostFound' | 'profile' | 'assistant' | 'logout' | 'events' | 'users';
 
 type NavItem = {
   label: string;
@@ -38,7 +38,7 @@ const navigationGroups: Array<{ label: string; items: NavItem[] }> = [
   },
   {
     label: 'Account',
-    items: [{ label: 'Profile', to: '/profile', icon: 'profile' }, { label: 'Audit Logs', to: '/audit-logs', icon: 'profile', adminOnly: true }]
+    items: [{ label: 'Profile', to: '/profile', icon: 'profile' }, { label: 'Users', to: '/admin/users', icon: 'users', adminOnly: true }, { label: 'Audit Logs', to: '/audit-logs', icon: 'profile', adminOnly: true }]
   }
 ];
 
@@ -48,6 +48,7 @@ const mobileBottomItems = navItems.filter((item) =>
 );
 
 const iconPaths: Record<NavIconName, ReactNode> = {
+  users: (<><circle cx="9" cy="8" r="3"/><path d="M3 21v-2a6 6 0 0 1 12 0v2M16 5a3 3 0 0 1 0 6M18 15a5 5 0 0 1 3 4v2"/></>),
   events: (<><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 11h18M8 15h3M8 18h6"/></>),
   dashboard: (
     <>
