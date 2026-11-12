@@ -58,7 +58,7 @@ export default function NotFoundPage() {
         @media(max-width:720px){.nf-card{padding:1.3rem;border-radius:20px}.nf-content{grid-template-columns:1fr;gap:1.2rem;margin-top:1.3rem}.nf-visual{min-height:190px}.nf-illustration{width:min(100%,280px)}.nf-card::after{font-size:7rem}.nf-actions{display:grid;grid-template-columns:1fr 1fr}.nf-button-primary{grid-column:1/-1}}
         @media(max-width:430px){.nf-page{padding:.75rem}.nf-shell{min-height:calc(100vh - 1.5rem)}.nf-actions{grid-template-columns:1fr}.nf-button-primary{grid-column:auto}.nf-link-row a{flex:1;text-align:center}}
       `}</style>
-      <main className="nf-page">
+      <main className="auth-page nf-page">
         <div className="nf-shell">
           <section className="nf-card" aria-labelledby="not-found-title">
             <div className="nf-brand">

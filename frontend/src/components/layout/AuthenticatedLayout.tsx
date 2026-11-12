@@ -272,7 +272,7 @@ export function AuthenticatedLayout() {
       </aside>
 
       <div className="min-w-0 flex-1">
-        <header className="relative z-[100] overflow-visible border-b border-[#e5edf5] bg-white/90 px-4 py-3 shadow-[0_4px_20px_rgba(15,23,42,.04)] backdrop-blur-xl md:px-8">
+        <header className="cc-account-header relative z-[100] overflow-visible border-b border-[#e5edf5] bg-white/90 px-4 py-3 shadow-[0_4px_20px_rgba(15,23,42,.04)] backdrop-blur-xl md:px-8">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-3">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-teal-100 bg-teal-50 text-sm font-extrabold text-teal-800 shadow-sm">

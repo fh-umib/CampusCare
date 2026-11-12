@@ -88,8 +88,8 @@ export default function OnboardingPage() {
         : 'Add a few student details so CampusCare can make your support workspace more relevant.';
 
   return (
-    <div className="space-y-6">
-      <section className="dark-gradient overflow-hidden rounded-[2rem] p-6 text-white shadow-xl md:p-8">
+    <div className="account-entry space-y-6">
+      <section className="account-entry-hero dark-gradient rounded-[2rem] p-6 text-white shadow-xl md:p-8">
         <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-end">
           <div>
             <div className="mb-4 flex items-center gap-3">

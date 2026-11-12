@@ -119,7 +119,7 @@ export default function RegisterPage() {
 
   if (isAdminRegistration) {
     return (
-      <main className="gradient-shell grid min-h-screen place-items-center px-4 py-6">
+      <main className="auth-page auth-register gradient-shell grid min-h-screen place-items-center px-4 py-6">
         <section className="w-full max-w-xl rounded-[1.5rem] border border-[#dfeaf3] bg-white/90 p-5 text-center shadow-xl backdrop-blur md:p-7">
           <div className="mx-auto flex justify-center">
             <CampusCareLogoMark size={58} variant="light" />
@@ -216,7 +216,7 @@ export default function RegisterPage() {
       : 'Set up a student workspace for help requests, skills, stress tracking, mood reflection, and campus reports.';
 
   return (
-    <main className="gradient-shell min-h-screen px-4 py-3 md:px-6 md:py-4">
+    <main className="auth-page auth-register gradient-shell min-h-screen px-4 py-3 md:px-6 md:py-4">
       <AuthTopActionStyles />
       <style>{`
         .register-page * { box-sizing: border-box; }
@@ -377,19 +377,19 @@ export default function RegisterPage() {
         }
       `}</style>
       <section className="register-page mx-auto max-w-6xl">
-        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+        <div className="auth-entry-header flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
           <Link className="flex items-center gap-3 font-extrabold text-[#071527]" to="/">
             <CampusCareLogoMark size={40} variant="light" />
             CampusCare
           </Link>
-          <div className="flex flex-wrap gap-2">
+          <div className="auth-top-actions flex flex-wrap gap-2">
             <AuthTopAction accent icon="role" to="/start">Change role</AuthTopAction>
             <AuthTopAction icon="login" to={`/login?role=${fixedRole}`}>Already registered</AuthTopAction>
           </div>
         </div>
 
-        <div className="mt-4 grid gap-4 lg:grid-cols-[0.76fr_1.24fr] lg:items-stretch">
-          <aside className="dark-gradient flex overflow-hidden rounded-[1.45rem] p-4 text-white shadow-xl md:p-5 lg:h-full lg:flex-col">
+        <div className="auth-split mt-4 grid gap-4 lg:grid-cols-[minmax(0,0.76fr)_minmax(0,1.24fr)] lg:items-stretch">
+          <aside className="auth-hero dark-gradient flex min-w-0 flex-col rounded-[1.45rem] p-4 text-white shadow-xl md:p-5 lg:h-full">
             <div className="flex items-center gap-3">
               <CampusCareLogoMark size={48} variant="dark" />
               <div>
@@ -397,8 +397,8 @@ export default function RegisterPage() {
                 <p className="mt-1 text-xs text-white/50">Guided account setup</p>
               </div>
             </div>
-            <h1 className="mt-5 text-2xl font-semibold leading-tight lg:text-[2.15rem]">Create your CampusCare account with purpose.</h1>
-            <p className="mt-3 text-sm leading-6 text-white/65">
+            <h1 className="mt-5 text-2xl font-semibold leading-tight lg:text-[2.15rem]"><span className="hidden lg:inline">Create your CampusCare account with purpose.</span><span className="lg:hidden">Create your account with purpose.</span></h1>
+            <p className="auth-hero-secondary mt-3 text-sm leading-6 text-white/65">
               Your selected workspace is fixed while you create your account and add optional profile details.
             </p>
 
@@ -414,16 +414,16 @@ export default function RegisterPage() {
                     <span className="register-role-description">{selectedRole.description}</span>
                   </span>
                 </div>
-              <p className="text-xs leading-5 text-white/50 lg:mt-auto lg:pt-4">Need a different workspace? Use “Change role” above. Admin registration remains protected.</p>
+              <p className="auth-hero-secondary text-xs leading-5 text-white/50 lg:mt-auto lg:pt-4">Need a different workspace? Use “Change role” above. Admin registration remains protected.</p>
             </div>
           </aside>
 
-          <div className="premium-card p-4 shadow-xl md:p-5 lg:h-full">
+          <div className="auth-form-panel premium-card min-w-0 p-4 shadow-xl md:p-5 lg:h-full">
             <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
               <div>
                 <span className="badge-green">{selectedRole.badge}</span>
                 <h2 className="mt-2 text-2xl font-semibold tracking-tight text-[#071527]">Create account</h2>
-                <p className="mt-1 max-w-2xl text-sm leading-5 text-slate-600">
+                <p className="auth-form-intro mt-1 max-w-2xl text-sm leading-5 text-slate-600">
                   {roleContext}
                 </p>
               </div>

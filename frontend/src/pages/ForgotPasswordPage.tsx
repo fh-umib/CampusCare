@@ -97,7 +97,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <main className="recovery-page">
+    <main className="auth-page recovery-page">
       <AuthTopActionStyles />
       <style>{`
         .recovery-page {
@@ -148,12 +148,12 @@ export default function ForgotPasswordPage() {
       `}</style>
 
       <div className="recovery-container">
-        <header className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+        <header className="auth-entry-header flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
           <Link className="recovery-brand" to="/">
             <CampusCareLogoMark size={40} variant="light" />
             CampusCare
           </Link>
-          <div className="flex flex-wrap gap-2">
+          <div className="auth-top-actions flex flex-wrap gap-2">
             <AuthTopAction accent icon="login" to={`/login?role=${role}`}>Back to sign in</AuthTopAction>
             <AuthTopAction icon="home" to="/">Back to landing</AuthTopAction>
           </div>

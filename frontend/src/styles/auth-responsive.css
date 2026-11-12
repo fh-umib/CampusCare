@@ -1,0 +1,473 @@
+/* Entry layouts share shrinkable tracks and controls; do not mask overflow. */
+main.auth-page {
+  min-width: 0;
+  min-height: 100svh;
+  padding: max(1rem, env(safe-area-inset-top))
+    max(1rem, env(safe-area-inset-right))
+    max(1.25rem, env(safe-area-inset-bottom))
+    max(1rem, env(safe-area-inset-left));
+  overflow-wrap: anywhere;
+}
+:is(.auth-page, .account-entry, .cc-account-security, .lp-page)
+  :is(
+    section,
+    article,
+    aside,
+    header,
+    footer,
+    nav,
+    form,
+    fieldset,
+    label,
+    .grid,
+    .flex
+  ) {
+  min-width: 0;
+}
+:is(.auth-page, .account-entry, .cc-account-security, .lp-page)
+  :is(.grid, .flex)
+  > * {
+  min-width: 0;
+}
+.auth-page .auth-split > *,
+.lp-page .lp-hero-grid > *,
+.auth-page .recovery-layout > * {
+  min-width: 0;
+  max-width: 100%;
+}
+:is(.auth-page, .account-entry, .cc-account-security)
+  :is(input, select, textarea) {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+:is(.auth-page, .account-entry, .cc-account-security)
+  :is(.badge, .badge-green, .register-section-pill) {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+:is(.auth-page, .account-entry, .cc-account-security)
+  :is(
+    button,
+    .btn-primary,
+    .btn-secondary,
+    .auth-top-action,
+    .register-action,
+    .nf-button
+  ) {
+  min-height: 44px;
+  max-width: 100%;
+  line-height: 1.4;
+  white-space: normal;
+  text-align: center;
+}
+.auth-page .auth-top-action {
+  min-width: 0;
+}
+.auth-page .auth-top-action svg,
+.auth-page .register-action svg {
+  flex-shrink: 0;
+}
+.auth-page .auth-top-action span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.auth-page .register-section-header,
+.auth-page .register-role-heading {
+  flex-wrap: wrap;
+}
+.auth-page .register-section-header > div {
+  min-width: 0;
+  flex: 1 1 150px;
+}
+.auth-page .register-role-icon {
+  flex-shrink: 0;
+}
+.cc-account-security {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.cc-account-security > section,
+.cc-account-security .grid > * {
+  min-width: 0;
+}
+.cc-account-security img {
+  display: block;
+  width: 11rem;
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: contain;
+}
+.cc-account-security .security-manual-key {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+}
+.account-entry :is(h1, h2),
+.auth-page :is(h1, h2) {
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+.lp-page .lp-container {
+  width: min(
+    calc(100% - 2rem - env(safe-area-inset-left) - env(safe-area-inset-right)),
+    1240px
+  );
+}
+.lp-page .lp-hero-copy {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.lp-page :is(.lp-brand, .lp-role-top, .lp-module-top) {
+  min-width: 0;
+}
+.lp-page :is(.lp-btn, .lp-role-action) {
+  min-height: 44px;
+  max-width: 100%;
+  white-space: normal;
+}
+.lp-page .lp-brand > svg,
+.auth-page .auth-entry-header > a > svg {
+  flex-shrink: 0;
+}
+.lp-page .lp-header {
+  padding-top: max(1rem, env(safe-area-inset-top));
+}
+.lp-page .lp-footer {
+  padding-bottom: max(1.6rem, env(safe-area-inset-bottom));
+}
+.cc-theme-welcome {
+  min-height: 100svh;
+  padding: max(1rem, env(safe-area-inset-top))
+    max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom))
+    max(1rem, env(safe-area-inset-left));
+}
+.cc-account-header {
+  padding-top: max(0.75rem, env(safe-area-inset-top));
+}
+[aria-label="Quick mobile navigation"] {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+}
+@media (max-width: 1023px) {
+  #main-content {
+    padding-bottom: calc(7rem + env(safe-area-inset-bottom));
+  }
+}
+
+@media (max-width: 1023px) {
+  .auth-page .auth-split {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+    min-height: 0;
+  }
+  .auth-page .auth-hero {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    padding: 1rem;
+  }
+  .auth-page .auth-hero h1 {
+    margin-top: 0.6rem;
+    font-size: clamp(1.2rem, 3vw, 1.6rem);
+    line-height: 1.25;
+  }
+  .auth-page .auth-hero-secondary {
+    display: none;
+  }
+  .auth-register .auth-hero > div:first-child {
+    display: none;
+  }
+  .auth-register .auth-hero h1 {
+    margin-top: 0;
+  }
+  .auth-register .auth-hero .register-role-description {
+    display: none;
+  }
+  .auth-register .auth-hero > .grid {
+    margin-top: 0.75rem;
+  }
+  .auth-register .register-role-card {
+    padding: 0.65rem;
+    gap: 0.6rem;
+  }
+  .auth-page .recovery-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .auth-page .recovery-aside {
+    min-height: 0;
+    padding: 1rem;
+  }
+  .auth-page .recovery-aside h1 {
+    margin: 0;
+    font-size: 1.4rem;
+    line-height: 1.3;
+  }
+  .auth-page .recovery-aside > svg,
+  .auth-page .recovery-aside > p,
+  .auth-page .recovery-points {
+    display: none;
+  }
+}
+@media (max-width: 767px) {
+  .auth-page .auth-form-panel,
+  .auth-page .recovery-card {
+    padding: 1rem;
+  }
+  .auth-page .auth-form-panel h2 {
+    font-size: 1.35rem;
+    line-height: 1.3;
+  }
+  .auth-register .auth-form-intro {
+    display: none;
+  }
+  .auth-page .auth-top-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    gap: 0.5rem;
+  }
+  .auth-page .auth-top-action {
+    width: 100%;
+  }
+  .auth-page .role-entry-title {
+    font-size: clamp(1.6rem, 5vw, 2rem);
+    line-height: 1.2;
+  }
+  .auth-page .role-entry-intro {
+    margin-top: 1rem;
+    gap: 1rem;
+  }
+  .auth-page .role-entry-steps {
+    gap: 0.35rem;
+    padding: 0.5rem;
+  }
+  .auth-page .role-entry-step {
+    min-height: 36px;
+  }
+  .auth-page .role-entry-description {
+    min-height: 0;
+  }
+  .auth-page .role-entry-card {
+    padding: 1rem;
+  }
+  .auth-page .nf-copy h1 {
+    font-size: clamp(1.6rem, 5vw, 2rem);
+    line-height: 1.2;
+  }
+  .auth-page .nf-visual {
+    min-height: 140px;
+  }
+  .auth-page .nf-illustration {
+    max-height: 160px;
+  }
+  .account-entry .account-entry-hero {
+    padding: 1.1rem;
+  }
+  .account-entry .account-entry-hero h1 {
+    margin-top: 0.75rem;
+    font-size: 1.5rem;
+    line-height: 1.25;
+  }
+  .account-entry .account-entry-hero p {
+    margin-top: 0.5rem;
+    line-height: 1.5;
+  }
+  .account-entry .premium-card {
+    padding: 1rem;
+  }
+  .account-entry form {
+    gap: 1rem;
+  }
+  :is(.auth-page, .account-entry, .cc-account-security)
+    :is(input, select, textarea) {
+    font-size: 16px;
+  }
+  .cc-account-security > .pf-card {
+    padding: 1rem;
+  }
+  .lp-page .lp-nav-shell {
+    flex-wrap: wrap;
+  }
+  .lp-page .lp-nav {
+    flex: 1 1 100%;
+    justify-content: flex-start;
+  }
+  .lp-page .lp-nav .lp-btn {
+    flex: 1;
+  }
+  .lp-page .lp-hero h1 {
+    font-size: clamp(1.8rem, 6vw, 2.5rem);
+    line-height: 1.15;
+  }
+  .lp-page .lp-hero {
+    padding-top: 1.75rem;
+  }
+  .lp-page .lp-hero-copy > p {
+    font-size: 0.9rem;
+    line-height: 1.65;
+  }
+  .lp-page .lp-hero-actions .lp-btn {
+    flex: 1 1 100%;
+  }
+  .lp-page .lp-trust-point {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .lp-page :is(.lp-preview-module strong, .lp-preview-module span) {
+    white-space: normal;
+    overflow: visible;
+  }
+  .lp-page .lp-footer-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 479px) {
+  .auth-register .auth-form-panel > .flex:first-child {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .auth-register .auth-form-panel > .flex:first-child .badge-green {
+    display: none;
+  }
+  .auth-register .auth-form-panel h2 {
+    margin-top: 0;
+    font-size: 1.25rem;
+  }
+  .auth-page .auth-entry-header {
+    align-items: stretch;
+  }
+  .auth-page .auth-top-actions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .auth-page .auth-top-action {
+    font-size: 0.8rem;
+  }
+  .auth-page .register-section-body,
+  .auth-page .register-details > summary {
+    padding: 0.75rem;
+  }
+  .auth-page .register-section-pill {
+    flex-shrink: 1;
+  }
+  .auth-page .role-entry-card-top {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .auth-page .role-entry-trust {
+    flex-wrap: wrap;
+  }
+  .auth-page .nf-brand {
+    align-items: flex-start;
+  }
+  .auth-page .nf-brand > svg {
+    flex-shrink: 0;
+  }
+}
+
+/* Reuse the existing dark palette for custom (non-Tailwind) entry surfaces. */
+:root[data-theme="dark"] main.auth-page:is(.role-entry-page, .recovery-page) {
+  color: var(--cc-text);
+  background: var(--cc-bg);
+}
+:root[data-theme="dark"]
+  .auth-page
+  :is(
+    .auth-top-action,
+    .register-action-secondary,
+    .recovery-card,
+    .recovery-success,
+    .register-section,
+    .role-entry-card:not(.role-entry-card-admin),
+    .role-entry-steps,
+    .role-entry-step,
+    .role-entry-feature,
+    .nf-button,
+    .nf-link-row a
+  ) {
+  color: var(--cc-text);
+  border-color: var(--cc-border);
+  background: var(--cc-surface);
+}
+:root[data-theme="dark"]
+  .auth-page
+  :is(
+    .auth-top-action-accent,
+    .register-role-state,
+    .role-entry-eyebrow,
+    .role-entry-badge,
+    .role-entry-icon
+  ) {
+  color: var(--cc-accent);
+  border-color: var(--cc-border);
+  background: var(--cc-surface-soft);
+}
+:root[data-theme="dark"]
+  .auth-page
+  :is(
+    .register-section-title,
+    .recovery-brand,
+    .recovery-card h2,
+    .recovery-success h2,
+    .role-entry-brand,
+    .role-entry-title,
+    .nf-brand strong
+  ) {
+  color: var(--cc-text);
+}
+:root[data-theme="dark"]
+  .auth-page
+  :is(
+    .register-section-helper,
+    .recovery-card > p,
+    .recovery-success p,
+    .recovery-demo-note,
+    .role-entry-brand span,
+    .role-entry-copy,
+    .role-entry-description,
+    .role-entry-step span,
+    .role-entry-trust span,
+    .nf-brand span
+  ) {
+  color: var(--cc-muted);
+}
+:root[data-theme="dark"] .auth-page .register-section-pill {
+  color: var(--cc-muted);
+  border-color: var(--cc-border);
+  background: var(--cc-surface-raised);
+}
+:root[data-theme="dark"] .auth-page .role-entry-card-admin {
+  color: #fff;
+}
+:root[data-theme="dark"]
+  .auth-page
+  .role-entry-card-admin
+  .role-entry-description {
+  color: #c2d2dd;
+}
+:root[data-theme="dark"] .auth-page .role-entry-card-admin .role-entry-feature {
+  color: #d2e7eb;
+  border-color: var(--cc-border);
+  background: rgba(255, 255, 255, 0.04);
+}
+:root[data-theme="dark"] .auth-page .nf-button-primary {
+  color: #fff;
+  background: #0d9e8a;
+  border-color: #0d9e8a;
+}
+:root[data-theme="dark"] .auth-page .recovery-success-icon {
+  color: var(--cc-accent);
+  border-color: var(--cc-border);
+  background: var(--cc-surface-soft);
+}
+:root[data-theme="dark"]
+  .auth-page
+  :is(.badge, .badge-green, [class~="bg-white/70"]) {
+  color: var(--cc-accent);
+  border-color: var(--cc-border);
+  background: var(--cc-surface-soft);
+}

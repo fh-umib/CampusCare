@@ -88,7 +88,7 @@ const steps = [
 
 export default function RoleEntryPage() {
   return (
-    <main className="role-entry-page">
+    <main className="auth-page role-entry-page">
       <AuthTopActionStyles />
       <style>{`
         .role-entry-page {
@@ -302,7 +302,7 @@ export default function RoleEntryPage() {
       `}</style>
 
       <div className="role-entry-container">
-        <header className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+        <header className="auth-entry-header flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
           <Link className="role-entry-brand" to="/">
             <CampusCareLogoMark size={40} variant="light" />
             <span>
@@ -310,7 +310,7 @@ export default function RoleEntryPage() {
               <span>Student support platform</span>
             </span>
           </Link>
-          <div className="flex flex-wrap gap-2">
+          <div className="auth-top-actions flex flex-wrap gap-2">
             <AuthTopAction accent icon="login" to="/login">Already have an account</AuthTopAction>
             <AuthTopAction icon="home" to="/">Back to landing</AuthTopAction>
           </div>

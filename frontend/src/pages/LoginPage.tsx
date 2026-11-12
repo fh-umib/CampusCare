@@ -77,29 +77,29 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="gradient-shell min-h-screen px-4 py-4 md:px-6 md:py-5">
+    <main className="auth-page auth-login gradient-shell min-h-screen px-4 py-4 md:px-6 md:py-5">
       <AuthTopActionStyles />
       <section className="mx-auto max-w-5xl">
-        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+        <div className="auth-entry-header flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
           <Link className="flex items-center gap-3 font-extrabold text-[#071527]" to="/">
             <CampusCareLogoMark size={40} variant="light" />
             CampusCare
           </Link>
-          <div className="flex flex-wrap gap-2">
+          <div className="auth-top-actions flex flex-wrap gap-2">
             <AuthTopAction accent icon="role" to="/start">Choose role</AuthTopAction>
             <AuthTopAction icon="home" to="/">Back to landing</AuthTopAction>
           </div>
         </div>
 
-        <div className="mt-5 grid gap-4 lg:min-h-[32rem] lg:grid-cols-[0.78fr_1.22fr] lg:items-stretch">
-          <aside className="dark-gradient rounded-[1.5rem] p-5 text-white shadow-xl md:p-6">
+        <div className="auth-split mt-5 grid gap-4 lg:min-h-[32rem] lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)] lg:items-stretch">
+          <aside className="auth-hero dark-gradient min-w-0 rounded-[1.5rem] p-5 text-white shadow-xl md:p-6">
             <span className="rounded-full border border-cyan-200/20 bg-cyan-100/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-cyan-100">
               {rolePanel.eyebrow}
             </span>
             <h1 className="mt-4 text-3xl font-semibold leading-tight lg:text-4xl">{rolePanel.title}</h1>
-            <p className="mt-3 text-sm leading-6 text-white/65">{rolePanel.description}</p>
+            <p className="auth-hero-secondary mt-3 text-sm leading-6 text-white/65">{rolePanel.description}</p>
 
-            <div className="mt-5 grid gap-2">
+            <div className="auth-hero-secondary mt-5 grid gap-2">
               {rolePanel.benefits.map((benefit, index) => (
                 <div key={benefit} className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5">
                   <p className="text-xs font-bold uppercase tracking-wide text-cyan-100">After login {index + 1}</p>
@@ -108,7 +108,7 @@ export default function LoginPage() {
               ))}
             </div>
 
-            <div className="mt-5 rounded-xl border border-white/10 bg-white/5 p-3">
+            <div className="auth-hero-secondary mt-5 rounded-xl border border-white/10 bg-white/5 p-3">
               <p className="text-sm font-semibold text-white">CampusCare access</p>
               <p className="mt-1 text-xs leading-5 text-white/60">
                 Sign in with your account to open the dashboard and modules that match your role.
@@ -116,7 +116,7 @@ export default function LoginPage() {
             </div>
           </aside>
 
-          <div className="premium-card flex flex-col justify-center p-5 md:p-6">
+          <div className="auth-form-panel premium-card flex min-w-0 flex-col justify-center p-5 md:p-6">
             <span className="badge-green">{rolePanel.eyebrow}</span>
             <h2 className="mt-2 text-2xl font-semibold tracking-tight text-[#071527]">{challengeToken ? 'Verify your identity' : 'Sign in to CampusCare'}</h2>
             <p className="mt-1 text-sm leading-5 text-slate-600">
