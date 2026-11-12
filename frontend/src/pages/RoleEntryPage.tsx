@@ -107,7 +107,7 @@ export default function RoleEntryPage() {
         .role-entry-brand { display: flex; align-items: center; gap: .7rem; color: #071527; text-decoration: none; }
         .role-entry-brand strong,.role-entry-brand span { display: block; }
         .role-entry-brand strong { font-size: .95rem; }
-        .role-entry-brand span { margin-top: .1rem; color: #64748b; font-size: .65rem; }
+        .role-entry-brand span { margin-top: .1rem; color:var(--cc-text-muted); font-size: .65rem; }
         .role-entry-intro {
           display: grid;
           grid-template-columns: minmax(0,1.15fr) minmax(360px,.85fr);
@@ -141,7 +141,7 @@ export default function RoleEntryPage() {
           line-height: 1.08;
           letter-spacing: -.02em;
         }
-        .role-entry-copy { max-width: 720px; margin: 0; color: #64748b; font-size: .88rem; line-height: 1.65; }
+        .role-entry-copy { max-width: 720px; margin: 0; color:var(--cc-text-muted); font-size: .88rem; line-height: 1.65; }
         .role-entry-steps {
           display: grid;
           gap: .45rem;
@@ -220,7 +220,7 @@ export default function RoleEntryPage() {
           border: 1px solid rgba(13,158,138,.2);
           border-radius: 13px;
           background: linear-gradient(135deg,rgba(13,158,138,.13),rgba(103,227,214,.07));
-          color: #0d9e8a;
+          color:var(--cc-link);
         }
         .role-entry-card-admin .role-entry-icon { border-color: rgba(103,227,214,.25); background: rgba(103,227,214,.1); color: #67e3d6; }
         .role-entry-badge {
@@ -236,8 +236,8 @@ export default function RoleEntryPage() {
         }
         .role-entry-card-admin .role-entry-badge { border-color: rgba(103,227,214,.2); background: rgba(103,227,214,.08); color: #b7f7ee; }
         .role-entry-card h2 { margin: .85rem 0 .35rem; font-family: "Sora",sans-serif; font-size: 1.3rem; }
-        .role-entry-description { min-height: 55px; margin: 0; color: #64748b; font-size: .73rem; line-height: 1.55; }
-        .role-entry-card-admin .role-entry-description { color: rgba(255,255,255,.62); }
+        .role-entry-description { min-height: 55px; margin: 0; color:var(--cc-text-muted); font-size: .73rem; line-height: 1.55; }
+        .role-entry-card-admin .role-entry-description { color:rgba(255,255,255,.78); }
         .role-entry-features { display: grid; gap: .38rem; margin: .8rem 0; }
         .role-entry-feature {
           display: flex;
@@ -252,9 +252,9 @@ export default function RoleEntryPage() {
           font-weight: 650;
         }
         .role-entry-feature i { width: 6px; height: 6px; flex: none; border-radius: 50%; background: #0d9e8a; }
-        .role-entry-card-admin .role-entry-feature { border-color: rgba(255,255,255,.09); background: rgba(255,255,255,.045); color: rgba(255,255,255,.72); }
+        .role-entry-card-admin .role-entry-feature { border-color: rgba(255,255,255,.09); background: rgba(255,255,255,.045); color:rgba(255,255,255,.78); }
         .role-entry-card-admin .role-entry-feature i { background: #67e3d6; }
-        .role-entry-admin-note { margin: -.05rem 0 .65rem; color: rgba(255,255,255,.48); font-size: .62rem; }
+        .role-entry-admin-note { margin: -.05rem 0 .65rem; color:rgba(255,255,255,.78); font-size: .62rem; }
         .role-entry-action {
           display: flex;
           min-height: 42px;
@@ -282,7 +282,7 @@ export default function RoleEntryPage() {
           display: inline-flex;
           align-items: center;
           gap: .4rem;
-          color: #64748b;
+          color:var(--cc-text-muted);
           font-size: .62rem;
           font-weight: 650;
         }

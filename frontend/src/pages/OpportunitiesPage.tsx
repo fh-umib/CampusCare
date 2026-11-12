@@ -1062,7 +1062,7 @@ export default function OpportunitiesPage() {
                   Back to opportunity
                 </Link>
               </nav>
-              <header className="rounded-2xl border border-slate-800 bg-slate-950 p-4 text-white shadow-sm sm:p-5">
+              <header className="cc-inverse rounded-2xl border border-slate-800 bg-slate-950 p-4 text-white shadow-sm sm:p-5">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div className="min-w-0 flex-1 basis-64">
                     <div className="mb-2 flex flex-wrap items-center gap-2 text-[11px] font-semibold">

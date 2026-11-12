@@ -287,7 +287,7 @@ export default function RegisterPage() {
         .register-role-description {
           display: block;
           margin-top: .28rem;
-          color: rgba(255,255,255,.58);
+          color:rgba(255,255,255,.78);
           font-size: .68rem;
           line-height: 1.45;
         }
@@ -316,7 +316,7 @@ export default function RegisterPage() {
         }
         .register-section-helper {
           margin: .18rem 0 0;
-          color: #64748b;
+          color:var(--cc-text-muted);
           font-size: .68rem;
           line-height: 1.45;
         }
@@ -326,7 +326,7 @@ export default function RegisterPage() {
           border-radius: 999px;
           padding: .28rem .58rem;
           background: #f8fbfd;
-          color: #64748b;
+          color:var(--cc-text-muted);
           font-size: .6rem;
           font-weight: 800;
           letter-spacing: .04em;

@@ -37,12 +37,12 @@ export default function NotFoundPage() {
         .nf-card::after{content:"404";position:absolute;right:-.5rem;bottom:-2.4rem;color:rgba(11,29,53,.035);font-family:"Sora",sans-serif;font-size:10rem;font-weight:800;line-height:1;pointer-events:none}
         .nf-brand{display:flex;align-items:center;gap:.8rem}
         .nf-brand strong{display:block;font-family:"Sora",sans-serif;font-size:.95rem}
-        .nf-brand span{display:block;margin-top:.15rem;color:#64748b;font-size:.68rem}
+        .nf-brand span{display:block;margin-top:.15rem;color:var(--cc-text-muted);font-size:.68rem}
         .nf-content{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1.08fr) minmax(260px,.92fr);align-items:center;gap:2rem;margin-top:1.75rem}
         .nf-pill{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(13,158,138,.2);border-radius:999px;padding:.35rem .7rem;color:#0d7e70;background:#effbf8;font-size:.65rem;font-weight:850;letter-spacing:.07em;text-transform:uppercase}
         .nf-pill i{width:7px;height:7px;border-radius:50%;background:#0d9e8a;box-shadow:0 0 0 4px rgba(13,158,138,.09)}
         .nf-copy h1{max-width:550px;margin:.9rem 0 .65rem;font-family:"Sora",sans-serif;font-size:clamp(2rem,5vw,3.4rem);line-height:1.08;letter-spacing:0}
-        .nf-copy>p{max-width:560px;margin:0;color:#64748b;font-size:.88rem;line-height:1.7}
+        .nf-copy>p{max-width:560px;margin:0;color:var(--cc-text-muted);font-size:.88rem;line-height:1.7}
         .nf-actions{display:flex;flex-wrap:wrap;gap:.65rem;margin-top:1.35rem}
         .nf-button{display:inline-flex;min-height:43px;align-items:center;justify-content:center;gap:.45rem;border:1px solid #dce7ee;border-radius:11px;padding:.6rem 1rem;color:#334155;background:#fff;box-shadow:0 6px 16px rgba(15,23,42,.05);font-size:.75rem;font-weight:800;text-decoration:none;transition:.18s ease}
         .nf-button:hover{transform:translateY(-2px);border-color:rgba(13,158,138,.3);color:#0d7e70}
@@ -53,7 +53,7 @@ export default function NotFoundPage() {
         .nf-links{position:relative;z-index:1;margin-top:1.7rem;border-top:1px solid #e6eef4;padding-top:1.15rem}
         .nf-links h2{margin:0 0 .65rem;font-family:"Sora",sans-serif;font-size:.8rem}
         .nf-link-row{display:flex;flex-wrap:wrap;gap:.5rem}
-        .nf-link-row a{border:1px solid #dfeaf3;border-radius:999px;padding:.4rem .7rem;color:#64748b;background:#f9fcfe;font-size:.65rem;font-weight:750;text-decoration:none;transition:.18s ease}
+        .nf-link-row a{border:1px solid #dfeaf3;border-radius:999px;padding:.4rem .7rem;color:var(--cc-text-muted);background:#f9fcfe;font-size:.65rem;font-weight:750;text-decoration:none;transition:.18s ease}
         .nf-link-row a:hover{border-color:rgba(13,158,138,.25);color:#0d7e70;background:#effbf8}
         @media(max-width:720px){.nf-card{padding:1.3rem;border-radius:20px}.nf-content{grid-template-columns:1fr;gap:1.2rem;margin-top:1.3rem}.nf-visual{min-height:190px}.nf-illustration{width:min(100%,280px)}.nf-card::after{font-size:7rem}.nf-actions{display:grid;grid-template-columns:1fr 1fr}.nf-button-primary{grid-column:1/-1}}
         @media(max-width:430px){.nf-page{padding:.75rem}.nf-shell{min-height:calc(100vh - 1.5rem)}.nf-actions{grid-template-columns:1fr}.nf-button-primary{grid-column:auto}.nf-link-row a{flex:1;text-align:center}}

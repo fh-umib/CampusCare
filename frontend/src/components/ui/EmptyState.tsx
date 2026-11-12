@@ -120,7 +120,7 @@ export function EmptyState({
           padding:1.15rem;
           border:1px solid #dfeaf3;
           border-radius:16px;
-          color:#64748b;
+          color:var(--cc-text-muted);
           background:
             radial-gradient(circle at 82% 10%,rgba(103,227,214,.12),transparent 32%),
             linear-gradient(145deg,rgba(255,255,255,.96),rgba(246,250,253,.92));
@@ -135,13 +135,13 @@ export function EmptyState({
           place-items:center;
           border:1px solid rgba(13,158,138,.18);
           border-radius:14px;
-          color:#0d9e8a;
+          color:var(--cc-link);
           background:linear-gradient(145deg,rgba(13,158,138,.1),rgba(103,227,214,.14));
           box-shadow:inset 0 1px 0 rgba(255,255,255,.7);
         }
         .cc-empty-compact .cc-empty-icon { width:38px; height:38px; border-radius:12px; }
         .cc-empty-state h3 { margin:.2rem 0 0; color:#0b1d35; font-family:"Sora",sans-serif; font-size:.85rem; line-height:1.35; }
-        .cc-empty-state p { max-width:370px; margin:0; color:#64748b; font-size:.7rem; line-height:1.55; }
+        .cc-empty-state p { max-width:370px; margin:0; color:var(--cc-text-muted); font-size:.7rem; line-height:1.55; }
         .cc-empty-action {
           display:inline-flex;
           min-height:36px;
@@ -166,9 +166,9 @@ export function EmptyState({
         .cc-empty-success { border-color:rgba(13,158,138,.24); background:linear-gradient(145deg,#f8fffd,#effaf7); }
         .cc-empty-warning { border-color:rgba(217,119,6,.2); background:linear-gradient(145deg,#fffdfa,#fff8ed); }
         .cc-empty-warning .cc-empty-icon { border-color:rgba(217,119,6,.18); color:#b45309; background:#fff7ed; }
-        .cc-empty-dark { border-color:rgba(255,255,255,.1); color:rgba(255,255,255,.68); background:linear-gradient(135deg,#071527,#0b1d35); }
+        .cc-empty-dark { border-color:rgba(255,255,255,.1); color:rgba(255,255,255,.78); background:linear-gradient(135deg,#071527,#0b1d35); }
         .cc-empty-dark h3 { color:#fff; }
-        .cc-empty-dark p { color:rgba(255,255,255,.64); }
+        .cc-empty-dark p { color:rgba(255,255,255,.78); }
         @media(max-width:560px) {
           .cc-empty-state { min-height:132px; padding:1rem; }
           .cc-empty-action { width:100%; }

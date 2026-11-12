@@ -119,24 +119,24 @@ export default function ForgotPasswordPage() {
           box-shadow:0 20px 44px rgba(7,21,39,.16);
         }
         .recovery-aside h1 { margin:1.2rem 0 .65rem; font-family:"Sora",sans-serif; font-size:clamp(1.8rem,3vw,2.55rem); line-height:1.12; letter-spacing:0; }
-        .recovery-aside > p { margin:0; color:rgba(255,255,255,.6); font-size:.8rem; line-height:1.65; }
+        .recovery-aside > p { margin:0; color:rgba(255,255,255,.78); font-size:.8rem; line-height:1.65; }
         .recovery-role-pill { display:inline-flex; align-items:center; gap:.4rem; border:1px solid rgba(103,227,214,.2); border-radius:999px; padding:.3rem .65rem; background:rgba(103,227,214,.08); color:#b7f7ee; font-size:.6rem; font-weight:800; text-transform:uppercase; }
         .recovery-points { display:grid; gap:.6rem; margin-top:1.4rem; }
         .recovery-point { display:grid; grid-template-columns:auto minmax(0,1fr); gap:.7rem; border:1px solid rgba(255,255,255,.08); border-radius:13px; padding:.75rem; background:rgba(255,255,255,.045); }
         .recovery-point-icon { display:grid; width:34px; height:34px; place-items:center; border-radius:10px; color:#67e3d6; background:rgba(103,227,214,.09); }
         .recovery-point strong,.recovery-point span { display:block; }
         .recovery-point strong { font-size:.72rem; }
-        .recovery-point span { margin-top:.18rem; color:rgba(255,255,255,.46); font-size:.62rem; line-height:1.5; }
+        .recovery-point span { margin-top:.18rem; color:rgba(255,255,255,.78); font-size:.62rem; line-height:1.5; }
         .recovery-card { display:flex; min-width:0; flex-direction:column; justify-content:center; border:1px solid #dfeaf3; border-radius:24px; padding:1.5rem; background:rgba(255,255,255,.9); box-shadow:0 16px 38px rgba(15,23,42,.07); backdrop-filter:blur(14px); }
         .recovery-card h2 { margin:.7rem 0 .35rem; font-family:"Sora",sans-serif; font-size:1.45rem; }
-        .recovery-card > p { margin:0; color:#64748b; font-size:.76rem; line-height:1.6; }
+        .recovery-card > p { margin:0; color:var(--cc-text-muted); font-size:.76rem; line-height:1.6; }
         .recovery-form { display:grid; gap:.85rem; margin-top:1.2rem; }
         .recovery-actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.6rem; }
         .recovery-success { border:1px solid rgba(13,158,138,.23); border-radius:17px; padding:1rem; background:linear-gradient(135deg,rgba(13,158,138,.08),rgba(103,227,214,.12)); }
         .recovery-success-icon { display:grid; width:44px; height:44px; place-items:center; border:1px solid rgba(13,158,138,.22); border-radius:13px; color:#087c6d; background:rgba(255,255,255,.62); }
         .recovery-success h2 { margin:.8rem 0 .35rem; }
-        .recovery-success p { margin:0; color:#64748b; font-size:.75rem; line-height:1.65; }
-        .recovery-demo-note { margin-top:.9rem; border-top:1px solid rgba(13,158,138,.16); padding-top:.8rem; color:#64748b; font-size:.64rem; line-height:1.5; }
+        .recovery-success p { margin:0; color:var(--cc-text-muted); font-size:.75rem; line-height:1.65; }
+        .recovery-demo-note { margin-top:.9rem; border-top:1px solid rgba(13,158,138,.16); padding-top:.8rem; color:var(--cc-text-muted); font-size:.64rem; line-height:1.5; }
         @media(max-width:760px) {
           .recovery-page { padding:.85rem; }
           .recovery-layout { grid-template-columns:1fr; }

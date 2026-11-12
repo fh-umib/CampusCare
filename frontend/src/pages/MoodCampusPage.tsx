@@ -20,11 +20,11 @@ const moodMeta: Record<MoodState, {
   score: number;
   icon: IconName;
 }> = {
-  motivated: { label: 'Motivated', helper: 'Ready to keep moving.', color: '#1687b8', soft: '#eaf6fb', score: 5, icon: 'spark' },
-  calm: { label: 'Calm', helper: 'Balanced and steady.', color: '#0d9e8a', soft: '#e8f8f5', score: 4, icon: 'calm' },
-  tired: { label: 'Tired', helper: 'Low energy this week.', color: '#c4871b', soft: '#fff7e8', score: 3, icon: 'tired' },
-  stressed: { label: 'Stressed', helper: 'Pressure feels present.', color: '#d46645', soft: '#fff1ec', score: 2, icon: 'pressure' },
-  overwhelmed: { label: 'Overwhelmed', helper: 'Everything feels heavy.', color: '#7650b5', soft: '#f3effb', score: 1, icon: 'overwhelmed' }
+  motivated: { label: 'Motivated', helper: 'Ready to keep moving.', color: 'var(--cc-info)', soft: 'var(--cc-info-bg)', score: 5, icon: 'spark' },
+  calm: { label: 'Calm', helper: 'Balanced and steady.', color: 'var(--cc-success)', soft: 'var(--cc-success-bg)', score: 4, icon: 'calm' },
+  tired: { label: 'Tired', helper: 'Low energy this week.', color: 'var(--cc-warning)', soft: 'var(--cc-warning-bg)', score: 3, icon: 'tired' },
+  stressed: { label: 'Stressed', helper: 'Pressure feels present.', color: 'var(--cc-danger)', soft: 'var(--cc-error-bg)', score: 2, icon: 'pressure' },
+  overwhelmed: { label: 'Overwhelmed', helper: 'Everything feels heavy.', color: 'var(--cc-violet)', soft: 'var(--cc-violet-bg)', score: 1, icon: 'overwhelmed' }
 };
 
 const iconPaths: Record<IconName, ReactNode> = {
@@ -133,7 +133,7 @@ function MetricCard({ icon, label, value, helper, color, delay = 0 }: {
 }) {
   return (
     <article className="mc-card mc-metric mc-lift mc-reveal" style={{ animationDelay: `${delay}ms` }}>
-      <div className="mc-metric-top"><Icon name={icon} color={color} background={`${color}14`} /><i style={{ background: color }} /></div>
+      <div className="mc-metric-top"><Icon name={icon} color={color} background={`color-mix(in srgb, ${color} 8%, transparent)`} /><i style={{ background: color }} /></div>
       <span className="mc-label">{label}</span>
       <strong style={{ color }}>{value}</strong>
       <p>{helper}</p>
@@ -448,7 +448,7 @@ export default function MoodCampusPage() {
         .mc-eyebrow { display:inline-flex; align-items:center; gap:7px; border:1px solid rgba(103,227,214,.22); border-radius:999px; padding:.36rem .76rem; background:rgba(103,227,214,.08); color:#bdf8ef; font-size:.68rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
         .mc-eyebrow i { width:7px; height:7px; border-radius:50%; background:#67e3d6; }
         .mc-hero h1 { max-width:760px; margin:.9rem 0 .55rem; font-family:"Sora",sans-serif; font-size:clamp(1.75rem,3.2vw,2.65rem); line-height:1.14; letter-spacing:-.02em; }
-        .mc-hero p { max-width:720px; margin:0; color:rgba(255,255,255,.68); font-size:.9rem; line-height:1.7; }
+        .mc-hero p { max-width:720px; margin:0; color:rgba(255,255,255,.78); font-size:.9rem; line-height:1.7; }
         .mc-hero-badges,.mc-hero-actions { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:1.1rem; }
         .mc-hero-badges span { border:1px solid rgba(255,255,255,.1); border-radius:999px; padding:.38rem .7rem; background:rgba(255,255,255,.06); color:rgba(255,255,255,.78); font-size:.68rem; font-weight:700; }
         .mc-hero-actions a { display:inline-flex; min-height:39px; align-items:center; justify-content:center; gap:.35rem; border-radius:10px; padding:.5rem .85rem; color:#fff; font-size:.72rem; font-weight:800; text-decoration:none; transition:transform .18s ease; }
@@ -457,10 +457,10 @@ export default function MoodCampusPage() {
         .mc-hero-secondary { border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.07); }
         .mc-hero-visual { display:grid; justify-items:center; gap:.85rem; text-align:center; }
         .mc-reflection-ring { display:grid; place-items:center; width:126px; height:126px; border:1px solid rgba(103,227,214,.2); border-radius:50%; background:rgba(255,255,255,.045); box-shadow:inset 0 0 0 14px rgba(255,255,255,.022); }
-        .mc-hero-visual > span { max-width:210px; color:rgba(255,255,255,.58); font-size:.7rem; line-height:1.55; }
-        .mc-section-heading > span,.mc-label { display:block; color:#0d9e8a; font-size:.64rem; font-weight:850; letter-spacing:.08em; text-transform:uppercase; }
+        .mc-hero-visual > span { max-width:210px; color:rgba(255,255,255,.78); font-size:.7rem; line-height:1.55; }
+        .mc-section-heading > span,.mc-label { display:block; color:var(--cc-link); font-size:.64rem; font-weight:850; letter-spacing:.08em; text-transform:uppercase; }
         .mc-section-heading h2 { margin:.25rem 0 0; font-family:"Sora",sans-serif; font-size:1.05rem; line-height:1.35; }
-        .mc-section-heading p { margin:.3rem 0 0; color:#64748b; font-size:.74rem; line-height:1.55; }
+        .mc-section-heading p { margin:.3rem 0 0; color:var(--cc-text-muted); font-size:.74rem; line-height:1.55; }
         .mc-metrics { display:grid; gap:1rem; margin-top:1.2rem; }
         .mc-metrics-student { grid-template-columns:repeat(5,minmax(0,1fr)); }
         .mc-metrics-mentor { grid-template-columns:repeat(4,minmax(0,1fr)); }
@@ -468,16 +468,16 @@ export default function MoodCampusPage() {
         .mc-metric { padding:1rem; }
         .mc-metric-top { display:flex; align-items:center; justify-content:space-between; }
         .mc-metric-top i { width:32px; height:3px; border-radius:999px; opacity:.72; }
-        .mc-metric .mc-label { margin-top:.8rem; color:#64748b; }
+        .mc-metric .mc-label { margin-top:.8rem; color:var(--cc-text-muted); }
         .mc-metric > strong { display:block; margin:.3rem 0 .2rem; overflow:hidden; font-family:"Sora",sans-serif; font-size:1.4rem; line-height:1.2; text-overflow:ellipsis; text-transform:capitalize; white-space:nowrap; }
-        .mc-metric p { margin:0; color:#94a3b8; font-size:.68rem; line-height:1.45; }
+        .mc-metric p { margin:0; color:var(--cc-text-muted); font-size:.68rem; line-height:1.45; }
         .mc-student-top { display:grid; grid-template-columns:minmax(430px,1.1fr) minmax(320px,.9fr); gap:1rem; margin-top:1rem; }
         .mc-form { padding:1.35rem; }
         .mc-mood-options { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:.45rem; margin-top:1rem; }
         .mc-mood-options button { display:grid; justify-items:start; min-width:0; min-height:128px; border:1px solid #e1eaf1; border-radius:12px; padding:.7rem; color:#475569; background:#f9fcfe; cursor:pointer; text-align:left; transition:.18s ease; }
         .mc-mood-options button:hover,.mc-mood-options button.is-active { border-color:var(--mood-color); color:var(--mood-color); background:linear-gradient(160deg,#fff,var(--mood-soft)); transform:translateY(-3px); box-shadow:0 10px 24px rgba(15,23,42,.07); }
         .mc-mood-options strong { margin-top:.55rem; font-size:.72rem; }
-        .mc-mood-options button > span:last-child { margin-top:.16rem; color:#7b8ba0; font-size:.59rem; line-height:1.4; }
+        .mc-mood-options button > span:last-child { margin-top:.16rem; color:var(--cc-text-muted); font-size:.59rem; line-height:1.4; }
         .mc-form label { display:block; margin-top:1rem; }
         .mc-field-label { display:block; margin-bottom:.42rem; color:#334155; font-size:.72rem; font-weight:800; }
         .mc-input { width:100%; border:1px solid #d8e4ed; border-radius:10px; outline:none; padding:.7rem .8rem; color:#0b1d35; background:#f9fcfe; font:inherit; font-size:.78rem; transition:.18s ease; }
@@ -494,10 +494,10 @@ export default function MoodCampusPage() {
         .mc-distribution { display:grid; grid-template-columns:150px minmax(0,1fr); align-items:center; gap:1.4rem; margin-top:1rem; }
         .mc-donut { position:relative; display:grid; place-items:center; width:140px; height:140px; border-radius:50%; }
         .mc-donut::after { content:""; position:absolute; inset:19px; border-radius:50%; background:#fff; }
-        .mc-donut span { position:relative; z-index:1; display:grid; color:#64748b; font-size:.6rem; text-align:center; }
+        .mc-donut span { position:relative; z-index:1; display:grid; color:var(--cc-text-muted); font-size:.6rem; text-align:center; }
         .mc-donut strong { color:#0b1d35; font-family:"Sora",sans-serif; font-size:1.45rem; }
         .mc-bars { display:grid; gap:.55rem; }
-        .mc-bars > div > div:first-child { display:flex; align-items:center; justify-content:space-between; gap:1rem; color:#64748b; font-size:.68rem; }
+        .mc-bars > div > div:first-child { display:flex; align-items:center; justify-content:space-between; gap:1rem; color:var(--cc-text-muted); font-size:.68rem; }
         .mc-bars > div > div:first-child span { display:flex; align-items:center; gap:6px; }
         .mc-bars i,.mc-segment-labels i { width:7px; height:7px; border-radius:50%; }
         .mc-bars strong { color:#0b1d35; }
@@ -505,12 +505,12 @@ export default function MoodCampusPage() {
         .mc-bar-track span { display:block; height:100%; border-radius:999px; transform-origin:left; animation:mcGrow .7s ease both; }
         .mc-balance-summary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.55rem; margin-top:1rem; }
         .mc-balance-summary > div { display:grid; border:1px solid #e8eff5; border-radius:11px; padding:.75rem; background:#f8fbfd; }
-        .mc-balance-summary span { color:#64748b; font-size:.62rem; font-weight:750; }
+        .mc-balance-summary span { color:var(--cc-text-muted); font-size:.62rem; font-weight:750; }
         .mc-balance-summary strong { margin:.25rem 0; font-family:"Sora",sans-serif; font-size:1.35rem; }
-        .mc-balance-summary small { color:#94a3b8; font-size:.58rem; }
+        .mc-balance-summary small { color:var(--cc-text-muted); font-size:.58rem; }
         .mc-segments { display:flex; height:14px; overflow:hidden; margin-top:1rem; border-radius:999px; background:#e8eff5; }
         .mc-segments span { height:100%; transform-origin:left; animation:mcGrow .7s ease both; }
-        .mc-segment-labels { display:flex; flex-wrap:wrap; gap:.8rem; margin-top:.7rem; color:#64748b; font-size:.62rem; }
+        .mc-segment-labels { display:flex; flex-wrap:wrap; gap:.8rem; margin-top:.7rem; color:var(--cc-text-muted); font-size:.62rem; }
         .mc-segment-labels span { display:flex; align-items:center; gap:5px; }
         .mc-journey-card { overflow:hidden; background:radial-gradient(circle at 88% 5%,rgba(103,227,214,.1),transparent 15rem),rgba(255,255,255,.94); }
         .mc-journey-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; }
@@ -523,7 +523,7 @@ export default function MoodCampusPage() {
         .mc-journey-marker > span { display:grid; width:46px; height:46px; place-items:center; border:4px solid #fff; border-radius:50%; background:var(--mood-soft); box-shadow:0 0 0 1px color-mix(in srgb,var(--mood-color) 24%,transparent),0 7px 18px rgba(15,23,42,.09); transition:transform .2s ease,box-shadow .2s ease; }
         .mc-journey-content { min-width:0; border:1px solid #e5edf4; border-top:3px solid var(--mood-color); border-radius:11px; padding:.65rem; background:linear-gradient(180deg,#fff,var(--mood-soft)); box-shadow:0 8px 20px rgba(15,23,42,.04); text-align:center; transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease; }
         .mc-journey-content strong { display:block; color:var(--mood-color); font-family:"Sora",sans-serif; font-size:.69rem; }
-        .mc-journey-content p { display:-webkit-box; overflow:hidden; margin:.28rem 0 0; color:#64748b; font-size:.6rem; line-height:1.45; -webkit-box-orient:vertical; -webkit-line-clamp:2; }
+        .mc-journey-content p { display:-webkit-box; overflow:hidden; margin:.28rem 0 0; color:var(--cc-text-muted); font-size:.6rem; line-height:1.45; -webkit-box-orient:vertical; -webkit-line-clamp:2; }
         .mc-journey-item:hover .mc-journey-marker > span { transform:translateY(-3px) scale(1.04); box-shadow:0 0 0 1px color-mix(in srgb,var(--mood-color) 35%,transparent),0 10px 22px rgba(15,23,42,.12); }
         .mc-journey-item:hover .mc-journey-content { transform:translateY(-2px); border-color:color-mix(in srgb,var(--mood-color) 34%,#e5edf4); box-shadow:0 12px 26px rgba(15,23,42,.07); }
         .mc-attention-list { display:grid; gap:.45rem; margin-top:1rem; }
@@ -531,20 +531,20 @@ export default function MoodCampusPage() {
         .mc-attention-list > div:last-child { border-bottom:0; }
         .mc-attention-list div div { display:grid; }
         .mc-attention-list strong { font-size:.72rem; }
-        .mc-attention-list small { margin-top:.12rem; color:#94a3b8; font-size:.59rem; }
+        .mc-attention-list small { margin-top:.12rem; color:var(--cc-text-muted); font-size:.59rem; }
         .mc-attention-list > div > span:last-child { font-size:.6rem; font-weight:800; }
         .mc-insight,.mc-guidance { display:grid; grid-template-columns:auto minmax(0,1fr); align-items:start; gap:1rem; padding:1.25rem; }
         .mc-insight h2,.mc-guidance h2 { margin:.3rem 0; font-family:"Sora",sans-serif; font-size:1rem; line-height:1.4; }
-        .mc-insight p { margin:0; color:#64748b; font-size:.75rem; line-height:1.65; }
+        .mc-insight p { margin:0; color:var(--cc-text-muted); font-size:.75rem; line-height:1.65; }
         .mc-guidance ul { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.45rem 1rem; margin:.7rem 0 0; padding:0; list-style:none; }
-        .mc-guidance li { position:relative; padding-left:14px; color:#64748b; font-size:.7rem; line-height:1.45; }
+        .mc-guidance li { position:relative; padding-left:14px; color:var(--cc-text-muted); font-size:.7rem; line-height:1.45; }
         .mc-guidance li::before { content:""; position:absolute; top:.45rem; left:0; width:5px; height:5px; border-radius:50%; background:#0d9e8a; }
         .mc-history { margin-top:1rem; padding:1.25rem; }
         .mc-history-list { display:grid; gap:.55rem; margin-top:1rem; }
         .mc-history-list article { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:.85rem; border:1px solid #e5edf4; border-left:3px solid var(--record-color); border-radius:12px; padding:.75rem; background:#fbfdff; }
         .mc-history-list h3 { margin:0; font-size:.77rem; }
-        .mc-history-list div > span { display:block; margin-top:.13rem; color:#94a3b8; font-size:.6rem; }
-        .mc-history-list p { margin:.3rem 0 0; overflow:hidden; color:#64748b; font-size:.69rem; line-height:1.45; text-overflow:ellipsis; white-space:nowrap; }
+        .mc-history-list div > span { display:block; margin-top:.13rem; color:var(--cc-text-muted); font-size:.6rem; }
+        .mc-history-list p { margin:.3rem 0 0; overflow:hidden; color:var(--cc-text-muted); font-size:.69rem; line-height:1.45; text-overflow:ellipsis; white-space:nowrap; }
         .mc-muted-note { color:#a8b5c4!important; font-style:italic; }
         .mc-attention-badge,.mc-soft-badge { display:inline-flex; align-items:center; gap:5px; border-radius:999px; padding:.3rem .55rem; font-size:.57rem; font-weight:800; }
         .mc-attention-badge { color:#b45309; background:#fff7ed; text-transform:uppercase; }
@@ -555,9 +555,9 @@ export default function MoodCampusPage() {
         .mc-form-compact .mc-mood-options button { min-height:105px; padding:.55rem; }
         .mc-empty { display:grid; min-height:160px; place-items:center; align-content:center; gap:.45rem; margin-top:1rem; border:1px dashed #d5e2ec; border-radius:12px; padding:1rem; background:#f8fbfd; text-align:center; }
         .mc-empty strong { font-size:.76rem; }
-        .mc-empty > span:last-child { max-width:290px; color:#94a3b8; font-size:.67rem; line-height:1.5; }
+        .mc-empty > span:last-child { max-width:290px; color:var(--cc-text-muted); font-size:.67rem; line-height:1.5; }
         .mc-page-error { margin:1rem 0; border:1px solid #fecaca; border-radius:10px; padding:.75rem; color:#b91c1c; background:#fef2f2; font-size:.75rem; }
-        .mc-loading { display:grid; min-height:260px; place-items:center; margin-top:1rem; color:#64748b; }
+        .mc-loading { display:grid; min-height:260px; place-items:center; margin-top:1rem; color:var(--cc-text-muted); }
         @media(max-width:1180px) { .mc-metrics-student,.mc-metrics-admin { grid-template-columns:repeat(3,minmax(0,1fr)); } .mc-mood-options { grid-template-columns:repeat(3,minmax(0,1fr)); } }
         @media(max-width:960px) { .mc-hero { grid-template-columns:1fr 180px; } .mc-student-top,.mc-role-grid { grid-template-columns:1fr; } .mc-metrics-mentor { grid-template-columns:repeat(2,minmax(0,1fr)); } }
         @media(max-width:760px) { .mc-page { margin:-1rem; padding:1rem; } .mc-hero { grid-template-columns:1fr; min-height:0; padding:1.35rem; } .mc-hero-visual { display:none; } .mc-metrics-student,.mc-metrics-admin { grid-template-columns:repeat(2,minmax(0,1fr)); } .mc-chart-grid,.mc-footer-grid { grid-template-columns:1fr; } .mc-chart-grid > section:nth-child(3) { grid-column:auto; } .mc-guidance ul { grid-template-columns:1fr; } .mc-distribution { grid-template-columns:1fr; justify-items:center; } .mc-bars { width:100%; } .mc-journey-heading { display:block; } .mc-journey-heading > span { display:inline-flex; margin-top:.65rem; } .mc-journey { display:grid; grid-template-columns:1fr; gap:.55rem; padding-left:2.9rem; } .mc-journey::before { top:22px; bottom:22px; left:19px; width:2px; height:auto; background:linear-gradient(180deg,rgba(13,158,138,.18),rgba(22,135,184,.3),rgba(118,80,181,.18)); } .mc-journey-item { grid-template-rows:auto; grid-template-columns:1fr; } .mc-journey-item time { margin-bottom:.3rem; text-align:left; } .mc-journey-marker { position:absolute; top:10px; left:-2.9rem; width:39px; } .mc-journey-marker > span { width:40px; height:40px; border-width:3px; } .mc-journey-content { min-height:0; text-align:left; } }

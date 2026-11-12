@@ -176,7 +176,7 @@ export function NotificationBell() {
         .cc-notification-panel{position:fixed;z-index:10000;display:flex;flex-direction:column;overflow:hidden;border:1px solid #dfeaf3;border-radius:22px;background:rgba(255,255,255,.98);box-shadow:0 24px 68px rgba(7,21,39,.22),0 3px 14px rgba(15,23,42,.08);backdrop-filter:blur(18px);animation:ccNotificationOpen .18s ease both;transform-origin:top right}
         .cc-notification-head{display:flex;flex:none;align-items:center;justify-content:space-between;gap:.8rem;border-bottom:1px solid #e8eff5;padding:14px 16px;background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(248,251,253,.94))}
         .cc-notification-head h2{margin:0;color:#0b1d35;font-family:"Sora",sans-serif;font-size:.94rem;line-height:1.25}
-        .cc-notification-head p{margin:.16rem 0 0;color:#64748b;font-size:.64rem;line-height:1.35}
+        .cc-notification-head p{margin:.16rem 0 0;color:var(--cc-text-muted);font-size:.64rem;line-height:1.35}
         .cc-notification-read-all{flex:none;border:1px solid rgba(13,158,138,.18);border-radius:8px;padding:.38rem .55rem;color:#0d7e70;background:#f0fbf9;font:inherit;font-size:.61rem;font-weight:800;cursor:pointer;transition:.18s ease}
         .cc-notification-read-all:hover{border-color:rgba(13,158,138,.32);background:#e5f8f4}
         .cc-notification-list{min-height:0;overflow-y:auto;padding:7px}
@@ -189,13 +189,13 @@ export function NotificationBell() {
         .cc-notification-title{display:flex;min-width:0;align-items:center;gap:6px;color:#0b1d35;font-size:.7rem;font-weight:750;line-height:1.35}
         .is-unread .cc-notification-title{font-weight:850}
         .cc-notification-dot{width:6px;height:6px;flex:none;border-radius:50%;background:#0d9e8a;box-shadow:0 0 0 3px rgba(13,158,138,.09)}
-        .cc-notification-copy p{display:-webkit-box;overflow:hidden;margin:.2rem 0;color:#64748b;font-size:.63rem;line-height:1.42;-webkit-box-orient:vertical;-webkit-line-clamp:2}
-        .cc-notification-copy time{display:block;color:#94a3b8;font-size:.56rem;font-weight:650}
-        .cc-notification-arrow{align-self:center;color:#94a3b8}
+        .cc-notification-copy p{display:-webkit-box;overflow:hidden;margin:.2rem 0;color:var(--cc-text-muted);font-size:.63rem;line-height:1.42;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+        .cc-notification-copy time{display:block;color:var(--cc-text-muted);font-size:.56rem;font-weight:650}
+        .cc-notification-arrow{align-self:center;color:var(--cc-text-muted)}
         .cc-notification-empty,.cc-notification-error{display:grid;min-height:166px;place-items:center;align-content:center;gap:.42rem;margin:10px;padding:1rem;border:1px dashed #d7e4ed;border-radius:15px;text-align:center;background:linear-gradient(145deg,#fbfefd,#f4fafb)}
-        .cc-notification-empty-icon,.cc-notification-error-icon{display:grid;width:42px;height:42px;place-items:center;border:1px solid rgba(13,158,138,.18);border-radius:13px;color:#0d9e8a;background:#e8f8f5}
+        .cc-notification-empty-icon,.cc-notification-error-icon{display:grid;width:42px;height:42px;place-items:center;border:1px solid rgba(13,158,138,.18);border-radius:13px;color:var(--cc-link);background:#e8f8f5}
         .cc-notification-empty h3,.cc-notification-error h3{margin:.15rem 0 0;color:#0b1d35;font-family:"Sora",sans-serif;font-size:.78rem}
-        .cc-notification-empty p,.cc-notification-error p{max-width:285px;margin:0;color:#64748b;font-size:.64rem;line-height:1.5}
+        .cc-notification-empty p,.cc-notification-error p{max-width:285px;margin:0;color:var(--cc-text-muted);font-size:.64rem;line-height:1.5}
         .cc-notification-error{border-style:solid;border-color:#dfeaf3;background:#f8fbfd}
         .cc-notification-error-icon{color:#475569;background:#eef4f8}
         .cc-notification-retry{display:inline-flex;min-height:34px;align-items:center;gap:.35rem;margin-top:.25rem;border:1px solid rgba(13,158,138,.22);border-radius:8px;padding:.4rem .65rem;color:#0d7e70;background:#fff;font:inherit;font-size:.62rem;font-weight:800;cursor:pointer}

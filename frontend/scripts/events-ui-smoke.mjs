@@ -107,10 +107,10 @@ try {
     const context = await browser.newContext({
       viewport: { width, height: 900 },
     });
-    await context.addInitScript(() => {
+    await context.addInitScript((theme) => {
       localStorage.setItem("campuscare_token", "fixture-only-token");
-      localStorage.setItem("campuscare-theme", "light");
-    });
+      localStorage.setItem("campuscare-theme", theme);
+    }, process.env.SMOKE_THEME || "light");
     const page = await context.newPage();
     const errors = [];
     let schemaUnavailable = false;

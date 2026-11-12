@@ -1,0 +1,397 @@
+/* Shared contrast pairs. Accent remains available for decoration; primary is
+   deliberately darker so white button labels remain readable in either theme. */
+:root {
+  --cc-surface-2: var(--cc-surface-soft);
+  --cc-text-secondary: #334155;
+  --cc-text-muted: #526579;
+  --cc-link: #087466;
+  --cc-primary: #087f72;
+  --cc-primary-hover: #06695f;
+  --cc-control-border: #7b8fa5;
+  --cc-focus: #087f72;
+  --cc-disabled-bg: #e2e8f0;
+  --cc-disabled-text: #475569;
+  --cc-success: #086653;
+  --cc-success-bg: #e8f8f1;
+  --cc-warning: #854d0e;
+  --cc-warning-bg: #fff4d6;
+  --cc-danger: #a51e3b;
+  --cc-error-bg: #fff0f3;
+  --cc-info: #075985;
+  --cc-info-bg: #eaf5ff;
+  --cc-violet: #6d28d9;
+  --cc-violet-bg: #f3effb;
+  --cc-neutral: #334155;
+  --cc-neutral-bg: #eef2f6;
+}
+
+:root[data-theme="dark"] {
+  --cc-text-secondary: #cbd5e1;
+  --cc-text-muted: #adbec8;
+  --cc-link: #8ceadd;
+  --cc-control-border: #638197;
+  --cc-focus: #72eadc;
+  --cc-disabled-bg: #213449;
+  --cc-disabled-text: #cbd5e1;
+  --cc-success: #a6efd0;
+  --cc-warning: #f5d58a;
+  --cc-danger: #ffc0cb;
+  --cc-info: #addcff;
+  --cc-violet: #d0c0ff;
+  --cc-violet-bg: #2b2442;
+  --cc-neutral: #cbd5e1;
+  --cc-neutral-bg: #182f40;
+}
+
+:is(input, textarea, select)::placeholder {
+  color: var(--cc-text-muted) !important;
+  opacity: 1;
+}
+:is(input:not([type="checkbox"]):not([type="radio"]), textarea, select) {
+  border-color: var(--cc-control-border) !important;
+}
+.panel,
+.panel-soft,
+.premium-card {
+  border-color: var(--cc-border);
+}
+:is(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 3px solid var(--cc-focus) !important;
+  outline-offset: 3px;
+}
+.btn-primary,
+[class~="bg-[#0d9e8a]"][class~="text-white"] {
+  color: #fff !important;
+  background: var(--cc-primary);
+}
+.btn-primary:hover:not(:disabled) {
+  background: var(--cc-primary-hover);
+}
+[class~="text-slate-400"],
+[class~="text-slate-500"],
+.section-subtitle,
+.field-label {
+  color: var(--cc-text-muted) !important;
+}
+.badge {
+  color: var(--cc-text-secondary);
+  background: var(--cc-surface-2);
+}
+.badge-green,
+.alert-success {
+  color: var(--cc-success);
+  background: var(--cc-success-bg);
+}
+.badge-blue {
+  color: var(--cc-info);
+  background: var(--cc-info-bg);
+}
+.badge-amber {
+  color: var(--cc-warning);
+  background: var(--cc-warning-bg);
+}
+.badge-rose,
+.alert-error {
+  color: var(--cc-danger);
+  background: var(--cc-error-bg);
+}
+
+/* Complete exact utility pairs; no substring matching of arbitrary classes. */
+:root[data-theme="dark"]
+  :is(
+    [class~="text-sky-800"],
+    [class~="text-blue-600"],
+    [class~="text-blue-700"]
+  ) {
+  color: var(--cc-info) !important;
+}
+:root[data-theme="dark"]
+  :is(
+    [class~="text-amber-800"],
+    [class~="text-amber-900"],
+    [class~="text-orange-700"]
+  ) {
+  color: var(--cc-warning) !important;
+}
+:root[data-theme="dark"] :is([class~="bg-blue-50"], [class~="bg-sky-100"]) {
+  background: var(--cc-info-bg) !important;
+}
+:root[data-theme="dark"] :is([class~="bg-emerald-50"], [class~="bg-teal-100"]) {
+  background: var(--cc-success-bg) !important;
+}
+:root[data-theme="dark"]
+  :is([class~="text-emerald-700"], [class~="text-emerald-800"]) {
+  color: var(--cc-success) !important;
+}
+:root[data-theme="dark"] [class~="hover:bg-slate-50"]:hover {
+  background: var(--cc-surface-soft) !important;
+}
+:root[data-theme="dark"]
+  :is(input:not([type="checkbox"]):not([type="radio"]), textarea, select) {
+  border-color: var(--cc-control-border) !important;
+}
+:root[data-theme="dark"]
+  :is(
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+    textarea,
+    select
+  ):not(:disabled) {
+  color: var(--cc-text) !important;
+  background-color: var(--cc-input) !important;
+}
+:is(table th, table td) {
+  border-color: var(--cc-border);
+}
+table tbody tr {
+  border-color: var(--cc-border);
+}
+.premium-card > [class~="border-t"] {
+  border-color: var(--cc-border);
+}
+.sh-card .sh-secondary-button {
+  color: var(--cc-text);
+  background: var(--cc-surface-soft);
+  border-color: var(--cc-control-border);
+}
+
+/* Permanent navy regions keep their own foreground hierarchy in light mode. */
+:is(
+  .cc-inverse,
+  .dark-gradient,
+  .auth-hero,
+  .recovery-aside,
+  .db-hero,
+  .sh-hero,
+  .st-hero,
+  .mc-hero,
+  .sk-hero,
+  .lf-hero,
+  .pf-hero,
+  .lp-footer,
+  .lp-final
+) {
+  --cc-link: #8ceadd;
+  --cc-text-muted: #c0d0dc;
+}
+.ai-demo-notice small {
+  color: var(--cc-text-muted);
+}
+.an-empty {
+  color: var(--cc-text-muted);
+}
+.role-entry-step strong {
+  color: var(--cc-link) !important;
+}
+.recovery-card .recovery-role-pill {
+  color: var(--cc-success);
+  background: var(--cc-success-bg);
+  border-color: var(--cc-control-border);
+}
+.cc-notification-count {
+  background: var(--cc-primary) !important;
+  color: #fff !important;
+}
+:root[data-theme="dark"] .lp-float-card {
+  background: var(--cc-surface) !important;
+  border-color: var(--cc-border);
+}
+:root[data-theme="dark"] .lp-float-card strong {
+  color: var(--cc-text);
+}
+:root[data-theme="dark"] .lp-section-kicker {
+  color: var(--cc-link);
+}
+:root[data-theme="dark"] .lp-btn-ghost {
+  color: var(--cc-link);
+}
+:root[data-theme="dark"] .lp-module-card .lp-icon-box {
+  color: var(--cc-accent) !important;
+}
+.register-action-primary,
+.lp-btn-primary,
+.lp-role-card:not(.lp-role-admin) .lp-role-action,
+.role-entry-card:not(.role-entry-card-admin) .role-entry-action,
+:is(
+  .sh-primary-button,
+  .st-primary-button,
+  .mc-primary-button,
+  .lf-primary-button,
+  .cc-empty-action,
+  .lf-owner-resolve button,
+  .nf-button-primary,
+  .st-hero-primary,
+  .mc-hero-primary,
+  .lf-hero-actions > a:first-child,
+  .pf-primary-link,
+  .db-btn-primary
+) {
+  color: #fff !important;
+  background: var(--cc-primary) !important;
+}
+.sk-check-button,
+.sk-attach-form button,
+.sk-catalog-form button,
+.sk-modal-actions button:last-child,
+.sk-result button {
+  color: #fff !important;
+  background: var(--cc-primary) !important;
+}
+:root[data-theme="dark"]
+  :is(
+    .sk-tags span,
+    .sk-secondary-button,
+    .sk-student-skills > span,
+    .sk-modal,
+    .sk-modal-actions button:first-child
+  ) {
+  color: var(--cc-text-secondary) !important;
+  border-color: var(--cc-border) !important;
+  background: var(--cc-surface-soft) !important;
+}
+:root[data-theme="dark"]
+  :is(
+    .db-operation-grid > div,
+    .db-stress-reading,
+    .db-skill-overview,
+    .st-level-message,
+    .st-distribution-list > div,
+    .sk-level-list > div,
+    .sk-students > article,
+    .lf-my-report-list button,
+    .mc-history-list article,
+    .mc-balance-summary > div,
+    .sh-anonymous,
+    .mc-journey-content
+  ) {
+  color: var(--cc-text-secondary) !important;
+  border-color: var(--cc-border) !important;
+  background: var(--cc-surface-soft) !important;
+}
+.sh-journey-step.is-complete span {
+  background: var(--cc-primary) !important;
+  color: #fff !important;
+}
+:root[data-theme="dark"] .sh-journey-step:not(.is-complete) span {
+  color: var(--cc-text-secondary);
+  background: var(--cc-surface-raised);
+  border-color: var(--cc-border);
+}
+:root[data-theme="dark"]
+  :is(.st-bar-row span, .st-bar-row b, .mc-journey-heading > span) {
+  color: var(--cc-text-secondary) !important;
+}
+:root[data-theme="dark"] .st-attention-list > div > span:first-child {
+  color: var(--cc-success);
+  background: var(--cc-success-bg);
+}
+:root[data-theme="dark"] .st-ranking > div > span {
+  color: var(--cc-success);
+  background: var(--cc-success-bg);
+}
+:root[data-theme="dark"] .st-attention-list > div > span:last-child {
+  color: var(--cc-info) !important;
+}
+:root[data-theme="dark"]
+  :is(.st-alert-error, .mc-alert-error, .sk-alert-error) {
+  color: var(--cc-danger) !important;
+  background: var(--cc-error-bg) !important;
+  border-color: var(--cc-error-border) !important;
+}
+:root[data-theme="dark"]
+  :is(.st-alert-success, .mc-alert-success, .sk-alert-success) {
+  color: var(--cc-success) !important;
+  background: var(--cc-success-bg) !important;
+  border-color: var(--cc-success-border) !important;
+}
+:root[data-theme="dark"] :is(.role-entry-step strong, .sk-form label > span) {
+  color: var(--cc-link) !important;
+}
+:root[data-theme="dark"]
+  :is(.sk-attach-form label > span, .sk-catalog-form label > span) {
+  color: var(--cc-text-secondary) !important;
+}
+:root[data-theme="dark"] .cc-empty-state h3 {
+  color: var(--cc-text) !important;
+}
+:root[data-theme="dark"] .db-donut::after {
+  background: var(--cc-surface);
+}
+:root[data-theme="dark"] .pf-icon {
+  color: var(--cc-accent) !important;
+}
+:root[data-theme="dark"] .db-action-arrow {
+  color: var(--cc-text-secondary);
+}
+:root[data-theme="dark"] .sk-options button {
+  color: var(--cc-text-secondary);
+  background: var(--cc-surface-soft);
+  border-color: var(--cc-control-border);
+}
+:root[data-theme="dark"] .sk-options button span {
+  color: var(--cc-success);
+  background: var(--cc-success-bg);
+}
+:root[data-theme="dark"] .sk-options button.is-selected {
+  color: var(--cc-text);
+  background: var(--cc-success-bg);
+  border-color: var(--cc-accent);
+}
+:root[data-theme="dark"]
+  :is(
+    .db-donut strong,
+    .db-mood-list strong,
+    .db-value,
+    .sh-stat strong,
+    .sh-metric strong,
+    .st-metric strong,
+    .mc-metric strong,
+    .lf-metric strong
+  ) {
+  color: var(--cc-text) !important;
+}
+:root[data-theme="dark"] :is(.st-record-content time, .mc-record-content time) {
+  color: var(--cc-text-muted) !important;
+}
+:root[data-theme="dark"]
+  :is(
+    .sh-badge,
+    .mc-soft-badge,
+    .lf-item-top > div span,
+    .lf-detail-head span
+  ) {
+  border: 1px solid var(--cc-border);
+}
+:root[data-theme="dark"]
+  :is(.badge, .badge-green, .badge-blue, .badge-amber, .badge-rose) {
+  border: 1px solid var(--cc-border);
+}
+:root[data-theme="dark"] .badge {
+  color: var(--cc-text-secondary);
+  background: var(--cc-surface-raised);
+}
+:root[data-theme="dark"] .badge-green {
+  color: var(--cc-success);
+  background: var(--cc-success-bg);
+}
+:root[data-theme="dark"] .badge-blue {
+  color: var(--cc-info);
+  background: var(--cc-info-bg);
+}
+:root[data-theme="dark"] .badge-amber {
+  color: var(--cc-warning);
+  background: var(--cc-warning-bg);
+}
+:root[data-theme="dark"] .badge-rose {
+  color: var(--cc-danger);
+  background: var(--cc-error-bg);
+}
+
+/* Override custom primary-button selectors as well as shared components. */
+:root[data-theme] :is(button, input, textarea, select):disabled {
+  opacity: 1 !important;
+  color: var(--cc-disabled-text) !important;
+  background: var(--cc-disabled-bg) !important;
+  border-color: var(--cc-control-border) !important;
+  box-shadow: none !important;
+  cursor: not-allowed;
+}

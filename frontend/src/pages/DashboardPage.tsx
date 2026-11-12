@@ -584,7 +584,7 @@ export default function DashboardPage() {
         .db-hero-eyebrow { display:inline-flex; align-items:center; gap:7px; border:1px solid rgba(103,227,214,.22); border-radius:999px; padding:.35rem .75rem; background:rgba(103,227,214,.08); color:#bdf8ef; font-size:.68rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
         .db-hero-eyebrow i,.db-live i { width:7px; height:7px; border-radius:50%; background:#67e3d6; animation:dbPulse 2s infinite; }
         .db-hero h1 { margin:.9rem 0 .55rem; font-family:"Sora",sans-serif; font-size:clamp(1.65rem,3vw,2.45rem); line-height:1.15; letter-spacing:-.025em; }
-        .db-hero p { max-width:670px; margin:0; color:rgba(255,255,255,.65); font-size:.9rem; line-height:1.7; }
+        .db-hero p { max-width:670px; margin:0; color:rgba(255,255,255,.78); font-size:.9rem; line-height:1.7; }
         .db-hero-actions { display:flex; flex-wrap:wrap; gap:.65rem; margin-top:1.2rem; }
         .db-btn { display:inline-flex; min-height:42px; align-items:center; justify-content:center; gap:7px; border-radius:11px; padding:.55rem 1rem; color:white; font-size:.8rem; font-weight:750; text-decoration:none; transition:.18s ease; }
         .db-btn:hover { transform:translateY(-2px); }
@@ -592,7 +592,7 @@ export default function DashboardPage() {
         .db-btn-glass { border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.08); }
         .db-hero-signal { position:relative; z-index:1; display:grid; justify-items:center; gap:.75rem; min-width:150px; }
         .db-signal-ring { display:flex; align-items:center; justify-content:center; width:110px; height:110px; border:1px solid rgba(103,227,214,.2); border-radius:50%; background:rgba(255,255,255,.05); box-shadow:inset 0 0 0 12px rgba(255,255,255,.025); }
-        .db-live { display:inline-flex; align-items:center; gap:7px; border-radius:999px; padding:.35rem .7rem; background:rgba(255,255,255,.07); color:rgba(255,255,255,.72); font-size:.68rem; font-weight:700; }
+        .db-live { display:inline-flex; align-items:center; gap:7px; border-radius:999px; padding:.35rem .7rem; background:rgba(255,255,255,.07); color:rgba(255,255,255,.78); font-size:.68rem; font-weight:700; }
         .db-metric-grid { display:grid; gap:1rem; margin-top:1.25rem; }
         .db-student-metrics { grid-template-columns:repeat(5,minmax(0,1fr)); }
         .db-mentor-metrics { grid-template-columns:repeat(4,minmax(0,1fr)); }
@@ -600,17 +600,17 @@ export default function DashboardPage() {
         .db-metric { min-width:0; padding:1rem; }
         .db-metric-top { display:flex; align-items:center; justify-content:space-between; gap:.75rem; }
         .db-metric-line { width:34px; height:3px; border-radius:999px; opacity:.75; }
-        .db-label { display:block; margin-top:.8rem; color:#64748b; font-size:.65rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; }
+        .db-label { display:block; margin-top:.8rem; color:var(--cc-text-muted); font-size:.65rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; }
         .db-value { margin:.35rem 0 .25rem; overflow:hidden; font-family:"Sora",sans-serif; font-size:1.55rem; font-weight:750; line-height:1.1; text-overflow:ellipsis; text-transform:capitalize; white-space:nowrap; }
-        .db-helper { margin:0; color:#94a3b8; font-size:.7rem; line-height:1.45; }
+        .db-helper { margin:0; color:var(--cc-text-muted); font-size:.7rem; line-height:1.45; }
         .db-section-heading { display:flex; align-items:flex-end; justify-content:space-between; gap:1rem; margin-bottom:1rem; }
         .db-section-heading h2 { margin:0; font-family:"Sora",sans-serif; font-size:1rem; font-weight:700; color:#0b1d35; }
-        .db-section-heading p { margin:.25rem 0 0; color:#64748b; font-size:.76rem; line-height:1.5; }
+        .db-section-heading p { margin:.25rem 0 0; color:var(--cc-text-muted); font-size:.76rem; line-height:1.5; }
         .db-action-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:1rem; }
         .db-action-card { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:.8rem; min-width:0; padding:1rem; color:#0b1d35; text-decoration:none; }
         .db-action-card strong,.db-action-card span { display:block; }
         .db-action-card strong { font-size:.82rem; }
-        .db-action-card span { margin-top:.2rem; color:#64748b; font-size:.69rem; line-height:1.4; }
+        .db-action-card span { margin-top:.2rem; color:var(--cc-text-muted); font-size:.69rem; line-height:1.4; }
         .db-content-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; }
         .db-admin-grid { display:grid; grid-template-columns:1.2fr .8fr; gap:1rem; }
         .db-chart-card { min-width:0; padding:1.25rem; }
@@ -624,46 +624,46 @@ export default function DashboardPage() {
         .db-status-blue { background:#eff6ff; color:#1d4ed8; }
         .db-level-track { display:grid; grid-template-columns:repeat(5,1fr); gap:.35rem; margin-top:1rem; }
         .db-level-step { height:10px; border-radius:999px; transition:background .3s ease; }
-        .db-level-labels { display:flex; justify-content:space-between; margin-top:.45rem; color:#94a3b8; font-size:.62rem; }
+        .db-level-labels { display:flex; justify-content:space-between; margin-top:.45rem; color:var(--cc-text-muted); font-size:.62rem; }
         .db-mood-layout { display:grid; grid-template-columns:150px minmax(0,1fr); align-items:center; gap:1.5rem; }
         .db-donut { position:relative; display:grid; place-items:center; width:140px; height:140px; border-radius:50%; }
         .db-donut::after { content:""; position:absolute; inset:18px; border-radius:50%; background:white; }
-        .db-donut span { position:relative; z-index:1; display:grid; color:#64748b; font-size:.64rem; text-align:center; }
+        .db-donut span { position:relative; z-index:1; display:grid; color:var(--cc-text-muted); font-size:.64rem; text-align:center; }
         .db-donut strong { color:#0b1d35; font-family:"Sora",sans-serif; font-size:1.5rem; }
         .db-mood-list { display:grid; gap:.65rem; }
-        .db-row-between { display:flex; align-items:center; justify-content:space-between; gap:1rem; color:#64748b; font-size:.72rem; }
+        .db-row-between { display:flex; align-items:center; justify-content:space-between; gap:1rem; color:var(--cc-text-muted); font-size:.72rem; }
         .db-row-between strong { color:#0b1d35; }
         .db-mood-name { display:flex; align-items:center; gap:7px; text-transform:capitalize; }
         .db-mood-name i { width:7px; height:7px; border-radius:50%; }
         .db-progress { height:6px; margin-top:.3rem; overflow:hidden; border-radius:999px; background:#e8eff5; }
         .db-progress span { display:block; height:100%; border-radius:999px; transform-origin:left; animation:dbProgress .7s ease both; }
-        .db-empty { display:grid; place-items:center; min-height:150px; border:1px dashed #d7e3ed; border-radius:13px; color:#94a3b8; font-size:.78rem; background:#f8fbfd; }
+        .db-empty { display:grid; place-items:center; min-height:150px; border:1px dashed #d7e3ed; border-radius:13px; color:var(--cc-text-muted); font-size:.78rem; background:#f8fbfd; }
         .db-empty-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; }
         .db-insight-card { display:grid; grid-template-columns:auto minmax(0,1fr); align-items:start; gap:1rem; padding:1.25rem; }
         .db-insight-card .db-label { margin:0; }
         .db-insight-card h2 { margin:.35rem 0; font-family:"Sora",sans-serif; font-size:1rem; line-height:1.45; }
-        .db-insight-card p { margin:0; color:#64748b; font-size:.76rem; line-height:1.6; }
-        .db-insight-card a,.db-inline-link { display:inline-flex; gap:6px; margin-top:.8rem; color:#0d9e8a; font-size:.75rem; font-weight:800; text-decoration:none; }
+        .db-insight-card p { margin:0; color:var(--cc-text-muted); font-size:.76rem; line-height:1.6; }
+        .db-insight-card a,.db-inline-link { display:inline-flex; gap:6px; margin-top:.8rem; color:var(--cc-link); font-size:.75rem; font-weight:800; text-decoration:none; }
         .db-activity-list { display:grid; }
         .db-activity-item { display:flex; align-items:flex-start; gap:.75rem; padding:.7rem 0; border-bottom:1px solid #edf2f7; }
         .db-activity-item:last-child { border-bottom:0; }
         .db-activity-item strong,.db-activity-item span { display:block; }
         .db-activity-item strong { color:#0b1d35; font-size:.78rem; }
-        .db-activity-item span { margin-top:.2rem; color:#94a3b8; font-size:.67rem; text-transform:capitalize; }
+        .db-activity-item span { margin-top:.2rem; color:var(--cc-text-muted); font-size:.67rem; text-transform:capitalize; }
         .db-queue-list { display:grid; gap:.5rem; }
         .db-queue-row { display:flex; align-items:center; justify-content:space-between; border:1px solid #e8eff5; border-radius:11px; padding:.7rem .8rem; background:#f8fbfd; font-size:.76rem; }
-        .db-queue-row span { display:flex; align-items:center; gap:8px; color:#64748b; }
+        .db-queue-row span { display:flex; align-items:center; gap:8px; color:var(--cc-text-muted); }
         .db-queue-row i { width:8px; height:8px; border-radius:50%; }
         .db-queue-row strong { font-family:"Sora",sans-serif; }
         .db-skill-overview { display:grid; grid-template-columns:auto 1fr 1fr; align-items:center; gap:1rem; padding:1rem; border:1px solid #e8eff5; border-radius:13px; background:#f8fbfd; }
         .db-skill-overview div { display:grid; }
         .db-skill-overview strong { font-family:"Sora",sans-serif; font-size:1.4rem; }
-        .db-skill-overview span { color:#64748b; font-size:.66rem; }
+        .db-skill-overview span { color:var(--cc-text-muted); font-size:.66rem; }
         .db-bars { display:grid; gap:.9rem; }
         .db-operation-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.7rem; }
         .db-operation-grid > div { display:grid; align-content:start; min-height:115px; border:1px solid #e8eff5; border-radius:13px; padding:.8rem; background:#f8fbfd; }
         .db-operation-grid strong { margin-top:.7rem; font-family:"Sora",sans-serif; font-size:1.45rem; }
-        .db-operation-grid small { margin-top:.15rem; color:#94a3b8; font-size:.65rem; }
+        .db-operation-grid small { margin-top:.15rem; color:var(--cc-text-muted); font-size:.65rem; }
         @media(max-width:1180px) { .db-student-metrics,.db-admin-metrics { grid-template-columns:repeat(3,minmax(0,1fr)); } }
         @media(max-width:920px) { .db-mentor-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); } .db-action-grid,.db-empty-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .db-admin-grid { grid-template-columns:1fr; } }
         @media(max-width:720px) { .db-page { margin:-1rem; padding:1rem; } .db-hero { grid-template-columns:1fr; padding:1.35rem; } .db-hero-signal { display:none; } .db-student-metrics,.db-admin-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); } .db-content-grid { grid-template-columns:1fr; } .db-mood-layout { grid-template-columns:1fr; justify-items:center; width:100%; } .db-mood-list { width:100%; } }

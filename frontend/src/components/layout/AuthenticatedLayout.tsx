@@ -179,7 +179,7 @@ export function AuthenticatedLayout() {
         Skip to content
       </a>
       <aside
-        className="hidden min-h-screen w-[272px] shrink-0 flex-col border-r border-white/10 p-4 text-white shadow-[12px_0_36px_rgba(7,21,39,.12)] lg:flex"
+        className="cc-inverse hidden min-h-screen w-[272px] shrink-0 flex-col border-r border-white/10 p-4 text-white shadow-[12px_0_36px_rgba(7,21,39,.12)] lg:flex"
         style={{
           background:
             'radial-gradient(circle at 22% 4%, rgba(13,158,138,.18), transparent 18rem), linear-gradient(180deg, #071527 0%, #0b1d35 60%, #06111f 100%)'
@@ -190,7 +190,7 @@ export function AuthenticatedLayout() {
             <CampusCareLogoMark size={44} variant="dark" />
             <div className="min-w-0">
               <p className="truncate text-[1.02rem] font-extrabold leading-tight text-white">CampusCare</p>
-              <p className="mt-1 truncate text-[0.72rem] text-white/65">Student support platform</p>
+              <p className="mt-1 truncate text-[0.72rem] text-white/80">Student support platform</p>
             </div>
           </div>
           <div className={`mt-3 inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[0.62rem] font-extrabold uppercase tracking-[0.08em] ${sidebarRoleClass(user?.role)}`}>
@@ -202,7 +202,7 @@ export function AuthenticatedLayout() {
         <nav aria-label="Primary navigation" className="mt-4 min-h-0 flex-1 space-y-3.5">
           {navigationGroups.map((group) => (
             <div key={group.label}>
-              <p className="mb-1.5 px-3 text-[0.61rem] font-extrabold uppercase tracking-[0.16em] text-white/55">
+              <p className="mb-1.5 px-3 text-[0.61rem] font-extrabold uppercase tracking-[0.16em] text-white/80">
                 {group.label}
               </p>
               <div className="space-y-1">
@@ -214,7 +214,7 @@ export function AuthenticatedLayout() {
                       `group relative flex min-h-9 items-center gap-3 overflow-hidden rounded-xl border px-3 py-2 text-sm font-semibold transition duration-200 ${
                         isCurrentItem(item, isActive)
                           ? 'border-teal-300/20 bg-gradient-to-r from-teal-400/15 to-cyan-300/[0.06] text-white shadow-lg shadow-black/10'
-                          : 'border-transparent text-white/70 hover:border-white/[0.08] hover:bg-white/[0.07] hover:text-white'
+                          : 'border-transparent text-white/80 hover:border-white/[0.08] hover:bg-white/[0.07] hover:text-white'
                       }`
                     }
                   >
@@ -228,7 +228,7 @@ export function AuthenticatedLayout() {
                         <span className={`flex h-7 w-7 items-center justify-center rounded-lg transition ${
                           isCurrentItem(item, isActive)
                             ? 'bg-teal-300/10 text-[#67e3d6]'
-                            : 'text-white/55 group-hover:bg-white/[0.06] group-hover:text-cyan-100'
+                            : 'text-white/80 group-hover:bg-white/[0.06] group-hover:text-cyan-100'
                         }`}>
                           <NavIcon name={item.icon} />
                         </span>
@@ -255,7 +255,7 @@ export function AuthenticatedLayout() {
             </div>
           </div>
           <div className="mt-3 flex items-center justify-between gap-3 border-t border-white/[0.07] pt-3">
-            <span className="flex items-center gap-2 text-[0.67rem] font-medium text-white/60">
+            <span className="flex items-center gap-2 text-[0.67rem] font-medium text-white/80">
               <span className="h-1.5 w-1.5 rounded-full bg-[#67e3d6]" />
               24/7 support
             </span>

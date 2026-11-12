@@ -123,7 +123,7 @@ export default function AdminUsersPage() {
   const summary = result?.summary;
   return (
     <div className="min-w-0 space-y-5 [overflow-wrap:anywhere]">
-      <header className="rounded-2xl border border-slate-800 bg-slate-950 p-5 text-white sm:p-6">
+      <header className="cc-inverse rounded-2xl border border-slate-800 bg-slate-950 p-5 text-white sm:p-6">
         <p className="text-[11px] font-bold uppercase tracking-[.16em] text-teal-200">
           Account administration
         </p>

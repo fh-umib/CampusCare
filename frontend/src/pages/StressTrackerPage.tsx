@@ -11,11 +11,11 @@ type Role = 'student' | 'mentor' | 'admin';
 type IconName = 'pulse' | 'shield' | 'subject' | 'calendar' | 'records' | 'trend' | 'attention' | 'insight' | 'arrow';
 
 const levelDetails: Record<StressLevel, { label: string; color: string; soft: string; message: string }> = {
-  1: { label: 'Low', color: '#0d9e8a', soft: '#e8f8f5', message: 'Pressure feels manageable. Keep your steady rhythm.' },
-  2: { label: 'Mild', color: '#1687b8', soft: '#eaf6fb', message: 'A little pressure is present. A short plan may help.' },
-  3: { label: 'Medium', color: '#4f6fca', soft: '#eef2ff', message: 'Pause, prioritize, and choose one clear next step.' },
-  4: { label: 'High', color: '#d97706', soft: '#fff7e8', message: 'Consider asking a mentor or classmate for support.' },
-  5: { label: 'Very High', color: '#dc5f45', soft: '#fff1ee', message: 'Take a breath and reach out. You do not need to carry this alone.' }
+  1: { label: 'Low', color: 'var(--cc-success)', soft: 'var(--cc-success-bg)', message: 'Pressure feels manageable. Keep your steady rhythm.' },
+  2: { label: 'Mild', color: 'var(--cc-info)', soft: 'var(--cc-info-bg)', message: 'A little pressure is present. A short plan may help.' },
+  3: { label: 'Medium', color: 'var(--cc-info)', soft: 'var(--cc-info-bg)', message: 'Pause, prioritize, and choose one clear next step.' },
+  4: { label: 'High', color: 'var(--cc-warning)', soft: 'var(--cc-warning-bg)', message: 'Consider asking a mentor or classmate for support.' },
+  5: { label: 'Very High', color: 'var(--cc-danger)', soft: 'var(--cc-error-bg)', message: 'Take a breath and reach out. You do not need to carry this alone.' }
 };
 
 const iconPaths: Record<IconName, ReactNode> = {
@@ -130,7 +130,7 @@ function MetricCard({ icon, label, value, helper, color, delay = 0 }: {
   return (
     <article className="st-card st-metric st-lift st-reveal" style={{ animationDelay: `${delay}ms` }}>
       <div className="st-metric-top">
-        <Icon name={icon} color={color} background={`${color}14`} />
+        <Icon name={icon} color={color} background={`color-mix(in srgb, ${color} 8%, transparent)`} />
         <i style={{ background: color }} />
       </div>
       <span className="st-label">{label}</span>
@@ -535,7 +535,7 @@ export default function StressTrackerPage() {
         .st-eyebrow { display:inline-flex; align-items:center; gap:7px; border:1px solid rgba(103,227,214,.22); border-radius:999px; padding:.36rem .76rem; background:rgba(103,227,214,.08); color:#bdf8ef; font-size:.68rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
         .st-eyebrow i { width:7px; height:7px; border-radius:50%; background:#67e3d6; }
         .st-hero h1 { max-width:760px; margin:.9rem 0 .55rem; font-family:"Sora",sans-serif; font-size:clamp(1.75rem,3.2vw,2.65rem); line-height:1.14; letter-spacing:-.02em; }
-        .st-hero p { max-width:720px; margin:0; color:rgba(255,255,255,.68); font-size:.9rem; line-height:1.7; }
+        .st-hero p { max-width:720px; margin:0; color:rgba(255,255,255,.78); font-size:.9rem; line-height:1.7; }
         .st-hero-badges { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:1.15rem; }
         .st-hero-badges span { border:1px solid rgba(255,255,255,.1); border-radius:999px; padding:.38rem .7rem; background:rgba(255,255,255,.06); color:rgba(255,255,255,.78); font-size:.68rem; font-weight:700; }
         .st-hero-actions { display:flex; flex-wrap:wrap; gap:.55rem; margin-top:1rem; }
@@ -545,10 +545,10 @@ export default function StressTrackerPage() {
         .st-hero-secondary { border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.07); }
         .st-hero-visual { display:grid; justify-items:center; gap:.85rem; text-align:center; }
         .st-pulse-ring { display:grid; place-items:center; width:126px; height:126px; border:1px solid rgba(103,227,214,.2); border-radius:50%; background:rgba(255,255,255,.045); box-shadow:inset 0 0 0 14px rgba(255,255,255,.022); }
-        .st-hero-visual > span { max-width:210px; color:rgba(255,255,255,.58); font-size:.7rem; line-height:1.55; }
-        .st-section-heading > span,.st-label { display:block; color:#0d9e8a; font-size:.64rem; font-weight:850; letter-spacing:.08em; text-transform:uppercase; }
+        .st-hero-visual > span { max-width:210px; color:rgba(255,255,255,.78); font-size:.7rem; line-height:1.55; }
+        .st-section-heading > span,.st-label { display:block; color:var(--cc-link); font-size:.64rem; font-weight:850; letter-spacing:.08em; text-transform:uppercase; }
         .st-section-heading h2 { margin:.25rem 0 0; font-family:"Sora",sans-serif; font-size:1.05rem; line-height:1.35; }
-        .st-section-heading p { margin:.3rem 0 0; color:#64748b; font-size:.74rem; line-height:1.55; }
+        .st-section-heading p { margin:.3rem 0 0; color:var(--cc-text-muted); font-size:.74rem; line-height:1.55; }
         .st-metrics { display:grid; gap:1rem; margin-top:1.2rem; }
         .st-metrics-student { grid-template-columns:repeat(5,minmax(0,1fr)); }
         .st-metrics-mentor { grid-template-columns:repeat(4,minmax(0,1fr)); }
@@ -556,9 +556,9 @@ export default function StressTrackerPage() {
         .st-metric { padding:1rem; }
         .st-metric-top { display:flex; align-items:center; justify-content:space-between; }
         .st-metric-top i { width:32px; height:3px; border-radius:999px; opacity:.72; }
-        .st-metric .st-label { margin-top:.8rem; color:#64748b; }
+        .st-metric .st-label { margin-top:.8rem; color:var(--cc-text-muted); }
         .st-metric > strong { display:block; margin:.3rem 0 .2rem; overflow:hidden; font-family:"Sora",sans-serif; font-size:1.45rem; line-height:1.2; text-overflow:ellipsis; text-transform:capitalize; white-space:nowrap; }
-        .st-metric p { margin:0; color:#94a3b8; font-size:.68rem; line-height:1.45; }
+        .st-metric p { margin:0; color:var(--cc-text-muted); font-size:.68rem; line-height:1.45; }
         .st-student-top { display:grid; grid-template-columns:minmax(340px,.88fr) minmax(0,1.12fr); gap:1rem; margin-top:1rem; }
         .st-form { padding:1.35rem; }
         .st-form label,.st-form > div:not(.st-section-heading):not(.st-alert) { display:block; margin-top:1rem; }
@@ -571,7 +571,7 @@ export default function StressTrackerPage() {
         .st-slider-heading strong { font-size:.78rem; }
         .st-range { display:block; width:100%; margin:.7rem 0 .5rem; cursor:pointer; }
         .st-level-options { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:.35rem; }
-        .st-level-options button { display:grid; justify-items:center; gap:.12rem; min-width:0; border:1px solid #e1eaf1; border-radius:9px; padding:.42rem .2rem; color:#64748b; background:#f8fbfd; cursor:pointer; transition:.18s ease; }
+        .st-level-options button { display:grid; justify-items:center; gap:.12rem; min-width:0; border:1px solid #e1eaf1; border-radius:9px; padding:.42rem .2rem; color:var(--cc-text-muted); background:#f8fbfd; cursor:pointer; transition:.18s ease; }
         .st-level-options button:hover,.st-level-options button.is-active { border-color:var(--level-color); color:var(--level-color); background:var(--level-soft); transform:translateY(-1px); }
         .st-level-options b { font-family:"Sora",sans-serif; font-size:.8rem; }
         .st-level-options span { overflow:hidden; max-width:100%; font-size:.57rem; text-overflow:ellipsis; white-space:nowrap; }
@@ -587,34 +587,34 @@ export default function StressTrackerPage() {
         .st-bar-row { display:grid; grid-template-columns:minmax(110px,.75fr) minmax(120px,2fr) 34px; align-items:center; gap:.7rem; }
         .st-bar-row > div:first-child { display:grid; }
         .st-bar-row span { overflow:hidden; color:#334155; font-size:.72rem; font-weight:750; text-overflow:ellipsis; white-space:nowrap; }
-        .st-bar-row small { margin-top:.12rem; color:#94a3b8; font-size:.59rem; }
+        .st-bar-row small { margin-top:.12rem; color:var(--cc-text-muted); font-size:.59rem; }
         .st-bar-row strong { color:#0b1d35; font-family:"Sora",sans-serif; font-size:.72rem; text-align:right; }
         .st-bar-track { height:9px; overflow:hidden; border-radius:999px; background:#e8eff5; }
         .st-bar-track span { display:block; height:100%; border-radius:999px; transform-origin:left; animation:stGrow .7s ease both; }
         .st-trend-wrap { position:relative; height:190px; margin-top:1rem; padding-left:22px; }
         .st-trend-wrap svg { width:100%; height:100%; overflow:visible; }
-        .st-trend-scale { position:absolute; inset:4px auto 5px 0; display:flex; flex-direction:column; justify-content:space-between; color:#94a3b8; font-size:.58rem; }
-        .st-trend-dates { display:flex; justify-content:space-between; margin:.3rem 0 0 22px; color:#94a3b8; font-size:.6rem; }
+        .st-trend-scale { position:absolute; inset:4px auto 5px 0; display:flex; flex-direction:column; justify-content:space-between; color:var(--cc-text-muted); font-size:.58rem; }
+        .st-trend-dates { display:flex; justify-content:space-between; margin:.3rem 0 0 22px; color:var(--cc-text-muted); font-size:.6rem; }
         .st-segments { display:flex; height:14px; overflow:hidden; margin-top:1.1rem; border-radius:999px; background:#e8eff5; }
         .st-segments span { height:100%; transform-origin:left; animation:stGrow .7s ease both; }
         .st-distribution-list { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:.45rem; margin-top:1rem; }
         .st-distribution-list > div { display:grid; justify-items:center; gap:.22rem; border:1px solid #e8eff5; border-radius:9px; padding:.55rem .25rem; background:#f8fbfd; }
         .st-distribution-list i { width:7px; height:7px; border-radius:50%; }
-        .st-distribution-list span { color:#64748b; font-size:.58rem; text-align:center; }
+        .st-distribution-list span { color:var(--cc-text-muted); font-size:.58rem; text-align:center; }
         .st-distribution-list strong { font-family:"Sora",sans-serif; font-size:.82rem; }
         .st-ranking { display:grid; gap:.45rem; margin-top:1rem; }
         .st-ranking > div { display:grid; grid-template-columns:28px minmax(0,1fr) auto; align-items:center; gap:.65rem; border-bottom:1px solid #edf2f7; padding:.55rem 0; }
         .st-ranking > div:last-child { border-bottom:0; }
-        .st-ranking > div > span { display:grid; place-items:center; width:27px; height:27px; border-radius:8px; color:#0d9e8a; background:#e8f8f5; font-size:.65rem; font-weight:850; }
+        .st-ranking > div > span { display:grid; place-items:center; width:27px; height:27px; border-radius:8px; color:var(--cc-link); background:#e8f8f5; font-size:.65rem; font-weight:850; }
         .st-ranking div div { display:grid; }
         .st-ranking div div strong { font-size:.73rem; }
-        .st-ranking small { margin-top:.12rem; color:#94a3b8; font-size:.6rem; }
+        .st-ranking small { margin-top:.12rem; color:var(--cc-text-muted); font-size:.6rem; }
         .st-ranking b { font-family:"Sora",sans-serif; font-size:.82rem; }
         .st-insight,.st-guidance { display:grid; grid-template-columns:auto minmax(0,1fr); align-items:start; gap:1rem; padding:1.25rem; }
         .st-insight h2,.st-guidance h2 { margin:.3rem 0; font-family:"Sora",sans-serif; font-size:1rem; line-height:1.4; }
-        .st-insight p { margin:0; color:#64748b; font-size:.75rem; line-height:1.65; }
+        .st-insight p { margin:0; color:var(--cc-text-muted); font-size:.75rem; line-height:1.65; }
         .st-guidance ul { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.45rem 1rem; margin:.7rem 0 0; padding:0; list-style:none; }
-        .st-guidance li { position:relative; padding-left:14px; color:#64748b; font-size:.7rem; line-height:1.45; }
+        .st-guidance li { position:relative; padding-left:14px; color:var(--cc-text-muted); font-size:.7rem; line-height:1.45; }
         .st-guidance li::before { content:""; position:absolute; top:.45rem; left:0; width:5px; height:5px; border-radius:50%; background:#0d9e8a; }
         .st-records { margin-top:1rem; padding:1.25rem; }
         .st-record-list { display:grid; gap:.55rem; margin-top:1rem; }
@@ -624,8 +624,8 @@ export default function StressTrackerPage() {
         .st-record-level span { margin-top:.1rem; font-size:.56rem; font-weight:800; text-align:center; }
         .st-record-content { min-width:0; }
         .st-record-content h3 { margin:0; overflow:hidden; font-size:.77rem; text-overflow:ellipsis; white-space:nowrap; }
-        .st-record-content div > span { display:block; margin-top:.16rem; color:#94a3b8; font-size:.6rem; }
-        .st-record-content p { margin:.35rem 0 0; overflow:hidden; color:#64748b; font-size:.69rem; line-height:1.45; text-overflow:ellipsis; white-space:nowrap; }
+        .st-record-content div > span { display:block; margin-top:.16rem; color:var(--cc-text-muted); font-size:.6rem; }
+        .st-record-content p { margin:.35rem 0 0; overflow:hidden; color:var(--cc-text-muted); font-size:.69rem; line-height:1.45; text-overflow:ellipsis; white-space:nowrap; }
         .st-record-content .st-muted-note { color:#a8b5c4; font-style:italic; }
         .st-attention-badge { display:inline-flex; align-items:center; gap:5px; border-radius:999px; padding:.3rem .55rem; color:#b45309; background:#fff7ed; font-size:.58rem; font-weight:850; text-transform:uppercase; }
         .st-attention-badge i { width:6px; height:6px; border-radius:50%; background:#d97706; animation:stPulse 2s infinite; }
@@ -635,15 +635,15 @@ export default function StressTrackerPage() {
         .st-level-dot { display:grid; place-items:center; width:30px; height:30px; border-radius:9px; font-family:"Sora",sans-serif; font-size:.72rem; font-weight:800; }
         .st-attention-list div div { display:grid; }
         .st-attention-list strong { overflow:hidden; font-size:.72rem; text-overflow:ellipsis; white-space:nowrap; }
-        .st-attention-list small { margin-top:.12rem; color:#94a3b8; font-size:.59rem; }
+        .st-attention-list small { margin-top:.12rem; color:var(--cc-text-muted); font-size:.59rem; }
         .st-attention-list > div > span:last-child { font-size:.62rem; font-weight:800; }
         .st-empty { display:grid; min-height:160px; place-items:center; align-content:center; gap:.45rem; margin-top:1rem; border:1px dashed #d5e2ec; border-radius:12px; padding:1rem; background:#f8fbfd; text-align:center; }
         .st-empty strong { font-size:.76rem; }
-        .st-empty > span:last-child { max-width:290px; color:#94a3b8; font-size:.67rem; line-height:1.5; }
+        .st-empty > span:last-child { max-width:290px; color:var(--cc-text-muted); font-size:.67rem; line-height:1.5; }
         .st-role-grid { display:grid; grid-template-columns:minmax(280px,.72fr) minmax(0,1.28fr); gap:1rem; margin-top:1rem; }
         .st-footer-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1rem; }
         .st-page-error { margin:1rem 0; border:1px solid #fecaca; border-radius:10px; padding:.75rem; color:#b91c1c; background:#fef2f2; font-size:.75rem; }
-        .st-loading { display:grid; min-height:260px; place-items:center; margin-top:1rem; color:#64748b; }
+        .st-loading { display:grid; min-height:260px; place-items:center; margin-top:1rem; color:var(--cc-text-muted); }
         @media(max-width:1180px) { .st-metrics-student,.st-metrics-admin { grid-template-columns:repeat(3,minmax(0,1fr)); } }
         @media(max-width:960px) { .st-hero { grid-template-columns:1fr 180px; } .st-student-top,.st-role-grid { grid-template-columns:1fr; } .st-metrics-mentor { grid-template-columns:repeat(2,minmax(0,1fr)); } }
         @media(max-width:760px) { .st-page { margin:-1rem; padding:1rem; } .st-hero { grid-template-columns:1fr; min-height:0; padding:1.35rem; } .st-hero-visual { display:none; } .st-metrics-student,.st-metrics-admin { grid-template-columns:repeat(2,minmax(0,1fr)); } .st-chart-grid,.st-footer-grid { grid-template-columns:1fr; } .st-guidance ul { grid-template-columns:1fr; } }
