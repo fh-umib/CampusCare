@@ -326,6 +326,27 @@ main.auth-page {
   }
 }
 @media (max-width: 479px) {
+  .lp-page .lp-nav-shell {
+    flex-wrap: nowrap;
+    gap: 0.4rem;
+    padding: 0.45rem;
+  }
+  .lp-page .lp-brand {
+    gap: 0.45rem;
+  }
+  .lp-page .lp-brand > span > span {
+    display: none;
+  }
+  .lp-page .lp-nav {
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+  }
+  .lp-page .lp-nav .lp-btn {
+    flex: 0 0 auto;
+    padding-inline: 0.65rem;
+    white-space: nowrap;
+  }
   .auth-register .auth-form-panel > .flex:first-child {
     flex-direction: row;
     align-items: center;

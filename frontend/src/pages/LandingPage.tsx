@@ -418,10 +418,7 @@ export default function LandingPage() {
             {isAuthenticated ? (
               <Link className="lp-btn lp-btn-primary" to="/dashboard">Go to dashboard</Link>
             ) : (
-              <>
-                <Link className="lp-btn lp-btn-secondary" to="/login">Login</Link>
-                <Link className="lp-btn lp-btn-primary" to="/start">Get Started</Link>
-              </>
+              <Link className="lp-btn lp-btn-primary" to="/start">Get Started</Link>
             )}
           </nav>
         </div>
