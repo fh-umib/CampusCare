@@ -17,3 +17,7 @@ phase*.log
 *.tmp
 *.temp
 *.tsbuildinfo
+public/captures/*.png
+out/*.mp4
+out/*.png
+.env.video.local

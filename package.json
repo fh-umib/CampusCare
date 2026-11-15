@@ -11,8 +11,18 @@
     "dev": "npm run dev --workspace frontend",
     "dev:frontend": "npm run dev --workspace frontend",
     "dev:backend": "npm run dev --workspace backend",
+    "video:capture": "tsx video/scripts/capture-campuscare.ts",
+    "video:assets": "tsx video/scripts/check-assets.ts",
+    "video:preview": "npm run video:assets && remotion studio video/remotion/index.ts",
+    "video:still": "npm run video:assets && remotion still video/remotion/index.ts CampusCareShowcase out/campuscare-landing-test.png --frame=60",
+    "video:render": "npm run video:assets && remotion render video/remotion/index.ts CampusCareShowcase out/campuscare-showcase.mp4",
+    "video:validate": "tsx video/scripts/validate-video.ts",
     "build": "npm run build --workspace frontend && npm run build --workspace backend",
     "lint": "npm run lint --workspace frontend && npm run lint --workspace backend"
+  },
+  "devDependencies": {
+    "@remotion/cli": "^4.0.543",
+    "playwright": "^1.65.1",
+    "remotion": "^4.0.543"
   }
 }
-
